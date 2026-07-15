@@ -1,0 +1,101 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# MLInside course — project settings (SSoT, non-secret)
+# Secrets live in ./settings/.env.secrets (git-ignored).
+# ──────────────────────────────────────────────────────────────────────────────
+
+project:
+  name: MLInside-course
+  title: "MLInside 2026 — course development (HSE / ВШЭ external education)"
+  org: "HSE (ВШЭ) × MLInside"
+  year: 2026
+  repo: "github.com/dataengy/MLInside-course"
+  status: in-development
+  lecturer_topics:
+    - dbt
+    - Dagster
+
+# ── People ──────────────────────────────────────────────────────────────────
+participants:
+  - name: "Nikolai Krupii"
+    role: "lecturer (dbt, Dagster)"
+    github: "github.com/dataengy"
+    telegram: "https://t.me/NikolayKrupiy"
+    email: "nikolai.krupii@prodamus.io"
+  - name: "Vlad Boyadzhi"
+    role: "co-author / lecturer (MLInside 2026 materials)"
+    telegram: "https://web.telegram.org/k/#@Boyadzhi"
+    github: "TBD"          # request GitHub profile from Nikolai
+  - name: "Alina"
+    role: "editor"
+
+# ── Planning & schedule ─────────────────────────────────────────────────────
+planning:
+  schedule_gsheet: "https://docs.google.com/spreadsheets/d/1cxYGtU36nbmO5DhjtNkm_HMESiNPwoWdd6QY8yb2JaU/edit"
+
+# ── Slide generation / rework tooling ───────────────────────────────────────
+slide_generation:
+  goal: "Rework prior-course decks into MLInside 2026 slides"
+  notebooklm: "https://notebooklm.google.com/notebook/382c4229-3c45-4b70-844b-f2ce44e8e5d5"
+  tools_to_try:
+    - NotebookLM        # active experiment (link above)
+    - Plus AI           # to evaluate for deck rework
+    - other AI slide services
+
+# ── Source materials (local, this machine unless noted) ─────────────────────
+materials:
+  prior_course_2025:
+    label: "ВШЭ ML Sys Design 2025 — prior course materials"
+    path: "/Users/nk.myg/Documents/_2025-11-ВШЭ_ВНЕШНЕЕ_ОБУЧЕНИЕ/"
+    exists: true
+    key_files:
+      - "dbt-preza-2025-11.pptx"
+      - "dbt_and_Analytics_Engineering.pptx"
+      - "NEW_ВШЭ_Семинар9-Практикум по dbt.pptx"
+      - "NEW_ВШЭ_Семинар12-Airbyte и Data Ingest.pptx"
+      - "Лекция_4_Оркестрация_данных_с_Apache_Airflow.pdf"
+      - "Семинар7_ Практикум по ClickHouse.pdf"
+      - "Dagster & Taipy – ML Ops и ML Sys 2025-11-25 ... .mp4"
+  mlinside_2026:
+    label: "HSU & MLInside 2026 — Vlad's new-course materials"
+    path: "/Users/nk.myg/Downloads/HSU & MLInside/"
+    exists: true
+    key_files:
+      - "Урок 8. Интеграция с dbt.pdf"
+      - "Семинар 9 материалы.md"
+      - "Семинар9-материалы.zip"
+      - "Семинар_4_CICD_введение_и_практика.pdf"
+      - "Семинар1_MLOP_и_основы_инжиниринга_данных_2.pdf"
+  dbt_seminar9_pdf:
+    label: "Семинар9-Введение в dbt.pdf"
+    path: "/Users/user/Downloads/HSE+MLInside/Семинар9-Введение в dbt.pdf"
+    exists: false        # lives on the NEW MacBook, not this machine
+
+# ── Reusable source projects (dbt / pdp) ────────────────────────────────────
+# "Используй подходящие материалы из проектов dbt и pdp"
+source_projects:
+  dbt:
+    label: "dbt project (analytics models/tests/docs to reuse in examples)"
+    path: "TBD"          # set local path
+  pdp:
+    label: "PDP / Prodamus Data Platform (Dagster + dbt + ClickHouse stack)"
+    path: "TBD"          # set local path
+
+# ── Deployment targets ──────────────────────────────────────────────────────
+deployment:
+  yandex_cloud:
+    label: "Yandex Cloud — SaaS + OSS combo"
+    console: "https://console.cloud.yandex.ru/"
+    stack: "Managed services (SaaS) + self-hosted OSS"
+    services: [ClickHouse, DataLens, "Managed Services"]
+  hetzner:
+    label: "Hetzner — full OSS stack"
+    console: "https://console.hetzner.cloud/"
+    stack: "self-hosted OSS end-to-end (Dagster, dbt, ClickHouse, ...)"
+
+# ── Course tech stack ───────────────────────────────────────────────────────
+stack:
+  orchestration: Dagster
+  transformation: dbt
+  warehouse: ClickHouse
+  ingestion: [Airbyte]
+  bi: [DataLens]

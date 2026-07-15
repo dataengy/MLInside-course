@@ -1,0 +1,20 @@
+# Secrets — never commit
+settings/.env.secrets
+*.env.secrets
+.env
+.env.*
+!.env.*.template
+
+# OS / editor cruft
+.DS_Store
+*.swp
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.uv/
+
+# Large binary course media (keep out of git)
+*.mp4
+*.zip
