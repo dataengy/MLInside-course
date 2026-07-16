@@ -1,0 +1,52 @@
+[project]
+name = "preza-gen"
+version = "0.3.1"
+description = "MLInside course deck generator — pptx/html/pdf from one content model"
+requires-python = ">=3.11"
+dependencies = [
+    "python-pptx>=1.0",
+    "pillow>=10",
+    "pyyaml>=6",
+    "loguru>=0.7",
+    "click>=8.1",
+]
+
+[project.optional-dependencies]
+pdf = ["weasyprint>=62"]           # backlog: HTML->PDF (alt engine: playwright)
+orchestration = ["prefect>=3.4", "requests>=2.32"]   # Prefect flow + ingest URL fetch
+dev = ["pytest>=8", "ruff>=0.6", "ty>=0.0.1a1"]
+
+[project.scripts]
+preza-gen = "preza_gen.build_deck:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+preza_gen = ["*.yml"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["src"]          # collects src/tests/* and doctests inside preza_gen
+# ignore the prefect-only package so `just check` stays green without the orchestration extra
+addopts = "-q --doctest-modules --ignore=src/orchestration"
+
+[tool.ruff]
+line-length = 100
+src = ["src"]
+exclude = [".tmp", "data", "docs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]   # line-length is enforced by the formatter, not the linter
+
+[tool.ty.environment]
+root = ["./src"]
+
+[tool.ty.rules]
+# preza_gen leans on python-pptx/PIL dynamic attrs — keep unresolved-attribute advisory
+unresolved-attribute = "warn"

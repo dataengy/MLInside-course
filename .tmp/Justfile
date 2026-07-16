@@ -1,0 +1,28 @@
+# .tmp/Justfile — dev/QA helpers for the deck generator.
+# Run from repo root:  just -f .tmp/Justfile <recipe>
+_root := justfile_directory() / ".."
+DECK := "data/generated/MLInside_Введение-в-dbt_v3.1.pptx"
+SRC := "data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx"
+
+default:
+    @just -f {{justfile()}} --list
+
+# Verify a built deck: slide/image/notes/materials counts, emphasis runs, author check
+verify deck=DECK:
+    cd {{_root}} && python3 .tmp/verify_deck.py {{deck}}
+
+# Render given 1-based slides to PNG for visual QA:  just -f .tmp/Justfile render 4 32 33
+render *nums:
+    cd {{_root}} && python3 .tmp/render_slides.py {{DECK}} {{nums}}
+
+# Labeled contact sheet of the source deck's media → .tmp/contact_sheet.png
+contact-sheet src=SRC:
+    cd {{_root}} && python3 .tmp/contact_sheet.py {{src}}
+
+# Source per-slide text + URLs/materials blocks
+extract-source src=SRC:
+    cd {{_root}} && python3 .tmp/extract_source.py {{src}}
+
+# Remove generated QA artifacts (keep scripts/docs)
+clean:
+    cd {{_root}} && rm -rf .tmp/render .tmp/media .tmp/*.png .tmp/*.pptx

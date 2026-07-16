@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.ai/scripts/publish/deck-watch.sh",
+            "timeout": 120,
+            "statusMessage": "Publishing new deck versions…"
+          }
+        ]
+      }
+    ]
+  }
+}

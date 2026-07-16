@@ -70,6 +70,45 @@ materials:
     path: "/Users/user/Downloads/HSE+MLInside/Семинар9-Введение в dbt.pdf"
     exists: false        # lives on the NEW MacBook, not this machine
 
+# ── Ingest (preza_gen.ingest → settings/files.yml provenance manifest) ──────
+# Pull external source material into data/ and record provenance. Local files are
+# hardlinked (byte-identical, zero copy); URLs are downloaded. Run: `just ingest`.
+ingest:
+  manifest: settings/files.yml
+  targets:
+    # MLInside design template (built upon by the generator)
+    - src: "~/Library/Mobile Documents/com~apple~CloudDocs/_2025-11-ВШЭ_ВНЕШНЕЕ_ОБУЧЕНИЕ/HSU & MLInside/MLinside шаблон презентаций.pptx"
+      dst: data/source/MLinside-шаблон-презентаций.pptx
+    # source deck whose ppt/media/* the generator reuses
+    - src: "~/Library/Mobile Documents/com~apple~CloudDocs/_2025-11-ВШЭ_ВНЕШНЕЕ_ОБУЧЕНИЕ/_!_HSU_202612/NEW_ВШЭ_Семинар9-Практикум по dbt.pptx"
+      dst: data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
+    # NotebookLM / Google Slides: no public API → export the .pptx into data/source/drafts/
+    # manually, then add a `src:` line here to register provenance. Google Slides with a
+    # share link can be pulled directly (needs the `orchestration` extra for `requests`):
+    # - url: "https://docs.google.com/presentation/d/<ID>/export/pptx"
+    #   dst: data/source/drafts/<name>.pptx
+
+# ── Orchestration (Prefect flow — src/orchestration; run: `just serve`) ──────
+# Prefect owns publishing (the Claude Stop-hook is disabled for this repo). The "sensor" is
+# an interval `scan` deployment that diffs a cursor and emits event_name; a
+# DeploymentEventTrigger on `build-and-publish` reacts. publish.send defaults FALSE (dry) —
+# flip to true to auto-post the built deck to Telegram topic 118.
+orchestration:
+  scan_interval_s: 30
+  deck_id: dbt-v3
+  event_name: preza.deck.changed
+  watch:                                  # inputs whose change should rebuild the deck
+    - src/preza_gen/preza-dbt-v3-content.yml
+    - data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
+    - data/source/drafts
+    - data/manual
+  cursor_file: data/.state/publish-cursor.json
+  settings_yml: src/preza_gen/build_deck_v3-settings.yml
+  content_yml: src/preza_gen/preza-dbt-v3-content.yml
+  publish:
+    open: false    # GUI unavailable from a background daemon
+    send: false    # DRY by default — set true to auto-post to the Telegram topic
+
 # ── Reusable source projects (dbt / pdp) ────────────────────────────────────
 # "Используй подходящие материалы из проектов dbt и pdp"
 source_projects:

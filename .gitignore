@@ -18,3 +18,25 @@ __pycache__/
 # Large binary course media (keep out of git)
 *.mp4
 *.zip
+
+# Generator materials & outputs (external inputs hardlinked in; tracked via settings/files.yml)
+data/source/
+data/generated/
+# runtime scan cursor (publish-cursor.json)
+data/.state/
+# machine-specific symlink → ~/Downloads
+data/Downloads
+.uv-cache/
+uv.lock
+
+# .tmp/ dev-QA artifacts (scripts + docs tracked; generated artifacts ignored)
+.tmp/render/
+.tmp/media/
+.tmp/*.png
+.tmp/*.pptx
+
+
+#..
+*/.bak/
+docs/seminar9-dbt/.bak/*.*
+docs/seminar9-dbt/.bak/build_deck_v2.py
