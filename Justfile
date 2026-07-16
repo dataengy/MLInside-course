@@ -8,13 +8,19 @@ default:
 ingest:
     cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.ingest
 
-# Build the deck (pptx + html) from build_deck_v3-settings.yml + preza-dbt-v3-content.yml
+# Deck config lives in content/ (course-specific); the generator is the src/preza_gen submodule.
+_settings := "content/build_deck_v3-settings.yml"
+_content := "content/preza-dbt-v3-content.yml"
+
+# Build the deck (pptx + html)
 build:
-    cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --pptx --html
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --pptx --html \
+      --settings {{_settings}} --content {{_content}}
 
 # Build all formats (pptx + html + pdf; pdf warns until an engine is installed)
 build-all:
-    cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --all
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --all \
+      --settings {{_settings}} --content {{_content}}
 
 # Send the newest built deck (auto-versioned) to the MLInside Telegram topic (118)
 send:

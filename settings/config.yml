@@ -98,13 +98,13 @@ orchestration:
   deck_id: dbt-v3
   event_name: preza.deck.changed
   watch:                                  # inputs whose change should rebuild the deck
-    - src/preza_gen/preza-dbt-v3-content.yml
+    - content/preza-dbt-v3-content.yml
     - data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
     - data/source/drafts
     - data/manual
   cursor_file: data/.state/publish-cursor.json
-  settings_yml: src/preza_gen/build_deck_v3-settings.yml
-  content_yml: src/preza_gen/preza-dbt-v3-content.yml
+  settings_yml: content/build_deck_v3-settings.yml
+  content_yml: content/preza-dbt-v3-content.yml
   publish:
     open: false    # GUI unavailable from a background daemon
     send: false    # DRY by default — set true to auto-post to the Telegram topic

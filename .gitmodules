@@ -1,0 +1,3 @@
+[submodule "src/preza_gen"]
+	path = src/preza_gen
+	url = https://github.com/hnkovr/preza_gen.git

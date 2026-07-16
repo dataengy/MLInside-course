@@ -4,9 +4,10 @@ from pathlib import Path
 
 from preza_gen import settings
 
-_PKG = Path(__file__).resolve().parents[1] / "preza_gen"
-SETTINGS_YML = _PKG / "build_deck_v3-settings.yml"
-CONTENT_YML = _PKG / "preza-dbt-v3-content.yml"
+# deck config lives in the course repo's content/ (the generator is a submodule)
+_CONTENT = Path(__file__).resolve().parents[2] / "content"
+SETTINGS_YML = _CONTENT / "build_deck_v3-settings.yml"
+CONTENT_YML = _CONTENT / "preza-dbt-v3-content.yml"
 
 
 def load():
