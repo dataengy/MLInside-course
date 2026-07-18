@@ -10,3 +10,6 @@ LibreOffice на машине не работает → pptx→pdf через н
 - Готово: `just build-all` даёт `data/generated/*.pdf` без предупреждения.
 
 Альтернатива — задача 0002 (Chromium/Playwright, точнее по вёрстке).
+
+---
+**CLOSED 2026-07-19** — superseded: pptx→pdf работает через LibreOffice (`soffice_path()`/`_render_with_soffice()` в `renderers/pdf.py`, preza_gen `f3d8ca4`). WeasyPrint остаётся опциональным fallback (`.[pdf]`).

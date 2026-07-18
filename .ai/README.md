@@ -19,7 +19,7 @@
 - Сборка/отправка:
   ```
   just build         # pptx + html
-  just build-all     # + pdf (нужен движок, см. tasks/0001-0002)
+  just build-all     # + pdf (LibreOffice/soffice; tasks/0001-0002 закрыты → tasks/.done/)
   just send          # → Telegram-топик 118
   just test          # pytest src/tests
   ```
