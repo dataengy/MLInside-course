@@ -17,10 +17,16 @@ build:
     cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --pptx --html \
       --settings {{_settings}} --content {{_content}}
 
-# Build all formats (pptx + html + pdf; pdf warns until an engine is installed)
+# Build all formats (pptx + html + PDF via LibreOffice; WeasyPrint is the optional fallback)
 build-all:
     cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --all \
       --settings {{_settings}} --content {{_content}}
+
+# Build, open the latest deck locally, then send it to Telegram.
+publish:
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --all --open \
+      --settings {{_settings}} --content {{_content}}
+    just send
 
 # Send the newest built deck (auto-versioned) to the MLInside Telegram topic (118)
 send:
@@ -35,6 +41,13 @@ send:
 
 build-send: build send
 
+# Build the distribution-ready HSU deck from the reviewed template-native dbt deck.
+dbt-final:
+    just -f src/preza_gen/preza_refactoring/Justfile build
+
+dbt-final-verify:
+    just -f src/preza_gen/preza_refactoring/Justfile verify
+
 # Serve the Prefect pipeline (scan interval + build-and-publish trigger). Needs a running
 # `prefect server start` and the orchestration extra. Publishing obeys config.yml orchestration.publish.
 serve:
@@ -43,6 +56,31 @@ serve:
 # Seed the scan cursor: mark current watched inputs as seen (no build). Run once after `serve`.
 seed:
     cd {{_dir}} && PYTHONPATH=src python3 -m orchestration.serve --seed
+
+# ── librarian (src/librarian submodule): dedupe/categorize/version/catalog ──
+# Scan source roots into data/.state/librarian-inventory.yml
+librarian-inventory +roots:
+    cd {{_dir}} && PYTHONPATH=src python3 -m librarian.cli inventory {{roots}}
+
+# Compute the move plan (no changes) → data/.state/librarian-plan.yml
+librarian-plan +roots:
+    cd {{_dir}} && PYTHONPATH=src python3 -m librarian.cli plan {{roots}}
+
+# Dry-run the reviewed plan
+librarian-apply-dry:
+    cd {{_dir}} && PYTHONPATH=src python3 -m librarian.cli apply
+
+# Execute the reviewed plan (moves files!)
+librarian-apply:
+    cd {{_dir}} && PYTHONPATH=src python3 -m librarian.cli apply --execute
+
+# Regenerate data/CATALOG.md from current data/ + data/reviews.yml
+librarian-catalog:
+    cd {{_dir}} && PYTHONPATH=src python3 -m librarian.cli catalog
+
+# Deterministic doc properties for given files (YAML to stdout)
+librarian-docprops +paths:
+    cd {{_dir}} && PYTHONPATH=src python3 -m librarian.cli docprops {{paths}}
 
 # uv: sync the venv from pyproject (incl. dev extras)
 sync:

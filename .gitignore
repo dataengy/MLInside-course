@@ -15,17 +15,11 @@ __pycache__/
 .venv/
 .uv/
 
-# Large binary course media (keep out of git)
-*.mp4
-*.zip
-
-# Generator materials & outputs (external inputs hardlinked in; tracked via settings/files.yml)
-data/source/
+# NB: *.zip and data/source/ are TRACKED (git LFS) since the 2026-07-19 librarian move —
+# data/source now holds the only copies of ingested originals.
 data/generated/
 # runtime scan cursor (publish-cursor.json)
 data/.state/
-# machine-specific symlink → ~/Downloads
-data/Downloads
 .uv-cache/
 uv.lock
 

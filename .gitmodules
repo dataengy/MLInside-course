@@ -1,3 +1,6 @@
 [submodule "src/preza_gen"]
 	path = src/preza_gen
 	url = https://github.com/hnkovr/preza_gen.git
+[submodule "src/librarian"]
+	path = src/librarian
+	url = https://github.com/hnkovr/librarian.git
