@@ -1,2 +1,0 @@
-[console_scripts]
-preza-gen = preza_gen.build_deck:main
