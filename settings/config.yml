@@ -41,12 +41,18 @@ slide_generation:
     - Plus AI           # to evaluate for deck rework
     - other AI slide services
 
-# ── Source materials (local, this machine unless noted) ─────────────────────
+# ── Source materials ────────────────────────────────────────────────────────
+# 2026-07-19: перенесены в ./data/ (librarian, git LFS) — см. data/CATALOG.md.
+# В iCloud-папке остался маркер _MOVED-TO-REPO.md + ~33 evicted-файла (ждут сети).
 materials:
+  library:
+    label: "Курсовая библиотека (librarian-managed)"
+    path: "data/"
+    catalog: "data/CATALOG.md"
   prior_course_2025:
-    label: "ВШЭ ML Sys Design 2025 — prior course materials"
-    path: "/Users/nk.myg/Documents/_2025-11-ВШЭ_ВНЕШНЕЕ_ОБУЧЕНИЕ/"
-    exists: true
+    label: "ВШЭ ML Sys Design 2025 — prior course materials (moved → data/)"
+    path: "~/Library/Mobile Documents/com~apple~CloudDocs/_2025-11-ВШЭ_ВНЕШНЕЕ_ОБУЧЕНИЕ/"
+    exists: true    # только маркер + evicted-остаток
     key_files:
       - "dbt-preza-2025-11.pptx"
       - "dbt_and_Analytics_Engineering.pptx"
@@ -56,9 +62,9 @@ materials:
       - "Семинар7_ Практикум по ClickHouse.pdf"
       - "Dagster & Taipy – ML Ops и ML Sys 2025-11-25 ... .mp4"
   mlinside_2026:
-    label: "HSU & MLInside 2026 — Vlad's new-course materials"
-    path: "/Users/nk.myg/Downloads/HSU & MLInside/"
-    exists: true
+    label: "HSU & MLInside 2026 — Vlad's new-course materials (moved → data/)"
+    path: "~/Library/Mobile Documents/com~apple~CloudDocs/_2025-11-ВШЭ_ВНЕШНЕЕ_ОБУЧЕНИЕ/HSU & MLInside/"
+    exists: true    # перенесено в data/decks|docs|archives
     key_files:
       - "Урок 8. Интеграция с dbt.pdf"
       - "Семинар 9 материалы.md"

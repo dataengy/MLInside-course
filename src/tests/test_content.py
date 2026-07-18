@@ -16,7 +16,7 @@ def load():
 
 def test_content_loads():
     cfg, content = load()
-    assert len(content.slides) == 43
+    assert len(content.slides) == 48
     assert content.slides[0].kind == "title"
     assert content.slides[-1].kind == "closing"
     assert cfg.theme.accent == "2419FF"
@@ -24,8 +24,9 @@ def test_content_loads():
 
 def test_code_slides_present():
     _, content = load()
-    # 8 code-example slides drawn from the source deck
-    assert sum(1 for s in content.slides if s.code) == 8
+    # 13 code-example slides drawn from the source deck
+    assert sum(1 for s in content.slides if s.code) == 13
+    assert all(s.bullets for s in content.slides if s.code)
 
 
 def test_typed_config_and_naming():

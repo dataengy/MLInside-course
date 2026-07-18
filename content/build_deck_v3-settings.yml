@@ -28,10 +28,13 @@ settings:
   body_font:
     bullets_only: {0: 26, 1: 21, 2: 18}
     with_image:   {0: 20, 1: 17, 2: 15}
-  # Code panels — dark monospace box (GitHub-dark palette).
-  code_style: {font: Consolas, size: 11, fg: E6EDF3, bg: 0D1117}
+  # Code panels — dark monospace box (GitHub-dark palette). The renderer fits the height to
+  # each snippet; code_box_full is only its maximum safe area, above the footer/logo.
+  # size = requested max; long snippets auto-shrink toward min_size so wrapped text never
+  # overflows the panel (see renderers/pptx.py:_fit_code_size).
+  code_style: {font: Consolas, size: 13, min_size: 9, fg: E6EDF3, bg: 0D1117}
   code_box:      {left: 6.95, top: 1.7, width: 5.95, height: 5.2}   # beside bullets
-  code_box_full: {left: 0.55, top: 1.6, width: 12.3, height: 5.45}  # code-only slide
+  code_box_full: {left: 0.55, top: 1.6, width: 12.3, height: 4.8}   # code-only safe area
   generation:
     parallel: false   # render requested formats concurrently (ThreadPoolExecutor)
   notes_emphasis:

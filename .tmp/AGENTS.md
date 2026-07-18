@@ -9,16 +9,21 @@
 ## Правила
 - Запуск — из **корня репозитория** через `just -f .tmp/Justfile <recipe>`.
 - Скрипты не мутируют исходники и не трогают `data/source/` — только читают и рендерят во `.tmp/`.
-- Генерируемые артефакты (`.tmp/render/`, `.tmp/media/`, `*.png`, `*.pptx`) — git-ignored; в git идут
-  только `*.py`, `*.md`, `Justfile`.
-- Продовый пайплайн — в `src/preza_gen/` (`build_deck_v3.py`, рендереры, `build_deck_v3.yml`); эти
-  скрипты — вокруг него (QA), не вместо.
+- Генерируемые артефакты (`.tmp/render/`, `.tmp/render-pdf/`, `.tmp/media/`, `*.png`, `*.pptx`) —
+  git-ignored; в git идут только `*.py`, `*.md`, `Justfile`.
+- Для визуальной проверки предпочитайте `render-pdf`: он рендерит PDF, экспортированный
+  LibreOffice, и не подменяет Corbel/Consolas шрифтами Quick Look.
+- Продовый генератор — сабмодуль `src/preza_gen/`; курсной контент и настройки —
+  `content/{preza-dbt-v3-content,build_deck_v3-settings}.yml`. Эти скрипты — вокруг пайплайна
+  (QA), не вместо него.
 
 ## Быстрая проверка новой версии
 ```
 just build                       # собрать (корневой Justfile)
 just -f .tmp/Justfile verify     # counts + emphasis + author
-just -f .tmp/Justfile render 1 4 26 28 32 33   # визуально глянуть проблемные слайды
+just -f .tmp/Justfile audit-code # длина/раскладка code-слайдов
+just -f .tmp/Justfile render-pdf data/generated/MLInside_Введение-в-dbt_v3.9.pdf 13 16
+                                  # визуально глянуть истинный LibreOffice-рендер
 ```
 
 ## Связанное

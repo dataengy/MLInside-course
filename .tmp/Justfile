@@ -1,10 +1,16 @@
 # .tmp/Justfile — dev/QA helpers for the deck generator.
-# Run from repo root:  just -f .tmp/Justfile <recipe>
+# Run from repo root: just -f .tmp/Justfile <recipe>
 _root := justfile_directory() / ".."
-DECK := "data/generated/MLInside_Введение-в-dbt_v3.1.pptx"
+DECK := "data/generated/MLInside_Введение-в-dbt_v3.9.pptx"
+PDF := "data/generated/MLInside_Введение-в-dbt_v3.9.pdf"
 SRC := "data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx"
+CONTENT := "content/preza-dbt-v3-content.yml"
 
 default:
+    @just -f {{justfile()}} help
+
+# List available local QA commands.
+help:
     @just -f {{justfile()}} --list
 
 # Verify a built deck: slide/image/notes/materials counts, emphasis runs, author check
@@ -14,6 +20,15 @@ verify deck=DECK:
 # Render given 1-based slides to PNG for visual QA:  just -f .tmp/Justfile render 4 32 33
 render *nums:
     cd {{_root}} && python3 .tmp/render_slides.py {{DECK}} {{nums}}
+
+# Render selected pages from a LibreOffice-produced PDF (true typography/layout QA).
+# Example: just -f .tmp/Justfile render-pdf data/generated/MLInside_Введение-в-dbt_v3.9.pdf 13 16
+render-pdf pdf *nums:
+    cd {{_root}} && python3 .tmp/render_pdf_pages.py {{pdf}} {{nums}}
+
+# Report code line density and whether each code slide has a left explanatory column.
+audit-code content=CONTENT:
+    cd {{_root}} && python3 .tmp/audit_code_slides.py {{content}}
 
 # Labeled contact sheet of the source deck's media → .tmp/contact_sheet.png
 contact-sheet src=SRC:
@@ -25,4 +40,8 @@ extract-source src=SRC:
 
 # Remove generated QA artifacts (keep scripts/docs)
 clean:
-    cd {{_root}} && rm -rf .tmp/render .tmp/media .tmp/*.png .tmp/*.pptx
+    cd {{_root}} && rm -rf .tmp/render .tmp/render-pdf .tmp/media .tmp/*.png .tmp/*.pptx
+
+# Build the deck, open it locally, and send the newest version to Telegram.
+publish:
+    cd {{_root}} && just publish

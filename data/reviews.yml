@@ -1,0 +1,117 @@
+# Curated per-file reviews merged into CATALOG.md by `just librarian-catalog`.
+# Keys = repo-relative paths of CURRENT files. Reviewed 2026-07-19 (Claude, по docprops
+# + контенту репозитория). Поля: summary / detailing / swot / mistakes / controversial /
+# recommendations — свободный Markdown.
+
+data/decks/MLInside_dbt-HSU-final-v6.pptx:
+  summary: >-
+    Флагманский HSU-дек «Практикум по dbt» (40 слайдов, 20 код-панелей, 29 картинок) —
+    итог переработки base_NEW_ВШЭ_Семинар9 под шаблон MLInside. Единственная версия стека
+    с полными спикер-нотами (2924 слова, ~73/слайд).
+  detailing: >-
+    Стек: v1–v5 + v4 (48-слайдовый QA-снапшот с очищенными метаданными) в `.history/`.
+    Плотность текста высокая (медиана 83 слова/слайд) — верхняя граница нормы для практикума.
+  swot: |-
+    - **S**: полный нотный трек; код-панели с реальными dbt-командами; единый шаблон.
+    - **W**: метаданные не очищены (author «Глазкова Наталия», last_modified_by личный) —
+      v4 очищен, v6 нет; 33MB из-за унаследованных медиа.
+    - **O**: сжать медиа (deck ужмётся в ~5MB как v3.x-линейка); перегенерация через preza_gen
+      делает деку воспроизводимой из YAML.
+    - **T**: ручные правки v5/v6 расходятся с `content/preza-dbt-v3-content.yml` — источник
+      истины дрейфует.
+  mistakes: >-
+    Метаданные автора не очищены (в отличие от v4); проверка `dbt-final-verify` всё ещё
+    завязана на v4 (48 слайдов), а не на текущий v6 (40).
+  recommendations: >-
+    1) Прогнать очистку метаданных для v6; 2) перевести verify-рецепт на конфиг
+    (`output`+`version` из dbt_final.yml); 3) синхронизировать изменения v5–v6 обратно в
+    content-YAML, чтобы дека собиралась из preza_gen без ручных правок.
+
+data/decks/MLInside_dbt-HSU-redesign-v2.pptx:
+  summary: >-
+    Промежуточная редизайн-ветка того же 40-слайдового дека; текст совпадает с
+    reworked-v1 (4451 слова), ноты почти пусты (441 слово).
+  controversial: >-
+    Фактически дубликат reworked-v1 по контенту (совпадают слова/слайды/картинки) —
+    отдельным «текущим» файлом быть не обязан.
+  recommendations: >-
+    Слить ветки: оставить final-v6 текущим, redesign-v2 и reworked-v1 убрать в
+    `.history/` как этапы одной линии (это одна эволюция, а не три продукта).
+
+data/decks/MLInside_dbt-HSU-reworked-v1.pptx:
+  summary: >-
+    Первая переработка base-дека под MLInside; контент идентичен redesign-v2, нот нет.
+  recommendations: >-
+    См. redesign-v2 — кандидат в `.history/` единого стека HSU-дека.
+
+data/decks/dbt-preza-2025-11.pptx:
+  summary: >-
+    Лекционный дек «dbt» ВШЭ-2025 (22 слайда, 28MB), предшественник курса 2026.
+    Практически совпадает по структуре с NEW_ВШЭ_ВНЕШНЕЕ_ОБУЧЕНИЕ.pptx (те же 22 слайда,
+    5 картинок; отличие — ноты 346 слов и год).
+  recommendations: >-
+    Считать историческим источником: объединить с NEW_ВШЭ_ВНЕШНЕЕ_ОБУЧЕНИЕ в один стек
+    (contentent почти идентичен), актуальный материал жить должен в content-YAML 2026.
+
+data/decks/NEW_ВШЭ_ВНЕШНЕЕ_ОБУЧЕНИЕ.pptx:
+  summary: >-
+    Вариант того же лекционного дека 2024-12 без нот; near-duplicate dbt-preza-2025-11.
+  recommendations: >-
+    Кандидат в `.history/`/`.archive` — как самостоятельная единица ценности не добавляет.
+
+data/decks/Введение-в-dbt,-v1.0,-25_09_05,-mix,-35-slides.pptx:
+  summary: >-
+    Компактный (962KB!) 35-слайдовый «Введение в dbt» с богатыми нотами (4577 слов,
+    ~131/слайд) — лучший из имеющихся текстовый скрипт лекции.
+  swot: |-
+    - **S**: лёгкий файл, полный лекторский текст в нотах.
+    - **W**: 0 код-панелей — практика не покрыта; картинок мало (5).
+    - **O**: ноты — готовый источник для speaker-notes в content-YAML v3.x.
+  recommendations: >-
+    Перелить ноты в `content/preza-dbt-v3-content.yml` (поле notes) — сейчас это
+    единственное место, где лекторский текст полнее, чем в generated-деке.
+
+data/decks/dbt-Overview.pptx:
+  summary: >-
+    Внешний обзорный мини-дек по dbt (12 слайдов, без нот) — справочный материал.
+  recommendations: Пометить тегом reference; в курс напрямую не идёт.
+
+data/decks/dbt_webinar.pptx:
+  summary: >-
+    Семейство вебинарных мини-деков (11–21 слайдов, 2013-шаблон, без картинок/нот):
+    dbt_webinar / _slides / _with_images / _with_links — четыре варианта одного вебинара.
+  controversial: >-
+    Четыре варианта одного материала как «текущие» — это же version-stack без версий
+    в имени; librarian не склеил их только из-за разных имён.
+  recommendations: >-
+    Выбрать один канонический (`_with_links` самый полный, 21 слайд), остальные три —
+    в `.history/` или `.archive/`.
+
+data/docs/Orchestrating-dbt-with-Apache-Airflow-using-Cosmos-(1).pdf:
+  summary: >-
+    Книга «Orchestrating dbt with Apache Airflow using Cosmos» (100 стр., 23K слов) —
+    референс для лекции про оркестрацию; в `.history/` лежит чуть более старый вариант.
+  recommendations: >-
+    Переименовать без «(1)» при следующем прогоне (копия с суффиксом выиграла по mtime);
+    тег reference/orchestration.
+
+data/docs/Основы_трансформации_данных_с_помощью_dbt_npl.pdf:
+  summary: >-
+    Русскоязычная книга «Основы трансформации данных с помощью dbt» — базовый референс
+    курса; дубль «(1)» удалён при ингесте.
+
+data/docs/NEW_ВШЭ_Семинар12-Airbyte-и-Data-Ingest.pdf:
+  summary: >-
+    PDF-экспорт семинара 12 (Airbyte/Data Ingest, 112 стр. — по странице на анимационный
+    шаг). Исходный pptx (27MB) пока в iCloud (evicted, ждёт сети).
+  recommendations: >-
+    После скачивания pptx держать pdf как производный (или убрать в .history).
+
+data/media/Занятия-по-курсу-ML-Ops-и-ML-Sys-2025-11-05-180428---МТС-Линк.mp4:
+  summary: >-
+    Запись занятия ML Ops/ML Sys 2025-11-05 (135MB; рядом усечённая copy-версия 78MB).
+  controversial: >-
+    Обе копии — один эфир: copy (78MB) на ~60% короче — вероятно оборванная выгрузка.
+  recommendations: >-
+    Сверить длительность; усечённую копию удалить или в `.archive/`. Для >100MB записей
+    рассмотреть link-stub вместо LFS (см. docs/data-structure.md).
