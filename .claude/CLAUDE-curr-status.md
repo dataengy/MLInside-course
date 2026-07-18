@@ -1,7 +1,7 @@
 # CLAUDE-curr-status — MLInside-course
 
 > Автогенерируемая часть (git/submodule/env/deck) — `just ctx` (см. «Как обновлять»).
-> Обновлено: 2026-07-17. Ведётся **несколькими агентами** (Claude Code + Codex) в одном рабочем дереве.
+> Обновлено: 2026-07-19. Ведётся **несколькими агентами** (Claude Code + Codex) в одном рабочем дереве.
 
 ## Кто и где работает (важно!)
 
@@ -13,10 +13,14 @@
 
 ## Последние 3 завершённые задачи
 
-1. **`e4736e7`** — Phase D: генератор вынесен в сабмодуль **`hnkovr/preza_gen`** → `src/preza_gen`;
-   контент переехал в **`content/`** (`build_deck_v3-settings.yml` = HOW, `preza-dbt-v3-content.yml` = WHAT).
-2. **`7089812`** — тулкит: `pipeline/ingest/scan/publish` + **Prefect-оркестрация** (`src/orchestration/`) + авто-версии имён.
-3. **`e86d36d`** — рендер: код-панели, блок «Материалы» → правый нижний угол, крупный шрифт на слайдах-списках.
+1. **`077da45`** (2026-07-19) — **Librarian-ингест**: iCloud `_2025-11-ВШЭ_ВНЕШНЕЕ_ОБУЧЕНИЕ` +
+   dbt-материалы из `~/Downloads` + бывший `assets/` → `data/` (46 перемещений: 11 текущих дек +
+   21 в `.history/`, 13 docs, 2 записи; sha256-дедуп, 16 точных дублей удалено из iCloud,
+   маркер `_MOVED-TO-REPO.md`); `data/CATALOG.md` + `data/reviews.yml`; git LFS (~800MB).
+2. **`2645a9a`** (2026-07-19) — сабмодуль **`hnkovr/librarian`** → `src/librarian`
+   (dedupe/categorize/version-stack/catalog, 24 теста) + `just librarian-*` + `docs/data-structure.md`.
+3. **`f3d8ca4`@preza_gen** — закоммичена и запушена вся WIP-работа Codex в сабмодуле
+   (soffice-pdf, `_fit_code_box`, preza_refactoring) + пути `assets/` → `data/decks/`.
 
 ## Текущее состояние
 
@@ -30,13 +34,13 @@
 
 ## Незакрытое (последние 2 рабочих дня)
 
-- ⚠️ **Незакоммиченная работа Codex в сабмодуле** `src/preza_gen` (` m` в `git status`):
-  `build_deck.py`, `pipeline.py`, `pyproject.toml`, `renderers/{html,pdf,pptx}.py`, `README.md`,
-  `examples/settings.example.yml` + новые `preza_refactoring/`, `tests/test_layout.py`, `tests/test_pdf.py`.
-  Среди них — **soffice→pdf** в `renderers/pdf.py` (`soffice_path()`, `_render_with_soffice()`) и
-  `_fit_code_box()` в `pptx.py` (компактные код-панели). **Нужен коммит+пуш в сабмодуле, затем бамп указателя.**
-- ⚠️ Незакоммичено в курсовом репо: `content/*.yml` (+5 код-слайдов, 43→48), `src/tests/test_content.py`,
-  `Justfile`, `.tmp/*`.
+- ⛔ **iCloud заблокирован**: сеть (iPhone-hotspot) не достаёт `p219-content.icloud.com`,
+  квота iCloud исчерпана (uploads висят 60ч, `brctl status`). Отсюда отложено:
+  **~33 evicted-файла** (+Dagster mp4, Семинар12/14 pptx, зипы ДЗ) и **ДЗ-репо
+  `dbt_project`/`clickhouse_hw` → submodules `data/code/`** (их `.git` тоже evicted).
+  После починки: `brctl download` → `just librarian-plan "<iCloud root>" && just librarian-apply`.
+- ⚠️ `just typecheck` — 22 pre-existing диагностик в `preza_gen/preza_refactoring` (lint/тесты зелёные, 49 passed).
+- ⚠️ v6-дека: метаданные автора не очищены; `dbt-final-verify` завязан на v4-снапшот (см. `data/reviews.yml`).
 - 🐞 **Пофикшен overflow код-панелей** (в сабмодуле, тоже незакоммичено): `_fit_code_box` считал
   **логические** строки, а длинные строки **переносятся** → код вылезал за пределы панели
   (на «dbt_utils в деле» обрезался `{% endif %}`). Теперь: `_visual_lines`/`_code_height` учитывают
@@ -62,10 +66,10 @@
 
 ## Следующие шаги
 
-1. Закоммитить+запушить сабмодуль `hnkovr/preza_gen`, бампнуть указатель в курсовом репо, затем коммит курсового.
-2. Прогнать `just check` + честный QA (`.tmp/render_pdf_pages.py`) по 48-слайдовой колоде.
-3. Отправить актуальную версию в TG-топик 118 (там всё ещё v3.4/43 слайда).
-4. Почистить `.bak1`, `egg-info/`, `~$*` lock-файлы; следить за диском.
+1. Починить iCloud (сеть/квота) → дозагрузить evicted-файлы (#8), затем ДЗ-репо → submodules (#5).
+2. Честный QA (`.tmp/render_pdf_pages.py`) по 48-слайдовой колоде; TG-топик 118 (там всё ещё v3.4).
+3. Очистка метаданных v6 + перевод `dbt-final-verify` на конфиг; типчек preza_refactoring.
+4. Рассмотреть `docs/data-structure.md` (per-course nesting, link-stubs для >100MB записей).
 
 ## Как обновлять
 
