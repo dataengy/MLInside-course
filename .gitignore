@@ -34,3 +34,8 @@ uv.lock
 */.bak/
 docs/seminar9-dbt/.bak/*.*
 docs/seminar9-dbt/.bak/build_deck_v2.py
+
+# Project-local SYMLINK port of the canonical skills catalog (absolute, machine-specific
+# paths → not portable across clones). The HARDLINK port in .claude/skills/ IS tracked.
+# Recreate with: bash ~/.ai/skills/_catalog/docs/pptx/create-preza-about-de-tool/scripts/port-skill-local.sh
+.claude/skills-canonical/

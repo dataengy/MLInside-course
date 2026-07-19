@@ -24,7 +24,23 @@
 
 ## Текущее состояние
 
-**Колода:** 48 слайдов · 13 код-слайдов · 16 картинок · 7 таблиц.
+**Новое (2026-07-20): генератор дек по DE-инструментам.**
+Канонический скилл `create-preza-about-de-tool` (+ саб-скиллы `preza-de-outline`/`-stamp`/`-validate`)
+в `~/.ai/skills/_catalog/docs/pptx/`; в репо проброшен **двумя способами** —
+хардлинк `.claude/skills/<slug>/skill.md` и симлинк-директория `.claude/skills-canonical/<slug>`
+(в каждом `NOTES.md` с объяснением). Детерминированные скрипты: `validate_content.py`,
+`stamp_provenance.py`, `resolve_slug.py`, `build_deck.sh`, `port-skill-local.sh`.
+Политика в `settings/config.yml → deck_generation` (20..50 слайдов, профиль `code-tables`,
+штамп `model/harness/effort/version` в заметках первого и последнего слайда).
+Новые деки: **Dagster — 50 слайдов** (25 код-панелей, 10 таблиц), **Prefect — 30**,
+**CI/CD + Observability** (см. `docs/CHANGELOG.md`). Гейт: `just preza-validate-all`.
+
+⚠️ **Требует решения:** на диске лежат незакоммиченные черновики прошлой Codex-сессии
+`content/preza-{dagster,prefect,cicd-observability}-v1-content.yml` (31/17/17 слайдов).
+Два из них **ниже минимума в 20 слайдов**. Justfile перенаправлен на новые файлы;
+черновики **не тронуты** — нужно решить: оставить, слить или отправить в `.stash/`.
+
+**Колода (dbt):** 48 слайдов · 13 код-слайдов · 16 картинок · 7 таблиц.
 Сборка: `data/generated/MLInside_Введение-в-dbt_v3.N.{pptx,html,pdf}` → хардлинк в `~/Downloads`.
 В TG (топик 118) последним уходил **v3.4** (43 слайда) — **новые 48-слайдовые версии ещё не отправлялись**.
 
