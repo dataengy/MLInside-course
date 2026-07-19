@@ -11,6 +11,12 @@ ingest:
 # Deck config lives in content/ (course-specific); the generator is the src/preza_gen submodule.
 _settings := "content/build_deck_v3-settings.yml"
 _content := "content/preza-dbt-v3-content.yml"
+_dagster_content := "content/preza-dagster-content.yml"
+_prefect_content := "content/preza-prefect-content.yml"
+_cicd_obs_content := "content/preza-cicd-observability-content.yml"
+
+# Deck-generation skill (canonical catalog) — scripts used by the validate/new targets below.
+_preza_skill := "~/.ai/skills/_catalog/docs/pptx/create-preza-about-de-tool/scripts"
 
 # Build the deck (pptx + html)
 build:
@@ -40,6 +46,47 @@ send:
       --chat -1002281796095 --thread 118
 
 build-send: build send
+
+# Build the Dagster lecture deck (PPTX + HTML).
+dagster-build:
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --pptx --html \
+      --settings {{_settings}} --content {{_dagster_content}}
+
+# Build all Dagster formats (PPTX + HTML + PDF when LibreOffice is available).
+dagster-build-all:
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --all \
+      --settings {{_settings}} --content {{_dagster_content}}
+
+prefect-build:
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --pptx --html \
+      --settings {{_settings}} --content {{_prefect_content}}
+
+cicd-observability-build:
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --pptx --html \
+      --settings {{_settings}} --content {{_cicd_obs_content}}
+
+# ── deck generation skill (create-preza-about-de-tool) ──────────────────────
+# Validate one deck content file against the schema, slide bounds and provenance stamp.
+preza-validate content:
+    cd {{_dir}} && python3 {{_preza_skill}}/validate_content.py {{content}} \
+      --settings settings/config.yml --visuals code-tables
+
+# Validate every generated DE-tool deck at once.
+preza-validate-all:
+    cd {{_dir}} && for f in {{_dagster_content}} {{_prefect_content}} {{_cicd_obs_content}}; do \
+      python3 {{_preza_skill}}/validate_content.py "$f" \
+        --settings settings/config.yml --visuals code-tables || exit 1; \
+    done
+
+# Resolve the slug/out_name a new topic would get (dry helper for the skill).
+preza-slug topic:
+    cd {{_dir}} && python3 {{_preza_skill}}/resolve_slug.py {{quote(topic)}}
+
+# Re-stamp provenance (model/harness/effort/version) into a deck's first+last notes.
+preza-stamp content version date:
+    cd {{_dir}} && python3 {{_preza_skill}}/stamp_provenance.py {{content}} \
+      --model claude-opus-4-8 --harness "Claude Code" --effort max \
+      --version {{version}} --date {{date}}
 
 # Build the distribution-ready HSU deck from the reviewed template-native dbt deck.
 dbt-final:

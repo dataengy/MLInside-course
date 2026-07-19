@@ -32,6 +32,21 @@ participants:
 planning:
   schedule_gsheet: "https://docs.google.com/spreadsheets/d/1cxYGtU36nbmO5DhjtNkm_HMESiNPwoWdd6QY8yb2JaU/edit"
 
+# ── Deck generation policy (create-preza-about-de-tool) ─────────────────────
+# Bounds enforced by the skill's validate_content.py before every build.
+deck_generation:
+  slides_min: 20
+  slides_max: 50
+  visuals_default: code-tables    # code-tables | reuse-source | image-pipeline
+  provenance:                     # stamped into the FIRST + LAST slide notes
+    harness: "Claude Code"
+    marker: "— Сгенерировано:"
+  decks:
+    - content/preza-dbt-v3-content.yml
+    - content/preza-dagster-content.yml
+    - content/preza-prefect-content.yml
+    - content/preza-cicd-observability-content.yml
+
 # ── Slide generation / rework tooling ───────────────────────────────────────
 slide_generation:
   goal: "Rework prior-course decks into MLInside 2026 slides"

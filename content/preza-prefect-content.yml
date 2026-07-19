@@ -1,0 +1,756 @@
+# preza-prefect-content.yml — WHAT deck: output naming, source media deck, and slides.
+# Visual profile: code-tables (no `image:` keys — visuals = dark code panels + tables).
+# Notes use emphasis markup (see settings.notes_emphasis) + blank-line paragraphs.
+
+deck:
+  out_name: MLInside_Современная-оркестрация-ML-пайплайнов-Prefect
+  naming: increment
+  version_major: 1
+  downloads_dir: ~/Downloads
+  source_deck: data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
+content:
+- kind: title
+  title: Современная оркестрация ML-пайплайнов (Prefect)
+  subtitle: MLInside · 2026
+  notes: |
+    Приветствие. Сегодня разбираем **Prefect** — Python-first оркестратор, который вырос из простой идеи: __оркестрация не должна переписывать ваш код, она должна его обёртывать__. В прошлых семинарах мы строили трансформации в **dbt** и смотрели на **Dagster**; Prefect закрывает третий угол — !!надёжное выполнение сложного, склонного к сбоям кода!!.
+
+    План на лекцию: сначала контекст и история — кто и зачем создал Prefect, что такое **негативная инженерия**; потом полный разбор сущностей (**flow**, **task**, **deployment**, **work pool**, **block**, **artifact**, **automation**); затем **dev vs prod**, интеграция с **dbt** и честное сравнение с **Dagster** и **Airflow**. В конце — свежая новость июля 2026, которая меняет расклад на рынке, и домашнее задание. ~~Вопросы удобнее задавать по ходу.~~
+
+    — Сгенерировано: model=claude-opus-4-8 · harness=Claude Code · effort=max · version=v1.0 · 2026-07-20
+- kind: agenda
+  title: План лекции
+  bullets:
+  - Контекст, история и персоны — откуда взялся Prefect
+  - 'Архитектура: flow, task, task runners, состояния'
+  - 'Прод-сущности: deployments, work pools, workers, blocks'
+  - 'Надёжность: retries, caching, results, artifacts, automations'
+  - Dev vs Prod · Prefect Cloud vs self-hosted OSS
+  - CLI и интеграция с dbt
+  - Prefect vs Dagster vs Airflow · новость июля 2026
+  - Домашнее задание и критерии оценки
+  notes: |
+    Логика лекции — от __идеи__ к __сущностям__, от сущностей к __эксплуатации__. Первый блок отвечает на вопрос «зачем ещё один оркестратор, когда есть Airflow»; второй — это ядро, самая практическая часть, где мы разберём каждую сущность и увидим её в коде.
+
+    Блок про **dev vs prod** — самый недооценённый: 90% боли новичков в Prefect в том, что !!локальный запуск и запуск через deployment устроены принципиально по-разному!!. Дальше — **prefect-dbt** как мост к прошлому семинару, сравнительная таблица трёх оркестраторов и **ДЗ**, которое продолжает ваш dbt-проект по фрод-транзакциям. ~~Держим этот план как ориентир.~~
+- kind: section
+  title: Контекст, история и персоны
+  notes: |
+    Первый блок — вводный и исторический.
+
+    Разберёмся, __какую именно проблему решает Prefect__, кто его создал, что такое **позитивная и негативная инженерия**, и как продукт эволюционировал от **Prefect 1** к **Prefect 3**.
+- kind: content
+  title: Что такое Prefect и место в ML-стеке
+  materials:
+  - label: Prefect — документация
+    url: https://docs.prefect.io/
+  - label: Prefect на GitHub
+    url: https://github.com/PrefectHQ/prefect
+  bullets:
+  - Оркестратор рабочих процессов на чистом Python, open source
+  - Обычная функция становится flow одним декоратором
+  - 'Даёт то, чего нет у скрипта: retries, состояния, логи, расписания, UI'
+  - Динамические пайплайны — граф строится во время выполнения
+  - 'Место в стеке: ingestion → dbt (T) → ML-обучение → инференс'
+  code_caption: место Prefect в конвейере
+  code: |
+    ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+    │ ingestion│→ │   dbt    │→ │ features │→ │  train   │
+    └──────────┘  └──────────┘  └──────────┘  └──────────┘
+         ↑             ↑             ↑             ↑
+         └─────────────┴──── Prefect ┴─────────────┘
+            расписание · retries · состояния · алерты
+  notes: |
+    **Prefect** — это оркестратор, написанный на Python и для Python. Его центральный тезис: !!вы не переписываете код под оркестратор — вы добавляете декоратор!!. Обычная функция `train()` становится **flow**, и мгновенно получает то, чего у голого скрипта нет: **повторные попытки**, **историю состояний**, структурированные **логи**, **расписание** и **веб-интерфейс**.
+
+    В ML-стеке Prefect стоит поверх всех слоёв: он дёргает загрузку, запускает **dbt**-трансформации, готовит фичи и обучает модель, связывая это в один наблюдаемый процесс. Важное отличие от классических DAG-оркестраторов — __граф выполнения строится динамически__, во время работы: количество задач может зависеть от данных. ~~На схеме видно, что Prefect не заменяет ни dbt, ни ML-библиотеки — он ими дирижирует.~~
+- kind: content
+  title: История и персоны
+  materials:
+  - label: Prefect — блог компании
+    url: https://www.prefect.io/blog
+  bullets:
+  - Jeremiah Lowin — основатель Prefect Technologies (2018)
+  - До этого — коммитер и участник сообщества Apache Airflow
+  - 'Идея: взять уроки Airflow, но убрать его ограничения'
+  - Prefect Core с самого начала — open source на Python
+  - Компания выросла из консалтинга по данным в продуктовую
+  notes: |
+    Компанию **Prefect Technologies** основал в **2018** году **Jeremiah Lowin** — человек, который до этого активно работал с **Apache Airflow** и хорошо знал его боли изнутри. Именно поэтому Prefect с первого дня строился как __ответ на конкретные ограничения Airflow__, а не как «ещё один планировщик задач».
+
+    Ключевые претензии к Airflow того времени: !!статический DAG, который нельзя изменить во время выполнения!!, неудобная передача данных между задачами (XCom), тяжёлый scheduler и высокий порог входа. Prefect ответил на это моделью, где **workflow — это просто Python-функция**, а данные передаются как обычные значения. ~~Такая генеалогия объясняет многие решения в API, которые иначе кажутся произвольными.~~
+- kind: content
+  title: 'Позитивная и негативная инженерия'
+  materials:
+  - label: Prefect — Why Prefect
+    url: https://docs.prefect.io/v3/get-started/index
+  bullets:
+  - 'Позитивная инженерия: код, который создаёт бизнес-ценность'
+  - 'Негативная инженерия: код, защищающий от сбоев'
+  - 'Негативная: retries, таймауты, логи, алерты, идемпотентность'
+  - Тезис Prefect — негативную инженерию должен брать на себя фреймворк
+  - Отсюда декларативность retries, кэша и уведомлений
+  code_caption: без Prefect и с Prefect
+  code: |
+    # позитивная инженерия — то, ради чего вы пришли
+    df = load(); model = train(df); save(model)
+
+    # негативная инженерия — то, что приходится писать вокруг
+    for attempt in range(3):
+        try:
+            df = load(); break
+        except Exception as e:
+            log.warning(e); time.sleep(30 * 2 ** attempt)
+    else:
+        alert("load failed"); raise
+
+    # в Prefect это одна строка:
+    @task(retries=3, retry_delay_seconds=[30, 60, 120])
+  notes: |
+    Одна из самых узнаваемых идей Prefect — разделение на **позитивную** и **негативную инженерию**. **Позитивная** — это код, который непосредственно делает работу: загрузить, посчитать, обучить, записать. **Негативная** — это всё, что вы дописываете вокруг, чтобы позитивный код !!не сломался в три часа ночи!!: повторы, таймауты, обработка ошибок, логирование, алерты, проверки идемпотентности.
+
+    Тезис компании: __негативная инженерия не должна быть вашей заботой — её должен закрывать фреймворк__. Отсюда вся эргономика Prefect: retries и таймауты — это аргументы декоратора, а не пятнадцать строк boilerplate. На слайде слева — то, что вы пишете руками; справа — то, что Prefect делает декларативно. ~~Держите этот критерий в голове: если код пишется ради защиты от сбоя, ему, скорее всего, место в конфигурации оркестратора.~~
+- kind: content
+  title: 'Эволюция: Prefect 1 → 2 → 3'
+  materials:
+  - label: Prefect 3 — обзор
+    url: https://docs.prefect.io/v3/get-started/index
+  - label: Prefect — репозиторий и релизы
+    url: https://github.com/PrefectHQ/prefect/releases
+  bullets:
+  - 'Prefect 1 (Core): явный граф задач, DAG строился до запуска'
+  - Orion — экспериментальный движок, ставший основой второй версии
+  - 'Prefect 2: динамические flow, deployments, work pools, blocks'
+  - 'Prefect 3: переработанный движок, автономные задачи, события'
+  - Актуальная линейка — 3.x; примеры на лекции даём на ней
+  notes: |
+    **Prefect 1**, известный как **Prefect Core**, ещё наследовал DAG-мышление: граф задач нужно было собрать до запуска. Параллельно команда разрабатывала экспериментальный движок под кодовым именем **Orion**, где граф стал строиться __во время выполнения__ — именно он лёг в основу **Prefect 2**.
+
+    **Prefect 2** принёс современную модель: динамические flow, **deployments**, **work pools** и **workers**, **blocks** для конфигурации. **Prefect 3** переработал движок исполнения, усилил работу с **событиями** и автоматизациями и сделал задачи более автономными. !!Мы работаем на актуальной линейке 3.x!! — API второй и третьей версий похожи, но не идентичны, поэтому при чтении статей всегда проверяйте версию. ~~Гуглить рецепты «из Prefect 1» — самая частая ошибка новичка.~~
+- kind: section
+  title: Архитектура и сущности
+  notes: |
+    Переходим к ядру лекции.
+
+    Разберём каждую сущность Prefect: от **flow** и **task** до **work pool**, **block** и **automation**. !!Это самый практический блок — дальше всё домашнее задание опирается именно на него.!!
+- kind: content
+  title: 'Flow и Task: базовые декораторы'
+  materials:
+  - label: Prefect — Flows
+    url: https://docs.prefect.io/v3/concepts/flows
+  - label: Prefect — Tasks
+    url: https://docs.prefect.io/v3/concepts/tasks
+  bullets:
+  - '@flow — единица запуска, наблюдения и деплоя'
+  - '@task — шаг с retries, кэшем и отдельным состоянием'
+  - Flow может вызывать другие flow — это subflow
+  - Не превращайте каждую строку в task — только логические шаги
+  - Параметры flow типизируются и валидируются через pydantic
+  code_caption: fraud_pipeline.py
+  code: |
+    from prefect import flow, task
+
+    @task(retries=3, retry_delay_seconds=30, timeout_seconds=600)
+    def extract(day: str) -> str:
+        return load_raw_transactions(day)
+
+    @task
+    def validate(path: str) -> int:
+        return count_bad_rows(path)
+
+    @flow(name="fraud-pipeline", log_prints=True)
+    def fraud_pipeline(day: str, strict: bool = True):
+        path = extract(day)
+        bad = validate(path)
+        if strict and bad > 0:
+            raise ValueError(f"{bad} bad rows")
+        return path
+
+    if __name__ == "__main__":
+        fraud_pipeline("2026-07-20")
+  notes: |
+    Две главные сущности — **flow** и **task**. **Flow** — это единица, которую вы деплоите, планируете и наблюдаете целиком; **task** — отдельный шаг внутри неё, у которого своё состояние, свои **retries** и свой кэш. Flow может вызывать другие flow — тогда вложенный называется **subflow** и получает собственную запись в UI.
+
+    Практическое правило, которое стоит записать: !!task — это логический шаг или существенный побочный эффект, а не каждая строчка кода!!. Если разбить пайплайн на двести микрозадач, вы получите не наблюдаемость, а шум и заметный оверхед. Обратите внимание на типизацию параметров — Prefect валидирует их через **pydantic**, так что опечатка в параметре расписания упадёт __до запуска__, а не в середине. ~~В примере — скелет ровно того пайплайна, который вы будете писать в ДЗ.~~
+- kind: content
+  title: 'Параллелизм: .submit(), .map() и task runners'
+  materials:
+  - label: Prefect — Task runners
+    url: https://docs.prefect.io/v3/concepts/task-runners
+  bullets:
+  - Прямой вызов task() — синхронное выполнение по порядку
+  - '.submit() — отправка в task runner, возвращает future'
+  - '.map() — веерный запуск задачи по коллекции входов'
+  - 'Task runners: ThreadPool (по умолчанию), Dask, Ray'
+  - Dask и Ray подключаются пакетами prefect-dask и prefect-ray
+  code_caption: параллельная обработка партиций
+  code: |
+    from prefect import flow, task
+    from prefect.futures import wait
+
+    @task
+    def process(day: str) -> int:
+        return transform_partition(day)
+
+    @flow
+    def backfill(days: list[str]):
+        # веерный запуск: одна задача на каждый день
+        futures = process.map(days)
+        results = [f.result() for f in futures]
+        return sum(results)
+
+    # с внешним движком:
+    # from prefect_dask import DaskTaskRunner
+    # @flow(task_runner=DaskTaskRunner())
+  notes: |
+    По умолчанию вызов `process(day)` выполняется __синхронно, прямо в потоке flow__. Чтобы получить параллелизм, задачу отправляют в **task runner** методом `.submit()` — он возвращает **future**, а результат забирается через `.result()`. Метод `.map()` — это сахар для веерного запуска: одна задача на каждый элемент коллекции.
+
+    Именно `.map()` делает наглядной !!главную фишку Prefect — динамический граф!!: количество задач становится известно только во время выполнения, потому что зависит от данных. По умолчанию работает **ThreadPoolTaskRunner**; для тяжёлых вычислений подключают **Dask** (`prefect-dask`) или **Ray** (`prefect-ray`), и код flow при этом __не меняется — меняется только аргумент task_runner__. ~~Это ровно та развилка, где Prefect выигрывает у статических DAG.~~
+- kind: content
+  title: 'Состояния, retries и таймауты'
+  materials:
+  - label: Prefect — States
+    url: https://docs.prefect.io/v3/concepts/states
+  bullets:
+  - 'Состояния: Pending → Running → Completed / Failed / Crashed'
+  - 'Есть также Retrying, Cached, Paused, Cancelled'
+  - retries + retry_delay_seconds — список даёт backoff
+  - retry_condition_fn — повторять только нужные ошибки
+  - timeout_seconds спасает от зависших задач без ошибки
+  code_caption: тонкая настройка надёжности
+  code: |
+    from prefect import task
+
+    def only_transient(task, task_run, state) -> bool:
+        try:
+            state.result()
+        except TimeoutError:
+            return True      # повторяем
+        except ValueError:
+            return False     # бизнес-ошибка — не повторяем
+        return False
+
+    @task(
+        retries=3,
+        retry_delay_seconds=[10, 60, 300],   # экспоненциальный backoff
+        timeout_seconds=900,
+        retry_condition_fn=only_transient,
+    )
+    def load_to_clickhouse(path: str): ...
+  notes: |
+    Каждый **flow run** и **task run** живёт в конечном автомате **состояний**: `Pending → Running → Completed` либо `Failed`/`Crashed`. Есть промежуточные — `Retrying`, `Cached`, `Paused`, `Cancelled`. Состояние — это не просто метка в UI: на него можно вешать автоматизации и по нему строится вся история запусков.
+
+    Практический совет, который экономит часы: !!не повторяйте бизнес-ошибки!!. Если модель упала из-за сетевого таймаута — повтор оправдан; если из-за нарушения контракта данных — три повтора просто трижды сожгут ресурсы и на три часа отсрочат алерт. Для этого есть `retry_condition_fn`. И отдельно про `timeout_seconds`: __зависшая задача опаснее упавшей__, потому что она не даёт ни ошибки, ни результата. ~~Список в retry_delay_seconds — самый простой способ получить backoff.~~
+- kind: content
+  title: 'Results и кэширование'
+  materials:
+  - label: Prefect — Caching
+    url: https://docs.prefect.io/v3/concepts/caching
+  - label: Prefect — Results
+    url: https://docs.prefect.io/v3/concepts/results
+  bullets:
+  - Result — сохранённый результат выполнения задачи
+  - persist_result=True — сохранить в файловую систему или S3
+  - Cache policy определяет ключ кэша (входы, код задачи, версия)
+  - cache_expiration — как долго кэш считается валидным
+  - 'Экономит повторные вычисления при retry и backfill'
+  code_caption: кэш по входным параметрам
+  code: |
+    from datetime import timedelta
+    from prefect import task
+    from prefect.cache_policies import INPUTS, TASK_SOURCE
+
+    @task(
+        cache_policy=INPUTS + TASK_SOURCE,
+        cache_expiration=timedelta(hours=12),
+        persist_result=True,
+    )
+    def build_features(day: str):
+        return heavy_feature_computation(day)
+  notes: |
+    **Result** — это сохранённый результат выполнения задачи, а **кэш** — механизм, который позволяет при повторном запуске __не выполнять задачу заново__, а вернуть уже посчитанное. Ключ кэша задаётся **cache policy**: чаще всего это комбинация входных параметров (`INPUTS`) и исходного кода задачи (`TASK_SOURCE`), чтобы правка логики автоматически инвалидировала кэш.
+
+    Зачем это в ML: !!при падении на шаге обучения не нужно заново пересчитывать фичи!!. При backfill за тридцать дней кэш экономит буквально часы. Важная оговорка: чтобы результат пережил перезапуск процесса, нужен `persist_result=True` и настроенное хранилище — иначе кэш живёт только в рамках сессии. ~~И помните: кэш по входам корректен только для детерминированных задач.~~
+- kind: content
+  title: 'Deployments: от скрипта к управляемому процессу'
+  materials:
+  - label: Prefect — Deployments
+    url: https://docs.prefect.io/v3/concepts/deployments
+  bullets:
+  - Deployment — flow + расписание + инфраструктура + параметры
+  - Только у deployment есть расписание и запуск из UI/API
+  - Описывается в prefect.yaml или через flow.deploy() / .serve()
+  - Триггеры — cron, interval, RRule или событие
+  - Один flow может иметь несколько deployment с разными параметрами
+  code_caption: prefect.yaml (фрагмент)
+  code: |
+    deployments:
+      - name: fraud-daily
+        entrypoint: flows/fraud_pipeline.py:fraud_pipeline
+        work_pool:
+          name: local-pool
+        parameters:
+          strict: true
+        schedules:
+          - cron: "0 3 * * *"
+            timezone: "Europe/Moscow"
+  notes: |
+    **Deployment** — это, пожалуй, !!самое важное понятие для перехода в прод!!. Локально вы просто запускаете Python-файл. Но чтобы у flow появилось **расписание**, кнопка «запустить» в UI и запуск по API, его нужно __зарегистрировать как deployment__: метаданные о том, где лежит код, какие параметры по умолчанию, в каком work pool исполнять и по какому триггеру запускать.
+
+    Описывается это либо декларативно в `prefect.yaml` (рекомендуемый путь для командной работы и git), либо императивно через `flow.deploy()`, либо через `.serve()` для быстрого старта. Ключевая мысль: **один flow — много deployment**. Одна и та же функция может быть развёрнута как ежедневный прод-запуск и как ручной backfill с другими параметрами. ~~Именно этот слайд нужно перечитать перед выполнением ДЗ.~~
+- kind: content
+  title: 'Work pools и workers'
+  materials:
+  - label: Prefect — Work pools
+    url: https://docs.prefect.io/v3/concepts/work-pools
+  bullets:
+  - Work pool — очередь и описание типа инфраструктуры
+  - Worker — процесс, который забирает запуски из пула
+  - 'Типы пулов: process, docker, kubernetes, облачные push-пулы'
+  - Разделение позволяет менять инфраструктуру без правки кода
+  - Без запущенного worker deployment создаст run, но не выполнит его
+  code_caption: control plane и execution plane
+  code: |
+      ┌──────────────── Prefect Server / Cloud ────────────────┐
+      │  API · БД состояний · UI · расписания · автоматизации  │
+      └────────────────────────┬───────────────────────────────┘
+                               │  work pool (очередь)
+              ┌────────────────┼────────────────┐
+              ▼                ▼                ▼
+        ┌──────────┐     ┌──────────┐     ┌──────────┐
+        │ worker A │     │ worker B │     │ worker C │
+        │ process  │     │  docker  │     │   k8s    │
+        └──────────┘     └──────────┘     └──────────┘
+             ваш код и ваши данные никогда не покидают worker
+  notes: |
+    Здесь работает !!гибридная модель исполнения!!, и это фундамент архитектуры Prefect. **Server** (или **Cloud**) — это **control plane**: он хранит состояния, расписания, метаданные и рисует UI. **Worker** — это **execution plane**: процесс в вашей инфраструктуре, который опрашивает **work pool**, забирает запланированный запуск и выполняет его __у вас__.
+
+    Отсюда два следствия. Первое, безопасность: **ваш код и данные не уходят в control plane** — наружу летят только метаданные о статусах. Второе, самая частая ошибка новичка: __deployment без запущенного worker создаёт run в статусе Scheduled, который никогда не выполнится__. Если run «висит» — первым делом проверьте, жив ли worker и смотрит ли он в тот же пул. ~~На схеме стрелка идёт от worker к серверу: worker опрашивает сервер, а не наоборот — поэтому не нужны входящие порты.~~
+- kind: content
+  title: 'Blocks и Variables: конфигурация и секреты'
+  materials:
+  - label: Prefect — Blocks
+    url: https://docs.prefect.io/v3/concepts/blocks
+  - label: Prefect — Variables
+    url: https://docs.prefect.io/v3/concepts/variables
+  bullets:
+  - Block — типизированное хранилище конфигурации и подключений
+  - 'Готовые типы: Secret, S3Bucket, DockerRegistry, SlackWebhook'
+  - Значения хранятся на сервере, секреты — в зашифрованном виде
+  - Variable — простое key-value значение без схемы
+  - В коде — только имя блока, никаких паролей в git
+  code_caption: работа с блоками и переменными
+  code: |
+    from prefect.blocks.system import Secret
+    from prefect.variables import Variable
+
+    # один раз: создать блок в UI или из кода
+    Secret(value="***").save(name="clickhouse-password")
+
+    @task
+    def load():
+        pwd = Secret.load("clickhouse-password").get()
+        target = Variable.get("dbt_target", default="dev")
+        return connect(password=pwd, target=target)
+  notes: |
+    **Block** — это типизированная, сохранённая на сервере конфигурация: строка подключения, доступ к S3, вебхук Slack, учётка реестра образов. В коде вы пишете `Secret.load("clickhouse-password")` — то есть !!в репозитории лежит только имя блока, а не значение!!. Секретные поля хранятся в зашифрованном виде и не отображаются в UI.
+
+    **Variable** — упрощённый вариант: обычное key-value без схемы, для несекретных настроек вроде имени dbt-таргета или размера батча. Практическая ценность в том, что __конфигурацию можно менять без передеплоя кода__: поправили переменную в UI — следующий запуск подхватил. ~~В ДЗ пароль к ClickHouse должен приехать именно из блока — жёстко зашитый пароль в коде будет считаться ошибкой.~~
+- kind: content
+  title: 'Artifacts: результаты, видимые в UI'
+  materials:
+  - label: Prefect — Artifacts
+    url: https://docs.prefect.io/v3/concepts/artifacts
+  bullets:
+  - Artifact — структурированный вывод запуска, привязанный к run
+  - 'Типы: markdown, table, link, progress'
+  - Удобно публиковать метрики модели и отчёты качества
+  - Артефакты с одинаковым key образуют историю версий
+  - Дешёвая замена самописных дашбордов для коротких отчётов
+  code_caption: отчёт о качестве данных в UI
+  code: |
+    from prefect.artifacts import create_markdown_artifact, create_table_artifact
+
+    @task
+    def report(metrics: dict, rows: list[dict]):
+        create_markdown_artifact(
+            key="fraud-model-metrics",
+            markdown=f"## Метрики\n- ROC AUC: **{metrics['auc']:.3f}**\n"
+                     f"- Precision@100: **{metrics['p100']:.3f}**",
+            description="Качество модели за прогон",
+        )
+        create_table_artifact(key="dq-checks", table=rows)
+  notes: |
+    **Artifact** — это структурированный вывод, который прикрепляется к конкретному запуску и отображается прямо в UI. Поддерживаются **markdown**, **table**, **link** и **progress**. Для ML это очень удобная штука: вместо того чтобы искать метрики в текстовых логах, вы публикуете !!аккуратный отчёт рядом с запуском!!.
+
+    Отдельно ценно, что артефакты с одинаковым `key` __образуют историю версий__ — можно посмотреть, как ROC AUC менялся от прогона к прогону, без отдельной системы трекинга экспериментов. Это не замена MLflow для серьёзных экспериментов, но для регулярных прод-прогонов часто достаточно. ~~В ДЗ артефакт с результатами dbt-тестов — хороший способ добрать баллы.~~
+- kind: content
+  title: 'Events и Automations: реакция на происходящее'
+  materials:
+  - label: Prefect — Automations
+    url: https://docs.prefect.io/v3/concepts/automations
+  - label: Prefect — Events
+    url: https://docs.prefect.io/v3/concepts/events
+  bullets:
+  - Каждое изменение состояния порождает событие
+  - Automation = trigger (условие на события) + action
+  - 'Actions: уведомление, запуск deployment, отмена, пауза'
+  - 'Триггеры по отсутствию события — SLA и контроль свежести'
+  - Уведомления в Slack, Teams, email, произвольный webhook
+  code_caption: цепочка событие → действие
+  code: |
+    событие                       →  automation  →  действие
+    ─────────────────────────────────────────────────────────
+    flow run Failed               →  reactive    →  Slack alert
+    dbt-flow Completed            →  reactive    →  run train-flow
+    нет Completed за 26 часов     →  proactive   →  PagerDuty
+    task run Crashed 3 раза       →  reactive    →  pause deployment
+  notes: |
+    В Prefect 3 всё, что происходит, порождает **события**: смена состояния запуска, появление артефакта, внешний сигнал через вебхук. **Automation** — это правило вида «если случилось такое событие, сделай такое действие»: отправить уведомление, запустить другой deployment, отменить или поставить на паузу.
+
+    Самый недооценённый вид — !!proactive-триггеры, то есть реакция на ОТСУТСТВИЕ события!!. «Если за 26 часов не было ни одного успешного завершения — зови дежурного». Это ровно то, что превращает пайплайн в __сервис с SLA__: молчаливо не запустившийся ночной джоб опаснее упавшего, потому что упавший хотя бы кричит. ~~В ДЗ уведомление об ошибке делается именно через automation, а не через try/except с отправкой сообщения.~~
+- kind: section
+  title: Dev vs Prod
+  notes: |
+    Второй важнейший блок.
+
+    Разберём, чем __локальный запуск принципиально отличается от прод-развёртывания__, и что выбрать: **Prefect Cloud** или **self-hosted OSS**. !!Здесь новички теряют больше всего времени.!!
+- kind: table
+  title: 'Локальный запуск vs Deployment + Worker'
+  table:
+    headers:
+    - ''
+    - Локально (python flow.py)
+    - Deployment + Worker
+    rows:
+    - - Как стартует
+      - Вручную из терминала
+      - По расписанию, событию, API или из UI
+    - - Где живёт код
+      - На вашей машине
+      - В git, образе или хранилище артефактов
+    - - Инфраструктура
+      - Текущий процесс
+      - Work pool → worker (process/docker/k8s)
+    - - Параметры
+      - Аргументы функции
+      - Значения по умолчанию из deployment
+    - - Конфигурация
+      - Локальный .env
+      - Blocks и Variables на сервере
+    - - Наблюдаемость
+      - Логи в терминале, UI при наличии сервера
+      - Полная история, состояния, артефакты, алерты
+    - - Типичная ошибка
+      - Работает у меня — и только
+      - Run висит в Scheduled — worker не запущен
+    col_ratios:
+    - 2
+    - 4
+    - 4
+  notes: |
+    Эту таблицу стоит сфотографировать. Локальный запуск — это просто `python flow.py`: код на вашей машине, конфиг в `.env`, логи в терминале. Здесь удобно разрабатывать, но !!невозможно эксплуатировать!!.
+
+    Прод — это **deployment**, зарегистрированный на сервере, и **worker**, который его исполняет. Код едет из git или образа, конфигурация приезжает из **blocks**, запуск инициирует расписание или событие, а вся история остаётся в базе. Обратите внимание на нижнюю строку: __две самые частые ошибки курса__ — «работает только у меня» (забыли вынести конфиг) и «run висит в Scheduled» (не запущен worker). ~~Проверять worker — первый рефлекс при отладке.~~
+- kind: table
+  title: 'Prefect Cloud vs Prefect OSS (self-hosted)'
+  table:
+    headers:
+    - ''
+    - Prefect OSS
+    - Prefect Cloud
+    rows:
+    - - Модель
+      - Open source, разворачиваете сами
+      - Управляемый SaaS
+    - - Что поднимаете
+      - prefect server + БД + worker
+      - Только worker у себя
+    - - Аутентификация
+      - Своя (обратный прокси и т.п.)
+      - Пользователи, роли, SSO на старших планах
+    - - Эксплуатация
+      - Ваши бэкапы, апгрейды, доступность
+      - На стороне вендора
+    - - Стоимость
+      - Бесплатно + своя инфраструктура
+      - Есть бесплатный тариф, дальше подписка
+    - - Когда выбирать
+      - Контроль, изоляция, обучение
+      - Быстрый старт, команда без DevOps
+    col_ratios:
+    - 2
+    - 4
+    - 4
+  notes: |
+    Ключевая развилка та же, что мы разбирали на dbt: **контроль против скорости старта**. **OSS-версия** — это полноценный `prefect server`, который вы поднимаете сами вместе с базой; функционально ядро оркестрации доступно бесплатно. **Cloud** снимает эксплуатацию и добавляет то, что в OSS приходится делать руками: управление пользователями и ролями, командные рабочие пространства, SSO на старших планах.
+
+    Важно, что !!в обоих случаях исполнение остаётся у вас!! — worker всегда в вашей инфраструктуре, и Cloud не получает ваши данные. Поэтому аргумент «не хотим отдавать данные наружу» против Cloud работает слабее, чем кажется; реальные аргументы — это регуляторика, изоляция сети и стоимость. ~~Для ДЗ поднимаем OSS локально: это бесплатно и полезнее для понимания.~~
+- kind: content
+  title: 'CLI: рабочие команды'
+  materials:
+  - label: Prefect — CLI reference
+    url: https://docs.prefect.io/v3/api-ref/cli/index
+  bullets:
+  - prefect server start — поднять локальный сервер и UI
+  - prefect work-pool create — создать пул нужного типа
+  - prefect worker start — запустить исполнителя
+  - prefect deploy — зарегистрировать deployment из prefect.yaml
+  - prefect flow-run ls / logs — разбор полётов из терминала
+  code_caption: типовая сессия
+  code: |
+    # 1. локальный control plane (UI на http://127.0.0.1:4200)
+    prefect server start
+
+    # 2. куда указывать клиенту
+    prefect config set PREFECT_API_URL=http://127.0.0.1:4200/api
+
+    # 3. пул и исполнитель
+    prefect work-pool create local-pool --type process
+    prefect worker start --pool local-pool
+
+    # 4. деплой из prefect.yaml и ручной запуск
+    prefect deploy --all
+    prefect deployment run 'fraud-pipeline/fraud-daily'
+
+    # 5. разбор полётов
+    prefect flow-run ls --limit 10
+    prefect flow-run logs <FLOW_RUN_ID>
+    prefect block ls && prefect variable ls
+  notes: |
+    Вот минимальная последовательность, которая доводит проект от нуля до работающего расписания. `prefect server start` поднимает **control plane** и **UI**; `prefect config set PREFECT_API_URL=...` объясняет клиенту, куда ходить — !!без этого шага деплой уйдёт «в никуда»!!, и это ошибка номер один.
+
+    Дальше — `work-pool create` и `worker start` (обязательно __в отдельном терминале__, это долгоживущий процесс), затем `prefect deploy` читает `prefect.yaml` и регистрирует deployment. Команды `flow-run ls` и `flow-run logs` — ваш основной инструмент отладки, когда UI под рукой нет. ~~Порядок шагов важен: пул создаётся до воркера, воркер — до деплоя.~~
+- kind: section
+  title: 'Интеграции и экосистема'
+  notes: |
+    Третий блок — про то, как Prefect живёт не в вакууме.
+
+    Смотрим **prefect-dbt** как мост к прошлому семинару, потом честно сравниваем Prefect с **Dagster** и **Airflow** и обсуждаем __главную новость этого месяца__.
+- kind: content
+  title: 'Интеграция с dbt: prefect-dbt'
+  materials:
+  - label: prefect-dbt — интеграция
+    url: https://docs.prefect.io/integrations/prefect-dbt/index
+  - label: prefect-dbt на GitHub
+    url: https://github.com/PrefectHQ/prefect-dbt
+  bullets:
+  - 'Установка: pip install prefect-dbt'
+  - PrefectDbtRunner запускает команды dbt Core из flow
+  - Профиль и креды подтягиваются из блоков Prefect
+  - Результаты dbt разбираются и попадают в логи и артефакты
+  - Позволяет обвязать dbt пре- и пост-шагами на Python
+  code_caption: dbt внутри Prefect flow
+  code: |
+    from prefect import flow, task
+    from prefect_dbt import PrefectDbtRunner, PrefectDbtSettings
+
+    settings = PrefectDbtSettings(
+        project_dir="dbt_fraud",
+        profiles_dir="dbt_fraud",
+    )
+
+    @task(retries=1, retry_delay_seconds=60)
+    def dbt_build(select: str | None = None):
+        runner = PrefectDbtRunner(settings=settings)
+        args = ["build"] + (["--select", select] if select else [])
+        return runner.invoke(args)
+
+    @flow(name="dbt-fraud")
+    def dbt_fraud_flow():
+        dbt_build("staging")
+        dbt_build("marts")
+  notes: |
+    Пакет **prefect-dbt** — это официальный мост между Prefect и **dbt Core**. Основной класс — **PrefectDbtRunner**: он вызывает команды dbt программно, разбирает результаты выполнения моделей и тестов и __прокидывает их в логи и события Prefect__, а не оставляет одной строкой «dbt exited with code 1».
+
+    Важная тонкость: !!один вызов `dbt build` — это одна задача Prefect, а не одна задача на модель!!. Гранулярность на уровне моделей — это территория Dagster с его asset-моделью; Prefect работает крупными блоками. Профиль подключения к **ClickHouse** при этом удобно собирать из **блоков**, чтобы пароль не лежал в `profiles.yml` в репозитории. ~~В ДЗ этого примера почти достаточно — останется добавить расписание и уведомление.~~
+- kind: table
+  title: 'Prefect vs Dagster vs Airflow'
+  table:
+    headers:
+    - ''
+    - Prefect
+    - Dagster
+    - Airflow
+    rows:
+    - - Модель абстракции
+      - Задачи и потоки (flow/task)
+      - Ассеты — результаты, а не действия
+      - DAG из операторов
+    - - Граф
+      - Динамический, строится в рантайме
+      - Декларативный граф ассетов
+      - Преимущественно статический
+    - - Передача данных
+      - Обычные Python-значения
+      - Типизированные IO-менеджеры
+      - XCom, небольшие объекты
+    - - Типизация
+      - pydantic на параметрах
+      - Строгие типы и asset checks
+      - Слабая
+    - - Бэкфиллы
+      - Через параметры и ручные запуски
+      - Партиции — первоклассная сущность
+      - Встроены, но громоздки
+    - - UI
+      - Запуски, состояния, артефакты
+      - Граф ассетов и их свежесть
+      - Классический вид DAG и задач
+    - - Порог входа
+      - Низкий — это просто Python
+      - Средний — нужна модель ассетов
+      - Высокий — много концепций
+    - - Сильная сторона
+      - Надёжное выполнение хрупкой работы
+      - Data products и lineage
+      - Зрелость и экосистема
+    col_ratios:
+    - 3
+    - 3
+    - 3
+    - 3
+  notes: |
+    Главное различие — !!единица мышления!!. Airflow думает **задачами в статическом DAG**. Dagster думает **ассетами** — «какая таблица должна существовать и быть свежей», а действие вторично. Prefect думает **выполнением**: «как надёжно провести этот код через сбои».
+
+    Отсюда практический критерий выбора. Если ваша боль — __понять, откуда взялась таблица, и доказать её качество__, вам ближе Dagster. Если боль — __ночная задача падает по таймауту внешнего API, и надо это пережить__, ближе Prefect. Airflow остаётся выбором там, где важнее зрелость, огромная экосистема провайдеров и наличие людей, которые его уже знают. ~~Заметьте: между Prefect и Dagster нет «лучше» — есть разные единицы владения.~~
+- kind: content
+  title: 'Новость: Prefect приобретает Dagster Labs'
+  materials:
+  - label: Prefect acquires Dagster
+    url: https://www.prefect.io/prefect-acquires-dagster
+  - label: Dagster — Prefect is acquiring Dagster
+    url: https://dagster.io/blog/prefect-is-acquiring-dagster
+  bullets:
+  - 13 июля 2026 — Prefect объявила о приобретении Dagster Labs
+  - Оба продукта продолжают существовать под своими именами
+  - Dagster сохраняет open-source-лицензию и дорожную карту
+  - Цены Prefect Cloud и Dagster+ не меняются
+  - Nick Schrock и Pete Hunt — стратегические советники Prefect
+  notes: |
+    Свежая и важная новость: **13 июля 2026** года **Prefect** объявила о приобретении **Dagster Labs** — то есть !!два главных наследника Airflow оказались в одной компании!!. Всё, что на слайде, — это опубликованные заявления сторон, а не интерпретация: оба продукта продолжают существовать под своими именами, **Dagster сохраняет open-source-лицензию и дорожную карту**, цены **Prefect Cloud** и **Dagster+** не меняются.
+
+    Персоналии: основатель Dagster **Nick Schrock** и CEO **Pete Hunt** переходят в роль __стратегических советников Prefect__ и остаются активными в open-source-сообществе. Позиционирование компании сформулировано так: **Dagster — для тех, кому важно определять и валидировать данные** (asset-centric подход), **Prefect — для тех, кому важно надёжно выполнять сложные, склонные к сбоям workflow**. ~~Ссылки на оба официальных анонса — внизу слайда, рекомендую прочитать первоисточники.~~
+- kind: content
+  title: 'Что это значит: осторожный прогноз'
+  materials:
+  - label: Prefect — блог
+    url: https://www.prefect.io/blog
+  bullets:
+  - 'Факт: продукты, лицензии и цены заявлены как неизменные'
+  - 'Оценка: вероятна конвергенция вокруг событий и метаданных'
+  - 'Оценка: конкуренция сместится в сторону AI-нагрузок'
+  - 'Риск: неопределённость фокуса и приоритетов в средней перспективе'
+  - 'Вывод: проектируем с оглядкой на переносимость'
+  notes: |
+    Разделим факты и оценки — это важная методическая привычка. **Факты** — только первый пункт: публичные обязательства сторон про имена, лицензии, дорожные карты и цены. Всё остальное на этом слайде — !!прогноз, а не факт!!, и на экзамене я жду именно такой формулировки.
+
+    Разумная оценка: вероятна постепенная конвергенция инфраструктурных слоёв — событий, метаданных, аутентификации — при сохранении двух разных пользовательских моделей. Основной **риск** для команд — неопределённость приоритетов в средней перспективе. Отсюда практический вывод, полезный независимо от исхода: __держите бизнес-логику в обычном Python и dbt, а оркестратор — тонким слоем сверху__. Тогда цена смены инструмента останется низкой. ~~Это универсальный совет по архитектуре, а не только реакция на новость.~~
+- kind: section
+  title: Домашнее задание
+  notes: |
+    Практика продолжает предыдущий семинар: вы не начинаете с нуля.
+
+    Берём !!ваш готовый dbt-проект по фрод-транзакциям!! и превращаем его в __управляемый, наблюдаемый и надёжный процесс__ средствами Prefect.
+- kind: content
+  title: 'ДЗ: оркестрация dbt-проекта средствами Prefect'
+  materials:
+  - label: prefect-dbt — интеграция
+    url: https://docs.prefect.io/integrations/prefect-dbt/index
+  - label: Prefect — Deployments
+    url: https://docs.prefect.io/v3/concepts/deployments
+  bullets:
+  - 'Исходник: dbt-проект из прошлого ДЗ — ClickHouse, transactions_db.transactions'
+  - 'Слои остаются прежними: raw → staging → marts'
+  - Обернуть запуск dbt во flow с задачами на каждый слой
+  - Добавить retries и таймауты на нестабильные шаги
+  - Настроить deployment с ежедневным расписанием
+  - Настроить уведомление об ошибке через automation
+  - 'Сдать: репозиторий, README, скриншот UI с успешным и упавшим запуском'
+  code_caption: скелет flows/fraud_dbt_flow.py
+  code: |
+    from prefect import flow, task
+    from prefect.blocks.system import Secret
+    from prefect.artifacts import create_markdown_artifact
+    from prefect_dbt import PrefectDbtRunner, PrefectDbtSettings
+
+    settings = PrefectDbtSettings(project_dir="dbt_fraud")
+
+    @task(retries=2, retry_delay_seconds=[30, 120], timeout_seconds=1800)
+    def dbt_run(select: str):
+        return PrefectDbtRunner(settings=settings).invoke(
+            ["build", "--select", select]
+        )
+
+    @task
+    def publish_report(summary: str):
+        create_markdown_artifact(key="fraud-dbt-run", markdown=summary)
+
+    @flow(name="fraud-dbt", log_prints=True)
+    def fraud_dbt(full_refresh: bool = False):
+        _ = Secret.load("clickhouse-password")   # креды из блока
+        dbt_run("staging")
+        dbt_run("marts")
+        publish_report("### Прогон завершён\n- слои: staging, marts")
+
+    if __name__ == "__main__":
+        fraud_dbt()
+  notes: |
+    Задание намеренно продолжает прошлую работу: датасет тот же — **transactions_db.transactions** в **ClickHouse**, слои те же — **raw → staging → marts**. Меняется только то, __кто и как это запускает__. Минимум, который нужно показать: flow с задачами на слои, **retries** на нестабильных шагах, **deployment** с расписанием и **уведомление об ошибке**.
+
+    Обратите внимание на две вещи в скелете. Первое: !!пароль к ClickHouse приезжает из блока, а не из кода!! — захардкоженный пароль автоматически снимает баллы. Второе: уведомление об ошибке делается **автоматизацией на событие Failed**, а не блоком `try/except` с ручной отправкой сообщения — иначе вы теряете алерты при падении самого процесса. ~~Скелет рабочий: его достаточно дополнить своим проектом и prefect.yaml.~~
+- kind: table
+  title: 'ДЗ: критерии оценки'
+  table:
+    headers:
+    - Уровень
+    - Что должно работать
+    - Доказательство
+    rows:
+    - - 6–7 баллов
+      - Flow оборачивает dbt build по слоям, локальный запуск успешен
+      - Репозиторий, README, логи успешного прогона
+    - - 6–7 баллов
+      - Настроены retries и таймауты хотя бы на одной задаче
+      - Фрагмент кода, скриншот повторной попытки
+    - - 8–9 баллов
+      - Deployment с расписанием, worker и work pool подняты
+      - prefect.yaml, скриншот запуска по расписанию в UI
+    - - 8–9 баллов
+      - Креды и настройки вынесены в blocks и variables
+      - Список блоков, отсутствие секретов в git
+    - - 8–9 баллов
+      - Автоматизация с уведомлением о падении flow
+      - Скриншот сработавшего алерта на упавшем запуске
+    - - 10 баллов
+      - Артефакты с результатами dbt-тестов в UI
+      - Скриншот artifact с метриками качества
+    - - 10 баллов
+      - Параллельные слои через .submit()/.map() или backfill за N дней
+      - Граф запуска и объяснение выбора в README
+    - - 10 баллов
+      - Раздел в README — сравнение с оркестрацией через Dagster
+      - Обоснованные trade-offs, а не пересказ документации
+    col_ratios:
+    - 2
+    - 5
+    - 4
+  notes: |
+    Логика уровней та же, что в dbt-задании. **6–7** — базовая работоспособность: dbt действительно запускается из flow, есть retries. **8–9** — !!переход в прод!!: появляется **deployment** с расписанием, поднятые **work pool** и **worker**, конфигурация вынесена в **blocks**, падение порождает **уведомление**. Это и есть та граница, которая отделяет скрипт от эксплуатируемого сервиса.
+
+    **10 баллов** — это уже про инженерное мышление: **артефакты** с результатами тестов, осмысленный параллелизм или **backfill**, и главное — __раздел в README со сравнением подходов__. В последнем пункте я оцениваю не объём, а честность рассуждения: где Prefect удобнее, где выигрышнее asset-модель Dagster, и почему для вашего конкретного проекта выбран этот вариант. ~~Пересказ документации баллов не приносит.~~
+- kind: closing
+  title: Спасибо
+  subtitle: Вопросы?
+  bullets:
+  - Prefect закрывает негативную инженерию — надёжность как конфигурация
+  - 'Ядро: flow и task, а прод — это deployment, work pool и worker'
+  - Гибридная модель — control plane отдельно, ваш код и данные у вас
+  - dbt остаётся движком трансформаций, Prefect им дирижирует
+  - Выбор оркестратора определяется единицей мышления, а не списком фич
+  notes: |
+    Если уносить из лекции одну мысль, пусть это будет формула: !!надёжное выполнение как конфигурация, а не как boilerplate!!. Всё остальное — **flow**, **task**, **deployment**, **work pool**, **block**, **automation** — это инструменты для неё. И помните ключевое разделение: локально вы просто запускаете Python, а в проде живут **deployment** и **worker** — без второго первый бесполезен.
+
+    Следующий шаг — открыть свой dbt-проект по фрод-транзакциям и обернуть его во flow. Начните с малого: один `dbt build` внутри `@flow`, локальный сервер, один worker. Дальше добавляйте расписание, блоки и алерты по слоям критериев. ~~Вопросы можно задавать в чате курса — разберём типовые ошибки на следующей встрече.~~
+
+    — Сгенерировано: model=claude-opus-4-8 · harness=Claude Code · effort=max · version=v1.0 · 2026-07-20
