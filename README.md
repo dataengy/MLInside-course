@@ -22,6 +22,7 @@ just build           # build the dbt deck (pptx + html) from content/
 just dagster-build   # Dagster lecture deck
 just prefect-build   # Prefect lecture deck
 just cicd-observability-build   # CI/CD + Observability lecture deck
+just airflow-build   # Apache Airflow lecture deck
 just preza-validate-all         # schema + slide-count + provenance gate for all DE-tool decks
 just publish         # build all formats, open, send to Telegram
 just check           # lint + typecheck + tests

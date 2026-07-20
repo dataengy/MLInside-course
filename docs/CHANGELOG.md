@@ -31,7 +31,15 @@ Canonical project changelog (finalize-issue passes migrate shipped work here).
     AI-тренды в CI) и Observability (три столпа, SLI/SLO, Prometheus/PromQL, Grafana,
     ELK vs Loki vs Victoria vs Thanos/Mimir, OpenTelemetry, Jaeger/Tempo, алертинг в
     Telegram/Mattermost, AIOps, MLOps drift + LLMOps evals/трейсинг), ДЗ.
-  - Сборка: `data/generated/MLInside_*_v1.2.{pptx,html}` → хардлинк в `~/Downloads`.
+  - `content/preza-apache-airflow-content.yml` — **40 слайдов**: контекст и история
+    (Максим Бошмен, Airbnb 2014 → ASF → Airflow 2.0), архитектура (Scheduler/Worker/
+    Webserver/метабаза, executors), DAG и операторы (TaskFlow API, сенсоры, провайдеры,
+    dynamic task mapping), расписание и ETL (logical_date, catchup/backfill,
+    идемпотентность, регулярный прогон dbt + Cosmos, сбор сырых данных, батч-прогнозы,
+    Assets), передача данных (XCom и его ограничения, метаданные вместо датафреймов),
+    обработка сбоев (retries/backoff, trigger rules, `on_failure_callback` → Telegram,
+    SLA, зомби-задачи), сравнение с Dagster/Prefect, ДЗ на базе dbt-задания.
+  - Сборка: `data/generated/MLInside_*_v1.{1,2}.{pptx,html}` → хардлинк в `~/Downloads`.
 - **Policy** — `settings/config.yml → deck_generation`: `slides_min: 20`, `slides_max: 50`,
   `visuals_default: code-tables`, provenance marker; deck registry. Every deck carries a
   `model/harness/effort/version` stamp in the **first and last** speaker notes.
