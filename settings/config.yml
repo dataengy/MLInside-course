@@ -46,6 +46,7 @@ deck_generation:
     - content/preza-dagster-content.yml
     - content/preza-prefect-content.yml
     - content/preza-cicd-observability-content.yml
+    - content/preza-apache-airflow-content.yml
 
 # ── Slide generation / rework tooling ───────────────────────────────────────
 slide_generation:
