@@ -33,7 +33,8 @@
 Политика в `settings/config.yml → deck_generation` (20..50 слайдов, профиль `code-tables`,
 штамп `model/harness/effort/version` в заметках первого и последнего слайда).
 Новые деки: **Dagster — 50 слайдов** (25 код-панелей, 10 таблиц), **Prefect — 30**,
-**CI/CD + Observability** (см. `docs/CHANGELOG.md`). Гейт: `just preza-validate-all`.
+**CI/CD + Observability — 40**, **Apache Airflow — 40** (см. `docs/CHANGELOG.md`).
+Гейт: `just preza-validate-all` (4 деки, все зелёные).
 
 ⚠️ **Требует решения:** на диске лежат незакоммиченные черновики прошлой Codex-сессии
 `content/preza-{dagster,prefect,cicd-observability}-v1-content.yml` (31/17/17 слайдов).
