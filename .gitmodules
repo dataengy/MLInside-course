@@ -4,3 +4,9 @@
 [submodule "src/librarian"]
 	path = src/librarian
 	url = https://github.com/hnkovr/librarian.git
+[submodule "data/code/dbt_project"]
+	path = data/code/dbt_project
+	url = https://github.com/hnkovr/hse-dz45-dbt-project.git
+[submodule "data/code/clickhouse_hw"]
+	path = data/code/clickhouse_hw
+	url = https://github.com/hnkovr/hse-dz45-clickhouse-hw.git

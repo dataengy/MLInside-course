@@ -2,6 +2,23 @@
 
 Canonical project changelog (finalize-issue passes migrate shipped work here).
 
+## 2026-07-27 — Librarian: deferred iCloud ingest completed + ДЗ submodules
+
+- iCloud recovered (downloads work again; upload-quota still exceeded) — all 647 evicted
+  files materialized; **32 planned actions applied**: 9 decks (Семинар12/14 Airbyte 27/80MB,
+  Практикум-по-dbt 76MB, dbt & Analytics Engineering, Docker/FastAPI, Kafka, VC),
+  12 docs (лекции 3–4, семинары 1/2/4, ДЗ 5–6, ведомость), 3 archives (семинар-зипы,
+  ДЗ 4-5), Dagster & Taipy recording + ДЗ images → media; 5+5 exact duplicates removed.
+- **ДЗ 4-5 repos → submodules**: private archive mirrors
+  [hnkovr/hse-dz45-dbt-project](https://github.com/hnkovr/hse-dz45-dbt-project) and
+  [hnkovr/hse-dz45-clickhouse-hw](https://github.com/hnkovr/hse-dz45-clickhouse-hw)
+  (upstream kre1ses/*, `ARCHIVE-NOTE.md` inside each) mounted at `data/code/`;
+  originals removed from iCloud after HEAD verification (full snapshot kept in
+  `data/archives/ДЗ-4-5,-вложения.zip`).
+- librarian: catalog collapses git submodules to one summary row per repo.
+- iCloud dir now holds only the `_MOVED-TO-REPO.md` marker + 2 junk tmp files —
+  safe to delete entirely.
+
 ## 2026-07-20 — Deck generation skill + DE-tool lecture decks
 
 - **New canonical skill** `create-preza-about-de-tool`

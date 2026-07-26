@@ -103,9 +103,9 @@ data/docs/Основы_трансформации_данных_с_помощью
 data/docs/NEW_ВШЭ_Семинар12-Airbyte-и-Data-Ingest.pdf:
   summary: >-
     PDF-экспорт семинара 12 (Airbyte/Data Ingest, 112 стр. — по странице на анимационный
-    шаг). Исходный pptx (27MB) пока в iCloud (evicted, ждёт сети).
+    шаг). Исходный pptx (27MB) теперь в data/decks; расширенная версия — Семинар 14.
   recommendations: >-
-    После скачивания pptx держать pdf как производный (или убрать в .history).
+    Держать pdf как производный от pptx (или убрать в .history); канон сюжета — Семинар 14.
 
 data/media/Занятия-по-курсу-ML-Ops-и-ML-Sys-2025-11-05-180428---МТС-Линк.mp4:
   summary: >-
@@ -115,3 +115,41 @@ data/media/Занятия-по-курсу-ML-Ops-и-ML-Sys-2025-11-05-180428---�
   recommendations: >-
     Сверить длительность; усечённую копию удалить или в `.archive/`. Для >100MB записей
     рассмотреть link-stub вместо LFS (см. docs/data-structure.md).
+
+data/decks/MLInside_Семинар9-Практикум-по-dbt.pptx:
+  summary: >-
+    76MB pptx «Семинар9-Практикум по dbt» из 2026-MLInside — самый тяжёлый дек библиотеки;
+    источник семейства HSU-final (base-дек в data/source — его предшественник).
+  recommendations: >-
+    Сжать медиа (три четверти веса — унаследованные картинки); кандидат на пересборку
+    через preza_gen вместо ручного файла.
+
+data/decks/NEW_ВШЭ_Семинар14-Airbyte-и-Data-Ingest.pptx:
+  summary: >-
+    Семинар 14 (Airbyte/Data Ingest, 80MB) — расширенная версия Семинара 12 (27MB pptx
+    + pdf в docs/). Три артефакта покрывают один сюжет.
+  recommendations: >-
+    Выбрать канонической 14-ю версию; 12-й pptx → .history/, pdf держать как производный.
+
+data/decks/dbt_and_Analytics_Engineering.pptx:
+  summary: >-
+    Отдельная лекция «dbt & Analytics Engineering» (19MB) — обзорный материал 2025;
+    частично пересекается с dbt-preza-2025-11 и «Введение в dbt».
+  recommendations: Пометить reference; при переработке в 2026-контент брать уникальные слайды.
+
+data/media/Dagster-&-Taipy-–-ML-Ops-и-ML-Sys-2025-11-25-175915---МТС-Линк.mp4:
+  summary: >-
+    Запись занятия Dagster & Taipy (2025-11-25, 92MB) — источник для Dagster-лекции 2026.
+  recommendations: >-
+    См. link-stub-политику из docs/data-structure.md для записей >100MB (эта — на грани).
+
+data/code/dbt_project:
+  summary: >-
+    ДЗ 4-5: студенческий dbt-проект (submodule → приватное зеркало hnkovr/hse-dz45-dbt-project;
+    upstream kre1ses/dbt_project). Только tracked-файлы; полный слепок с артефактами —
+    data/archives/ДЗ-4-5,-вложения.zip.
+
+data/code/clickhouse_hw:
+  summary: >-
+    ДЗ 4-5: ClickHouse-домашка (submodule → зеркало hnkovr/hse-dz45-clickhouse-hw;
+    upstream kre1ses/clickhouse_usage_example) — DDL, запросы, docker-compose, Kafka-загрузка.

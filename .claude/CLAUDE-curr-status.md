@@ -1,5 +1,45 @@
 # CLAUDE-curr-status — MLInside-course
 
+## Interrupted Task
+
+> Interrupted: 2026-07-27 — resume with: `claude --resume 799821fd-9e53-4233-b48d-7962c4feaacb`
+
+**Task:** три задачи по колодам (dbt / Dagster / Prefect / CI/CD+Observability / Airflow),
+каждая с директивой «предложи скрипт/скилл + `/save-all-deterministic-for-skill-as-scripts` + code standards + хуки при необходимости»:
+
+1. **Отправить последнюю версию каждой колоды в Telegram** (топик MLInside 118, `~/.ai/scripts/telegram/tg-send-file.sh`, чат `-1002281796095`).
+2. **Заархивировать все НЕпоследние версии** в `.archive/` внутри их исходного пути (`data/generated/.archive/`).
+3. **Убедиться, что весь сгенерированный контент в git через git-LFS.**
+
+**Reached (обследование готово, ничего ещё не сделано):**
+- `data/generated/` содержит 26 файлов, но **целиком в `.gitignore`** (строка 20) → ничего не трекается.
+- `.gitattributes`: есть LFS-правила для pptx/pdf/mov/key/mp4/zip/docx/xlsx — **нет правила для `*.html`**.
+- Последнее в TG (топик 118) уходило **v3.4** dbt; на диске **v3.13**.
+
+**⚠️ БЛОКЕР — по каждому сюжету на диске ДВЕ конкурирующие семьи колод (мои vs Codex-сессии):**
+
+| сюжет | Codex-билд | мой билд (совпадает с закоммиченными content/) |
+|---|---|---|
+| Dagster | `MLInside_Dagster_v1.4` | `MLInside_Современная-оркестрация-ML-пайплайнов-Dagster_v1.2` |
+| Prefect | `MLInside_Prefect_v1.1` | `MLInside_Современная-оркестрация-ML-пайплайнов-Prefect_v1.2` |
+| CI/CD | `MLInside_CICD_Observability_v1.1` | `MLInside_Автоматизация-и-мониторинг-CICD-Prometheus-Grafana_v1.2` |
+| Airflow | — | `MLInside_Оркестрация-данных-Apache-Airflow_v1.1` |
+| dbt | — | `MLInside_Введение-в-dbt_v3.13` |
+
+Наивный «max version per name» отправит ОБЕ Dagster-колоды, и Codex-овская v1.4 > моей v1.2 (но это 31-слайдовый черновик). **Нужно решение пользователя, какая семья каноническая, ПЕРЕД отправкой/архивацией.**
+
+**Remains:**
+- Получить решение по конкурирующим семьям (это тот же незакрытый вопрос про `preza-*-v1-content.yml`).
+- Реализовать 3 задачи скриптами (предложить: `deck-publish-latest.sh`, `deck-archive-old.sh`, git-LFS через существующий скилл `git-lfs-setup` + un-ignore `data/generated/` с LFS для html).
+- ⚠️ **DISK-CRITICAL: 4Gi свободно** — писать осторожно, LFS-добавление больших файлов может упасть.
+
+**Resume CLI:**
+```bash
+claude --resume 799821fd-9e53-4233-b48d-7962c4feaacb
+```
+
+---
+
 > Автогенерируемая часть (git/submodule/env/deck) — `just ctx` (см. «Как обновлять»).
 > Обновлено: 2026-07-19. Ведётся **несколькими агентами** (Claude Code + Codex) в одном рабочем дереве.
 
@@ -51,11 +91,11 @@
 
 ## Незакрытое (последние 2 рабочих дня)
 
-- ⛔ **iCloud заблокирован**: сеть (iPhone-hotspot) не достаёт `p219-content.icloud.com`,
-  квота iCloud исчерпана (uploads висят 60ч, `brctl status`). Отсюда отложено:
-  **~33 evicted-файла** (+Dagster mp4, Семинар12/14 pptx, зипы ДЗ) и **ДЗ-репо
-  `dbt_project`/`clickhouse_hw` → submodules `data/code/`** (их `.git` тоже evicted).
-  После починки: `brctl download` → `just librarian-plan "<iCloud root>" && just librarian-apply`.
+- ✅ **iCloud-ингест ЗАВЕРШЁН (2026-07-27)**: все evicted-файлы скачаны и перенесены
+  (32 действия: Семинар12/14, Практикум-по-dbt 76MB, лекции/ДЗ/зипы, Dagster mp4);
+  ДЗ-репо → приватные зеркала `hnkovr/hse-dz45-{dbt-project,clickhouse-hw}` + submodules
+  `data/code/`. В iCloud остался только маркер + 2 tmp-мусора — папку можно удалять.
+  (upload-квота iCloud всё ещё исчерпана — на нас не влияет.)
 - ⚠️ `just typecheck` — 22 pre-existing диагностик в `preza_gen/preza_refactoring` (lint/тесты зелёные, 49 passed).
 - ⚠️ v6-дека: метаданные автора не очищены; `dbt-final-verify` завязан на v4-снапшот (см. `data/reviews.yml`).
 - 🐞 **Пофикшен overflow код-панелей** (в сабмодуле, тоже незакоммичено): `_fit_code_box` считал
