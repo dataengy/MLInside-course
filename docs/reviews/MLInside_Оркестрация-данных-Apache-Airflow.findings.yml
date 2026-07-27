@@ -1,0 +1,18 @@
+deck: MLInside_Оркестрация-данных-Apache-Airflow
+content: content/preza-apache-airflow-content.yml
+lecture:
+  n: null
+  topic: 'Оркестрация данных: Apache Airflow'
+  owner: null
+  status: draft
+stats:
+  slides: 40
+  notes_coverage: 1.0
+  tables: 6
+  code_slides: 24
+  materials_slides: 13
+  accents_total: 0
+  accents_hit: 0
+  accents_partial: 0
+  accents_missing: 0
+findings: []

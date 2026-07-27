@@ -13,7 +13,10 @@ lecture materials, deck generators and the course data library.
 | `src/librarian/` | data librarian — submodule [hnkovr/librarian](https://github.com/hnkovr/librarian) |
 | `src/orchestration/` | Prefect flow (scan → build → publish) |
 | `data/` | course data library (git LFS) — see [`data/CATALOG.md`](data/CATALOG.md) and [`docs/data-structure.md`](docs/data-structure.md) |
-| `settings/` | project SSoT (`config.yml`) + ingest provenance (`files.yml`) |
+| `settings/` | project SSoT (`config.yml`) + ingest provenance (`files.yml`) + schedule dump (`schedule.yml`) |
+| `integrations/google/sheets/` | Google Sheets client — `connector.py`/`utils.py` hardlinked from pdp, project-owned `auth.py` ([README](integrations/google/sheets/README.md)) |
+| `src/schedule/` | course schedule sheet → `settings/schedule.yml` → `content/presentations.yml` |
+| `docs/reviews/` | per-deck review reports from `/preza-review` |
 
 ## Common commands (`just --list` for all)
 
@@ -24,6 +27,12 @@ just prefect-build   # Prefect lecture deck
 just cicd-observability-build   # CI/CD + Observability lecture deck
 just airflow-build   # Apache Airflow lecture deck
 just preza-validate-all         # schema + slide-count + provenance gate for all DE-tool decks
+just preza-review <content>     # score a deck against its lecture's accents + the DE-tool outline
+just preza-review-all           # …every deck mapped in content/presentations.yml
+just gsheet-tabs                # smoke-test Sheets auth (tab names of the schedule sheet)
+just gsheet-dump                # schedule sheet → settings/schedule.yml (verbatim)
+just presentations-plan         # upsert content/presentations.yml (curated fields survive)
+just presentations-show         # print the lecture → deck plan
 just publish         # build all formats, open, send to Telegram
 just check           # lint + typecheck + tests
 just librarian-plan "<root>"   # plan dedupe/categorize/version moves into data/
@@ -44,6 +53,24 @@ Each generated deck is a `content/preza-<slug>-content.yml`: 20–50 slides (bou
 `settings/config.yml → deck_generation`), `code:` panels and `table:` comparisons instead of images
 (visual profile `code-tables`), detailed speaker notes, and a `model/harness/effort/version`
 provenance stamp in the first and last slide notes. `just preza-validate-all` gates all of it.
+
+## Course plan & deck review
+
+The lecture plan lives in a Google Sheet (`settings/config.yml → planning.schedule_gsheet`) and is
+pulled into the repo in two layers:
+
+- `settings/schedule.yml` — **generated** verbatim dump (`just gsheet-dump`); never hand-edited.
+- `content/presentations.yml` — **curated** lecture → deck mapping (`just presentations-plan`).
+  Sheet-sourced fields are overwritten on every sync; `content:`, `out_name:`, `visuals:` and
+  anything you add by hand survive. Column mapping: `settings/gsheet.yml`.
+
+Each entry's `accents:` is the rubric `/preza-review` scores the deck against — every accent comes
+back ✅ hit / 🟡 partial / ❌ missing with slide numbers, alongside a structure check against the
+canonical 12-section DE-tool outline. Reports land in `docs/reviews/<out_name>.{md,findings.yml}`;
+a missing must-have accent exits non-zero, so it can gate a build.
+
+Auth is one-time Application Default Credentials — see
+[`integrations/google/sheets/README.md`](integrations/google/sheets/README.md).
 
 ## Data library
 

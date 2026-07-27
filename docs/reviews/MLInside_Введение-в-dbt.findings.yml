@@ -1,0 +1,28 @@
+deck: MLInside_Введение-в-dbt
+content: content/preza-dbt-v3-content.yml
+lecture:
+  n: null
+  topic: Введение в dbt
+  owner: null
+  status: draft
+stats:
+  slides: 48
+  notes_coverage: 1.0
+  tables: 7
+  code_slides: 13
+  materials_slides: 25
+  accents_total: 0
+  accents_hit: 0
+  accents_partial: 0
+  accents_missing: 0
+findings:
+- severity: error
+  kind: schema_invalid
+  slides: []
+  message: 'Схема/политика: provenance stamp missing from FIRST slide notes (expected ''— Сгенерировано:'')
+    — run stamp_provenance.py (см. `just preza-validate content/preza-dbt-v3-content.yml`)'
+- severity: error
+  kind: schema_invalid
+  slides: []
+  message: 'Схема/политика: provenance stamp missing from LAST slide notes (expected ''— Сгенерировано:'')
+    — run stamp_provenance.py (см. `just preza-validate content/preza-dbt-v3-content.yml`)'

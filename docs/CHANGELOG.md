@@ -2,6 +2,33 @@
 
 Canonical project changelog (finalize-issue passes migrate shipped work here).
 
+## 2026-07-27 — Course schedule sheet reader + `/preza-review`
+
+- **`integrations/google/sheets/`** — first `integrations/` dir in this repo. `connector.py`,
+  `utils.py`, `__init__.py` **hardlinked** from `~/pdp.deploy_dev/scripts/tools-utils/gsheets`
+  (registered in `~/.ai/integrations/_relink-actualized.py`; same inode, nlink 3). Deliberately
+  not linked: `pnf/` (Jira/Tempo-specific), the upstream Justfile, `gc-setup-sa.sh`.
+  Project-owned `auth.py` adds an **ADC-first** branch — the course sheet belongs to a personal
+  Google account, so the registry's Prodamus service account cannot read it. New `gsheets` extra.
+- **`src/schedule/`** — `python -m schedule {tabs,dump,plan,show}`: schedule sheet →
+  `settings/schedule.yml` (generated, verbatim) → `content/presentations.yml` (curated). The
+  upsert overwrites sheet-sourced fields only; `content:`/`out_name:`/`visuals:` and hand-added
+  keys survive, entries that leave the sheet are reported and kept. Column mapping is
+  header-driven config (`settings/gsheet.yml`), not code.
+- **`/preza-review`** (`~/.ai/skills/_catalog/docs/pptx/preza-review/`, script beside
+  `validate_content.py`) — scores a deck on two axes: accent coverage against the lecture's
+  `accents:` (✅ hit / 🟡 partial / ❌ missing, with slide numbers) and the canonical 12-section
+  DE-tool outline, plus notes/table/code/materials density. Writes
+  `docs/reviews/<out_name>.{md,findings.yml}`; a missing must-have accent exits non-zero.
+  All thresholds/keywords/stopwords in `settings/review.yml`.
+- `content/presentations.yml` seeded by hand with the five existing decks so the reviewer works
+  before the first sheet sync; the upsert adopts them by topic when the numbered rows arrive.
+- Justfile: `gsheet-tabs`, `gsheet-dump`, `presentations-plan[-dry]`, `presentations-show`,
+  `preza-review`, `preza-review-all`; `sync` now pulls the `gsheets` extra.
+- Known: the dbt deck reviews with 2 errors — it has no provenance stamp (pre-existing; it is
+  the one deck excluded from `preza-validate-all`). Its `visuals: reuse-source` is recorded in
+  the plan so image slides are no longer mis-flagged.
+
 ## 2026-07-27 — Librarian: deferred iCloud ingest completed + ДЗ submodules
 
 - iCloud recovered (downloads work again; upload-quota still exceeded) — all 647 evicted

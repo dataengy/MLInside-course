@@ -1,0 +1,18 @@
+deck: MLInside_Современная-оркестрация-ML-пайплайнов-Prefect
+content: content/preza-prefect-content.yml
+lecture:
+  n: null
+  topic: 'Современная оркестрация ML-пайплайнов: Prefect'
+  owner: null
+  status: draft
+stats:
+  slides: 30
+  notes_coverage: 1.0
+  tables: 4
+  code_slides: 14
+  materials_slides: 18
+  accents_total: 0
+  accents_hit: 0
+  accents_partial: 0
+  accents_missing: 0
+findings: []
