@@ -1,0 +1,238 @@
+<?xml version='1.0' encoding='utf-8'?>
+<picstore version="1" tool="picstore 0.1.0">
+  <taxonomy>
+    <style token="dark-ui" label="dark-theme interface" />
+    <style token="flat" label="flat vector design" />
+    <style token="hand-drawn" label="sketch / whiteboard" />
+    <style token="isometric" label="isometric 3d-ish vector" />
+    <style token="light-ui" label="light-theme interface" />
+    <style token="official" label="vendor official branding" />
+    <style token="photo-real" label="photographic realism" />
+    <type token="banner" label="wide decorative header image" />
+    <type token="chart" label="plotted data (bar/line/pie)" />
+    <type token="icon" label="small pictogram" />
+    <type token="logo" label="project or vendor mark" />
+    <type token="photo" label="photographic imagery" />
+    <type token="scheme" label="diagram / architecture / flowchart" />
+    <type token="screenshot" label="product UI or docs capture" />
+  </taxonomy>
+  <assets />
+  <deck slug="apache-airflow" content="content/preza-apache-airflow-content.yml" media-dir="data/images/apache-airflow" visuals="code-tables" topic="apache airflow">
+    <slide id="001-orkestraciya-dannyh-apache" idx="1" kind="title" title="Оркестрация данных (Apache Airflow)" digest="32ae0b60d4ad6ba8476c8d7fb454b044af9ef129" />
+    <slide id="002-plan-lekcii" idx="2" kind="agenda" title="План лекции" digest="f587faef83ee5f86e490363524debb7e45e388a7" />
+    <slide id="003-kontekst-istoriya-i-mesto-v" idx="3" kind="section" title="Контекст, история и место в стеке" digest="9f30d5792d43fe653ab4785a94d80ec0239b4e1b" />
+    <slide id="004-chto-takoe-airflow" idx="4" kind="content" title="Что такое Airflow" digest="0941c878164f84e78a3ed239c40e669131bb3960" />
+    <slide id="005-istoriya-i-persony" idx="5" kind="content" title="История и персоны" digest="b5d28703938b213dd115f875f8b0ba7545ccc819" />
+    <slide id="006-zachem-ne-prosto-cron" idx="6" kind="content" title="Зачем не просто cron" digest="0a3f219854cc689477d1a5858ae53ed4868a762b" />
+    <slide id="007-upravlenie-processami" idx="7" kind="section" title="Управление процессами: архитектура" digest="04e517df2983f32d5adf17608c91aadb8a3bae2d" />
+    <slide id="008-komponenty-airflow" idx="8" kind="content" title="Компоненты Airflow" digest="027ba03900cd3b10e9b54434525bc953e9ee6057" />
+    <slide id="009-scheduler-kak-on-prinimaet" idx="9" kind="content" title="Scheduler — как он принимает решения" digest="2cbd9b7b6a395a3691b4814d83b3f1ebfc5259fe" />
+    <slide id="010-executors-gde-vypolnyayutsya" idx="10" kind="table" title="Executors: где выполняются задачи" digest="7e70ce1e5a61019e84d18cddd245dd161bf5a3a5" />
+    <slide id="011-ponyatie-dag" idx="11" kind="content" title="Понятие DAG" digest="b48c1b781991769945f68d5a2321eea8dd018e5d" />
+    <slide id="012-operatory-iz-chego" idx="12" kind="content" title="Операторы — из чего собираются задачи" digest="5253bef05a0f680688e2fe385a20d7e615cde806" />
+    <slide id="013-taskflow-api-sovremennyj" idx="13" kind="content" title="TaskFlow API — современный способ писать DAG" digest="8f9d92e0a99a45c5e7510bc0d9cbd572d1feda03" />
+    <slide id="014-dinamicheskoe-postroenie-zadach" idx="14" kind="content" title="Динамическое построение задач" digest="dacacdc6d626402125d20e0fe9cce047d78ebdda" />
+    <slide id="015-raspisanie-i-etl" idx="15" kind="section" title="Расписание и ETL" digest="ba1a545a0021055d7600db9b4733a9676f4c78f3" />
+    <slide id="016-kak-airflow-ponimaet-vremya" idx="16" kind="content" title="Как Airflow понимает время" digest="79d2e008590c3800b45a650df1a4c35188478b61" />
+    <slide id="017-catchup-i-backfill" idx="17" kind="content" title="catchup и backfill" digest="47f1c7f1973fad758adea89add81ed7b72188247" />
+    <slide id="018-idempotentnost-glavnoe" idx="18" kind="content" title="Идемпотентность — главное требование к задаче" digest="779d3d1c5ce806fcc99c10a7246bc8b118a01c7a" />
+    <slide id="019-regulyarnyj-zapusk-dbt-modelej" idx="19" kind="content" title="Регулярный запуск dbt-моделей" digest="141cb42ee0ef0cdb43d745d777631fedbb9d1877" />
+    <slide id="020-tri-sposoba-zapuskat-dbt-iz" idx="20" kind="table" title="Три способа запускать dbt из Airflow" digest="c385513a34eefc709a62760d49382d0f66cb89a6" />
+    <slide id="021-sbor-syryh-dannyh" idx="21" kind="content" title="Сбор сырых данных" digest="832d9a6147bfc525b3fb95c07d22d5a7739158fb" />
+    <slide id="022-podgotovka-batch-prognozov" idx="22" kind="content" title="Подготовка батч-прогнозов" digest="e1daae7da43f31e5155928e5c8defcadc47d4f62" />
+    <slide id="023-assets-raspisanie-po-dannym-a" idx="23" kind="content" title="Assets — расписание по данным, а не по времени" digest="a19170c2628e04e931c8be6b5c06cf375ffd12d0" />
+    <slide id="024-peredacha-dannyh-xcom-i-ego" idx="24" kind="section" title="Передача данных: XCom и его ограничения" digest="1e255cbda4743f0b68fe8df5882f669b57cce514" />
+    <slide id="025-chto-takoe-xcom" idx="25" kind="content" title="Что такое XCom" digest="d30f4882c202ecaa7926c523ed38b62aff9a92ec" />
+    <slide id="026-ogranicheniya-xcom" idx="26" kind="content" title="Ограничения XCom" digest="51109834d430acc5aefcc94c81b2f1f8d72e9248" />
+    <slide id="027-chto-mozhno-i-chego-nelzya" idx="27" kind="table" title="Что можно и чего нельзя передавать через XCom" digest="f66cf4fe5abf514e8d38f3c8cf202276756d255b" />
+    <slide id="028-pravilnyj-pattern-peredachi" idx="28" kind="content" title="Правильный паттерн передачи" digest="71d1d888425527a282a43eaa6e72051f3d6ceab6" />
+    <slide id="029-obrabotka-sboev" idx="29" kind="section" title="Обработка сбоев" digest="97eae7bb5129d4cf76cb7abb7f8a93ac137aa61a" />
+    <slide id="030-politika-povtornyh-popytok" idx="30" kind="content" title="Политика повторных попыток" digest="ab4f91ef49cb59d8315d0aaed0d5086f39f993d5" />
+    <slide id="031-kakuyu-politiku-retraev-vybrat" idx="31" kind="table" title="Какую политику ретраев выбрать" digest="fe6226950f770cdbec01fa3e945205e2eca1c6bb" />
+    <slide id="032-trigger-rules-chto-delat-s" idx="32" kind="content" title="Trigger rules — что делать с упавшей веткой" digest="fb4e40b752c4e971031dd56e2e8e6ed6b4788f88" />
+    <slide id="033-alerty-pri-padenii" idx="33" kind="content" title="Алерты при падении" digest="e094c4fe73e5dc8741711db146107af2375fd4d3" />
+    <slide id="034-sla-zombi-zadachi-i" idx="34" kind="content" title="SLA, зомби-задачи и наблюдаемость" digest="87a562bcc41aed805012deb42a394efb8d3c1a6a" />
+    <slide id="035-sravnenie-i-itogi" idx="35" kind="section" title="Сравнение и итоги" digest="1eb51782efecef46b163707ebac7111e0d568c5a" />
+    <slide id="036-airflow-vs-dagster-vs-prefect" idx="36" kind="table" title="Airflow vs Dagster vs Prefect" digest="fb77749c19669f7ff4b07595dec3cfc181ea6908" />
+    <slide id="037-horoshie-praktiki" idx="37" kind="content" title="Хорошие практики" digest="365ae7018256c4f894df9a3bc4343b790b306e15" />
+    <slide id="038-domashnee-zadanie" idx="38" kind="content" title="Домашнее задание" digest="b13631fe51755a2514eb69ff1f04f7fb7305fb72" />
+    <slide id="039-kriterii-ocenki" idx="39" kind="table" title="Критерии оценки" digest="1fb7954e2f807572520fb009eca37e051c270e86" />
+    <slide id="040-itogi" idx="40" kind="closing" title="Итоги" digest="96ce0aaef521efeec8e4f48e6fea1a6b29b7f2c3" />
+  </deck>
+  <deck slug="cicd-observability" content="content/preza-cicd-observability-content.yml" media-dir="data/images/cicd-observability" visuals="code-tables" topic="ci/cd observability prometheus grafana">
+    <slide id="001-avtomatizaciya-i-monitoring" idx="1" kind="title" title="Автоматизация и мониторинг" digest="4de730ca93cb76f536163921a522762f17555a01" />
+    <slide id="002-plan-lekcii" idx="2" kind="agenda" title="План лекции" digest="22660eb501209c71a6ec297fac7e75026e23ca9b" />
+    <slide id="003-chast-1-ci-cd" idx="3" kind="section" title="Часть 1 — CI/CD" digest="e19f6cf03a8a633c01af79ae57640d6734587570" />
+    <slide id="004-zachem-ci-cd-v-data-i-ml" idx="4" kind="content" title="Зачем CI/CD в data- и ML-проектах" digest="e73bc9db107230510e3a1dc80ffb30f6b42f6794" />
+    <slide id="005-chem-data-ml-pajplajn" idx="5" kind="table" title="Чем data/ML-пайплайн отличается от бэкендового" digest="de12cab824e6a276ea790ed22d4bb61c1d34c1ec" />
+    <slide id="006-gitlab-ci" idx="6" kind="section" title="GitLab CI" digest="ed896b9d1212505b9fc9fdb46c6d7d35b9a91843" />
+    <slide id="007-gitlab-ci-yml-anatomiya" idx="7" kind="content" title=".gitlab-ci.yml — анатомия" digest="88e69d22e5797597cbf6e6bf551d89286b4d8799" />
+    <slide id="008-artefakty-kesh-rules" idx="8" kind="content" title="Артефакты, кэш, rules, environments, resource_group" digest="2a7537ba74f545d9b896f2eb2153b148571e726b" />
+    <slide id="009-cli-glab" idx="9" kind="content" title="CLI: glab" digest="6e51bdefb50d08ebab3588f30ce7e87035c154c8" />
+    <slide id="010-github-actions" idx="10" kind="section" title="GitHub Actions" digest="094da4ccc791bcf2dd68ffcad2d8c03387037c20" />
+    <slide id="011-workflow-jobs-i-steps" idx="11" kind="content" title="Workflow: jobs и steps" digest="763923ff4b803f0740aacaddc150bf5e588a0200" />
+    <slide id="012-matrix-i-reusable-workflows" idx="12" kind="content" title="Matrix и reusable workflows" digest="56e779f217176c7f4847cbc8af1d853472efe90e" />
+    <slide id="013-sekrety-i-oidc-dostupy-bez" idx="13" kind="content" title="Секреты и OIDC: доступы без долгоживущих ключей" digest="29d1e3e312ab502aa1991419d3c5665f867f6f04" />
+    <slide id="014-gitlab-ci-protiv-github-actions" idx="14" kind="table" title="GitLab CI против GitHub Actions" digest="e7fd018418faa55f11d43eaabf3c0bba858094e1" />
+    <slide id="015-self-hosted-rannery-na-vm" idx="15" kind="section" title="Self-hosted раннеры на VM" digest="ca4d27945de1cf46c1a053d2e1ff9ad10064c7f9" />
+    <slide id="016-gitlab-runner-ustanovka-i" idx="16" kind="content" title="GitLab Runner: установка и регистрация" digest="b4ed6b5d5f10526dc9c50ee01b3f4d56d09c8891" />
+    <slide id="017-github-actions-runner-na-vm" idx="17" kind="content" title="GitHub Actions runner на VM" digest="05e4c67755fdac5458e0783fd3e62898de34af48" />
+    <slide id="018-bezopasnost-sobstvennyh-rannerov" idx="18" kind="content" title="Безопасность собственных раннеров" digest="5f8e8c1cf8fb98101e8b2d9d4c7d65b1ceb3a332" />
+    <slide id="019-trend-ai-vnutri-ci-cd" idx="19" kind="content" title="Тренд: AI внутри CI/CD" digest="f1fe2b27a8ced27483f5b0c85956e2954ff6305a" />
+    <slide id="020-ai-v-ci-cd-vyigrysh-i-risk" idx="20" kind="table" title="AI в CI/CD: выигрыш и риск" digest="89bb79a76d06f64b69fc31e5e8e3edd93d7dbbed" />
+    <slide id="021-chast-2-observability" idx="21" kind="section" title="Часть 2 — Observability" digest="82ea971236939e85667eb440ce0e8ba5e81252b0" />
+    <slide id="022-tri-stolpa-nablyudaemosti" idx="22" kind="content" title="Три столпа наблюдаемости" digest="40e5a85bb96568b4b6d8ebfcb6e1d356bb305cdd" />
+    <slide id="023-sli-slo-i-error-budget" idx="23" kind="content" title="SLI, SLO и error budget" digest="ec05df6388e796b7b3668aec33d78e9ca2755fec" />
+    <slide id="024-prometheus-pull-model-i" idx="24" kind="content" title="Prometheus: pull-модель и экспортеры" digest="93357c5a47bc31c4407468cfc7a84ee6428439d1" />
+    <slide id="025-promql-yazyk-zaprosov" idx="25" kind="content" title="PromQL: язык запросов" digest="7a1f2f7bfd561895b0772ead1606269ca6653f33" />
+    <slide id="026-konfiguraciya-scrape-recording" idx="26" kind="content" title="Конфигурация: scrape, recording и alerting rules" digest="68cd63b285f470a55bae3eaefc3d9ee560711840" />
+    <slide id="027-grafana-dashbordy-peremennye" idx="27" kind="content" title="Grafana: дашборды, переменные, алерты как код" digest="249cf213be7f81ba25f9d86b9b0a3b85a2896a16" />
+    <slide id="028-stek-hraneniya-legacy-i" idx="28" kind="table" title="Стек хранения: legacy и современные варианты" digest="ff99612ba84b1bd89f6dfd058897e9d029c69540" />
+    <slide id="029-opentelemetry-i-trejsing" idx="29" kind="content" title="OpenTelemetry и трейсинг" digest="b518af30a24fcb16d742a012d0f13b49cf446b6c" />
+    <slide id="030-alertmanager-marshruty" idx="30" kind="content" title="Alertmanager: маршруты, Telegram и Mattermost" digest="b3d2bbe52ee3ec10e1a8eb2431ad4327d72bf6c5" />
+    <slide id="031-proverka-dostavki-curl-v" idx="31" kind="content" title="Проверка доставки: curl в Telegram и Mattermost" digest="03393c4f42dd64fe8487dfae0c91a73abc7af1ad" />
+    <slide id="032-kakim-dolzhen-byt-horoshij-alert" idx="32" kind="content" title="Каким должен быть хороший алерт" digest="2682dfe6052aa6a0d05579992720b262071f9c89" />
+    <slide id="033-ai-v-observability-i-aiops" idx="33" kind="content" title="AI в observability и AIOps" digest="0009a4a69d39f0ef44084b3e325d222b1de4c10e" />
+    <slide id="034-mlops-drejf-i-kachestvo" idx="34" kind="content" title="MLOps: дрейф и качество предсказаний" digest="d0977d2bb81626efbf191e79e36b39c0b5bb811a" />
+    <slide id="035-llmops-chto-monitorim-u-llm" idx="35" kind="content" title="LLMOps: что мониторим у LLM-приложений" digest="545960248a55a7da5e0ad69c753cabf6bd6849a3" />
+    <slide id="036-instrumenty-monitoringa-ml-i-llm" idx="36" kind="table" title="Инструменты мониторинга ML и LLM" digest="65e075032a8603b2a242ba7d0a39f0db9ca30525" />
+    <slide id="037-domashnee-zadanie" idx="37" kind="section" title="Домашнее задание" digest="6079346b63744f666e817733f95441f3ef3e85c7" />
+    <slide id="038-dz-minimalnyj-stek-monitoringa" idx="38" kind="content" title="ДЗ: минимальный стек мониторинга + CI" digest="2b64564631a0299c0e2edc851c700075998e9186" />
+    <slide id="039-dz-kriterii-ocenki" idx="39" kind="table" title="ДЗ: критерии оценки" digest="bb4daa2935f33ead42ef72d83fab0b4a5410e9ed" />
+    <slide id="040-spasibo-za-vnimanie" idx="40" kind="closing" title="Спасибо за внимание!" digest="25e4f6792a929fa26f8e02ac863113136b79e664" />
+  </deck>
+  <deck slug="dagster" content="content/preza-dagster-content.yml" media-dir="data/images/dagster" visuals="code-tables" topic="dagster">
+    <slide id="001-sovremennaya-orkestraciya-ml" idx="1" kind="title" title="Современная оркестрация ML-пайплайнов" digest="0c9fe0307fca8802585e71dc69848e72cc5e6e4a" />
+    <slide id="002-plan-lekcii" idx="2" kind="agenda" title="План лекции" digest="cd3155ec91998e2500c0235aefddd69373f1132c" />
+    <slide id="003-kontekst-istoriya-i-nastoyaschee" idx="3" kind="section" title="Контекст, история и настоящее" digest="4bb94d8c75e534fab10627fb94cb18484669db28" />
+    <slide id="004-zachem-nuzhen-orkestrator" idx="4" kind="content" title="Зачем нужен оркестратор" digest="0f8dbc63d9c5f8d51a2880707c521bfd8fdb30b7" />
+    <slide id="005-mesto-dagster-v-data-i-ml-steke" idx="5" kind="content" title="Место Dagster в data- и ML-стеке" digest="b7f5e46b8879ee4cde37becfda6efcce64481b8e" />
+    <slide id="006-istoriya-i-persony" idx="6" kind="content" title="История и персоны" digest="d9a2bcd43010e66fab76ee39b716acc5259511ba" />
+    <slide id="007-dagster-segodnya" idx="7" kind="content" title="Dagster сегодня" digest="f4818294e536f382acfdb6095678464d5aa0147e" />
+    <slide id="008-arhitektura-i-suschnosti" idx="8" kind="section" title="Архитектура и сущности" digest="c3b8d4e23d31469a7f3ade1e48fdf03ee9cbe2e0" />
+    <slide id="009-klyuchevaya-ideya-software" idx="9" kind="content" title="Ключевая идея — Software-Defined Assets" digest="e9d3c1b0488dfed778033b25b8af7300964d22ba" />
+    <slide id="010-asset-kod-metadannye" idx="10" kind="content" title="Asset — код, метаданные, материализация" digest="b70dd45d3ac38be99ee9145af221896901a4c638" />
+    <slide id="011-ops-graphs-i-jobs" idx="11" kind="content" title="Ops, Graphs и Jobs" digest="27aef6f9ba9adf44111165cc249a3f00fb4aa3f8" />
+    <slide id="012-asset-ili-op-kak-vybrat" idx="12" kind="table" title="Asset или Op — как выбрать" digest="f77276866575ad9a95b9412a1c39dd650bfc4f4c" />
+    <slide id="013-schedules-zapusk-po-vremeni" idx="13" kind="content" title="Schedules — запуск по времени" digest="2c428a0b69f4420ff485546d29b13c244ea329d3" />
+    <slide id="014-sensors-reakciya-na-sobytiya" idx="14" kind="content" title="Sensors — реакция на события" digest="d3a0123601b41ab8c5092b93bb0f5a9fa9e90741" />
+    <slide id="015-schedule-ili-sensor" idx="15" kind="table" title="Schedule или Sensor" digest="1aa498355a71e0187354b4dd75270636693207d2" />
+    <slide id="016-resources-i-io-managers" idx="16" kind="content" title="Resources и IO managers" digest="5b1dc7cfb6a173b7c02cecd4af0ea705a0f80b6c" />
+    <slide id="017-partitions-razrezaem-aktiv-po" idx="17" kind="content" title="Partitions — разрезаем актив по измерению" digest="186bdae23b915402aba799bd40dd3e96ae119cfa" />
+    <slide id="018-backfills-massovyj-pereschet" idx="18" kind="content" title="Backfills — массовый пересчёт истории" digest="3b47ba2f08f34f0f0e846f8c929657c9bd40ded9" />
+    <slide id="019-code-locations-i-workspace" idx="19" kind="content" title="Code locations и workspace" digest="b5ad115f034093fafb0265f0a32f4c28b3d0d05f" />
+    <slide id="020-instance-daemon-webserver" idx="20" kind="content" title="Instance, Daemon, Webserver" digest="50428b86be5417fc35cd8d6db5e45e9641ad61d1" />
+    <slide id="021-asset-checks-i-svezhest-dannyh" idx="21" kind="content" title="Asset checks и свежесть данных" digest="5a7885f6dbbe5c89513c28ac96549b0ed3fd1947" />
+    <slide id="022-dg-cli-i-components" idx="22" kind="content" title="dg CLI и Components" digest="b02d39e0bec18e350f486027ab64e8fd4d00f813" />
+    <slide id="023-dev-i-prod-rezhimy" idx="23" kind="section" title="Dev- и prod-режимы" digest="034181dbde1ef2b5d52c4ade355c7bb715457ccb" />
+    <slide id="024-lokalnaya-razrabotka" idx="24" kind="content" title="Локальная разработка" digest="12efaa0f02f38aa576367c038cb86adee86da32f" />
+    <slide id="025-dev-protiv-prod" idx="25" kind="table" title="Dev против Prod" digest="aab05410190810ab83dacb7a7d6c03d999177f93" />
+    <slide id="026-deploj-v-prodakshen" idx="26" kind="content" title="Деплой в продакшен" digest="2c6d7ec18758415fe93cab55d49796a9bca8e1fa" />
+    <slide id="027-dagster-oss-protiv-dagster" idx="27" kind="table" title="Dagster OSS против Dagster+" digest="83cdc517db810bea7883f8457fa974a7a83de9e8" />
+    <slide id="028-integraciya-s-dbt-scenarii-i" idx="28" kind="section" title="Интеграция с dbt: сценарии и практика" digest="cf6dff41cddd52a254bd07df21c84bd94b703d3f" />
+    <slide id="029-dagster-dbt-kak-eto-rabotaet" idx="29" kind="content" title="dagster-dbt — как это работает" digest="e3ab15a254042960901b8be6265e0fe289007df0" />
+    <slide id="030-scenarii-integracii-dbt-i" idx="30" kind="table" title="Сценарии интеграции dbt и Dagster" digest="05753314f3776c3e7a9226bf2386a6de50b40353" />
+    <slide id="031-multi-dbt-neskolko-dbt-proektov" idx="31" kind="content" title="Multi-dbt — несколько dbt-проектов" digest="beb3f5edec8b67ac012235a7cfee57a8dd3463bc" />
+    <slide id="032-airflow-cosmos-protiv-dagster" idx="32" kind="table" title="Airflow + Cosmos против Dagster + dbt" digest="1242648a5203b11a0f80e5cc2907b9c8aa0be1d4" />
+    <slide id="033-sqlmesh-alternativa-dbt" idx="33" kind="content" title="SQLMesh — альтернатива dbt" digest="3a19e7d5cfe14cc836faee6ac728e22e29b40400" />
+    <slide id="034-dbt-protiv-sqlmesh" idx="34" kind="table" title="dbt против SQLMesh" digest="6179085cb364020c7f4a5933914654612bc12e2a" />
+    <slide id="035-zagruzka-dannyh-cli-i-mcp" idx="35" kind="section" title="Загрузка данных, CLI и MCP" digest="4c4f5b26ce4ca3cb49846c113bbae1062f088bb7" />
+    <slide id="036-dlt-zagruzka-kak-kod" idx="36" kind="content" title="dlt — загрузка как код" digest="909405760304d9a189725f26d2e725d841f31d86" />
+    <slide id="037-airbyte-konnektory-kak-servis" idx="37" kind="content" title="Airbyte — коннекторы как сервис" digest="4b144ab1de7be3f6fe950c2e9180dc895026210f" />
+    <slide id="038-cli-shpargalka" idx="38" kind="content" title="CLI — шпаргалка" digest="58dbc3da9b9ebe96ebb0f39c30fe04eec9fab5ae" />
+    <slide id="039-mcp-dagster-i-ai-agenty" idx="39" kind="content" title="MCP — Dagster и AI-агенты" digest="5a9058a2e2e4ea00b25d9e1f12e2b6bb3d0984ce" />
+    <slide id="040-rynok-novosti-i-buduschee" idx="40" kind="section" title="Рынок, новости и будущее" digest="327371f4056a782b84b400f61ce111eacd0de873" />
+    <slide id="041-prefect-priobretaet-dagster-labs" idx="41" kind="content" title="Prefect приобретает Dagster Labs" digest="41ce504d6b2c02833097e4dc7b0c63ba9e05757b" />
+    <slide id="042-chto-eto-znachit-na-praktike" idx="42" kind="content" title="Что это значит на практике" digest="64431e767c511fb965680386b96cd33fd8c8f3a2" />
+    <slide id="043-konkurenty-obzor" idx="43" kind="table" title="Конкуренты — обзор" digest="f401f0b4362482ba8ed7e0072c0a5f4994f1a994" />
+    <slide id="044-neskolko-orkestratorov-na" idx="44" kind="content" title="Несколько оркестраторов на большом проекте" digest="ce1d448a6fd392701fe110cadf98bfd242c8146d" />
+    <slide id="045-kak-svyazat-orkestratory" idx="45" kind="table" title="Как связать оркестраторы между собой" digest="393d5cf6f8d016d685d3716e9fa6d79636bcfa90" />
+    <slide id="046-kuda-vse-dvizhetsya" idx="46" kind="content" title="Куда всё движется" digest="da92d6f560c79e97caa9bd2d6db1d49c14677a73" />
+    <slide id="047-domashnee-zadanie" idx="47" kind="section" title="Домашнее задание" digest="6079346b63744f666e817733f95441f3ef3e85c7" />
+    <slide id="048-dz-orkestriruem-dbt-proekt-v" idx="48" kind="content" title="ДЗ: оркестрируем dbt-проект в Dagster" digest="1953e46089a90deebf98b09751c2bf2885cdead7" />
+    <slide id="049-dz-kriterii-ocenki" idx="49" kind="table" title="ДЗ: критерии оценки" digest="bb4daa2935f33ead42ef72d83fab0b4a5410e9ed" />
+    <slide id="050-spasibo-za-vnimanie" idx="50" kind="closing" title="Спасибо за внимание!" digest="25e4f6792a929fa26f8e02ac863113136b79e664" />
+  </deck>
+  <deck slug="dbt-v3" content="content/preza-dbt-v3-content.yml" media-dir="data/images/dbt-v3" visuals="reuse-source" topic="dbt">
+    <slide id="001-vvedenie-v-dbt" idx="1" kind="title" title="Введение в dbt" digest="9e646490789a2d2ed7f81728eb9a1adf5f4734b2" />
+    <slide id="002-plan-lekcii" idx="2" kind="agenda" title="План лекции" digest="662b233e1cd4937d4ffea234064e77bd5735ade4" />
+    <slide id="003-vvedenie-i-ekosistema" idx="3" kind="section" title="Введение и экосистема" digest="c6017550cb135ee5e9f92c1469ee5ac9fbd420c4" />
+    <slide id="004-chto-takoe-dbt" idx="4" kind="content" title="Что такое dbt" digest="4a646b8c5232c8fefdc9c9206b83e9f4d13a24f2" has-image="1" />
+    <slide id="005-predposylki-i-istoriya" idx="5" kind="content" title="Предпосылки и история" digest="0843807bdc497052e09dfe04c9f5aa4c4d2f665d" has-image="1" />
+    <slide id="006-mesto-dbt-i-rol-analytics" idx="6" kind="content" title="Место dbt и роль Analytics Engineer" digest="64043274d0378d4c22072188d7e1c1e4ec7a90b0" has-image="1" />
+    <slide id="007-produkty-ekosistemy-dbt" idx="7" kind="content" title="Продукты экосистемы dbt" digest="226c685b3bad4a207375bc23b205a8f9f30e9e94" has-image="1" />
+    <slide id="008-dbt-core-vs-dbt-cloud" idx="8" kind="table" title="dbt Core vs dbt Cloud" digest="cbe7360429e21dcbc7b1eff39cf4f246286b7154" />
+    <slide id="009-dbt-core-arhitektura-i-proekt" idx="9" kind="section" title="dbt Core: архитектура и проект" digest="1f226c88e032e78dd7ac5d602617d5f9b163f453" />
+    <slide id="010-dbt-core-chto-eto-i-arhitektura" idx="10" kind="content" title="dbt Core: что это и архитектура" digest="e547a4e42cb4755fd34e06da9607aae799003b5b" has-image="1" />
+    <slide id="011-dbt-kak-kod-struktura-proekta" idx="11" kind="content" title="dbt как код: структура проекта" digest="554f1c59be3fee73472f2cc0020fb019d85c1c21" has-image="1" />
+    <slide id="012-sql-kompilyaciya-obertka-koda" idx="12" kind="content" title="SQL + компиляция (обёртка кода)" digest="8edf2f7b7bf043554360631645b108f14c5a4854" has-image="1" />
+    <slide id="013-model-skompilirovannyj-sql" idx="13" kind="content" title="Модель → скомпилированный SQL" digest="ba52a443730b29e355bada05e66cdbded89cfc57" />
+    <slide id="014-dag-zavisimostej" idx="14" kind="content" title="DAG зависимостей" digest="c13f1cbaca880d6535a5172a5c6f235a354d4268" has-image="1" />
+    <slide id="015-jinja-i-makrosy" idx="15" kind="table" title="Jinja и макросы" digest="6bf2033f49ec21a9bba58bcf0e7a4a1ad3a44ac8" />
+    <slide id="016-makrosy-na-jinja-dry-dlya-sql" idx="16" kind="content" title="Макросы на Jinja — DRY для SQL" digest="b3e4781b3259193fb263c10fe4ef7647fa7fca00" />
+    <slide id="017-materializacii" idx="17" kind="table" title="Материализации" digest="633d1f189a7a8a527a7c34956e211ec4d01e2787" />
+    <slide id="018-inkrementalnaya-model" idx="18" kind="content" title="Инкрементальная модель" digest="62d194a994c3527edc99add87f6e17ca9b774625" />
+    <slide id="019-suschnosti-dbt" idx="19" kind="content" title="Сущности dbt" digest="ec04dfe5fc05d7b7027490b6a1e18849627fc70e" has-image="1" />
+    <slide id="020-sources-kontrakt-i-freshness" idx="20" kind="content" title="Sources: контракт и freshness" digest="66d28fda10d747c62e3ca118a8d3dbdee7ada792" />
+    <slide id="021-snapshots-i-docs-istoriya" idx="21" kind="content" title="Snapshots и docs: история + смысл поля" digest="c07ece70f4b14d29210a04bd8bc5c3f952f4b3e7" />
+    <slide id="022-konfigi-dbt-project-yml-i" idx="22" kind="content" title="Конфиги: dbt_project.yml и profiles.yml" digest="192f666309c7a87cb49d95b49d9bf6a0930bbca8" has-image="1" />
+    <slide id="023-dbt-project-yml-konfig-proekta" idx="23" kind="content" title="dbt_project.yml — конфиг проекта" digest="f69ddd3126cfa709aa5d9c68a7d67664f4fa2092" />
+    <slide id="024-osnovnye-komandy-dbt" idx="24" kind="table" title="Основные команды dbt" digest="5157137c28f95a51d9d1fff9e1b557b6cb2a5b73" />
+    <slide id="025-adaptery" idx="25" kind="table" title="Адаптеры" digest="f484f727267a4884a2b5e7666d8f35a37ae548be" />
+    <slide id="026-testirovanie-dokumentaciya" idx="26" kind="section" title="Тестирование, документация, пакеты" digest="a6186ca5bb74c57fac582b61303b366ed60f31ad" />
+    <slide id="027-dokumentirovanie-v-dbt" idx="27" kind="content" title="Документирование в dbt" digest="b7b9992dff738b3d0c04bc4286672c7fd678fec8" has-image="1" />
+    <slide id="028-testirovanie" idx="28" kind="content" title="Тестирование" digest="aa65f973ebf7cbbfd85b1580d1bf98fecacf779f" has-image="1" />
+    <slide id="029-generic-testy-kontrakt-v" idx="29" kind="content" title="Generic-тесты: контракт в schema.yml" digest="e33c0552f76309b5347bba45d31832733758ca7f" />
+    <slide id="030-unit-test-logika-modeli-na" idx="30" kind="content" title="Unit-тест: логика модели на фикстурах" digest="752e44993c3ce88886e3b57307ea66ad45b095bb" />
+    <slide id="031-pakety-dbt-podklyuchenie" idx="31" kind="content" title="Пакеты dbt: подключение" digest="e7a115d752c671391a23e59895a465230df59e78" has-image="1" />
+    <slide id="032-klyuchevye-pakety" idx="32" kind="table" title="Ключевые пакеты" digest="10d8e5ba10b903ccd6d7c4568bfbe7cbd4843dc7" />
+    <slide id="033-dbt-utils-v-dele" idx="33" kind="content" title="dbt_utils в деле" digest="e286cb34e6fa7d61bd729032bbf9d337e6591b11" />
+    <slide id="034-zapusk-v-prodakshene" idx="34" kind="section" title="Запуск в продакшене" digest="09c03a8ba8b12ef4383984a81d4d006a8e3feb22" />
+    <slide id="035-kak-zapuskat-dbt-v-prode" idx="35" kind="content" title="Как запускать dbt в проде" digest="c586a443c6bece25c31a00830172ee62bb43b700" />
+    <slide id="036-airflow-dbt-orkestraciya" idx="36" kind="content" title="Airflow + dbt: оркестрация через Cosmos" digest="4f8a1e771e042827cbf49b92c702ac5fa697554b" />
+    <slide id="037-dagster-dbt-modeli-kak-data" idx="37" kind="content" title="Dagster + dbt: модели как data assets" digest="00c0654418887e88726312405b03be230332ebb7" />
+    <slide id="038-ci-cd-dlya-dbt" idx="38" kind="content" title="CI/CD для dbt" digest="363d4c4b6a278f28d8aacd9be3971c33b50658b1" />
+    <slide id="039-pre-commit-bystraya-zaschita" idx="39" kind="content" title="Pre-commit: быстрая защита до push" digest="ea31183b2258efd32e3fac19300c27b360e0dde1" />
+    <slide id="040-gitlab-ci-obyazatelnyj-barer" idx="40" kind="content" title="GitLab CI: обязательный барьер merge" digest="5ba1155e2d4f89a014fcbe63200b6b0089c39d74" />
+    <slide id="041-dopolnitelnye-vozmozhnosti-i" idx="41" kind="section" title="Дополнительные возможности и тренды" digest="6052752802cc197db5463ce302fd9e3e793b359a" />
+    <slide id="042-python-modeli-mikrobatching" idx="42" kind="content" title="Python-модели, микробатчинг, каталоги" digest="d3b2dc9da7508afa0beaf6b13155c694a7b4aa8d" has-image="1" />
+    <slide id="043-semantic-layer-metricflow" idx="43" kind="content" title="Semantic Layer / MetricFlow" digest="b975965bca7a43960779cd2bf47067f04f3a3f16" has-image="1" />
+    <slide id="044-dbt-i-ai" idx="44" kind="content" title="dbt и AI" digest="b448a9f470d4706595f89bf6a27a6ad43574e0dd" has-image="1" />
+    <slide id="045-sqlmesh-i-dbt-upravlenie" idx="45" kind="table" title="SQLMesh и dbt: управление изменениями" digest="1734ebbc026701fc90a015b2cedc48af42c16666" />
+    <slide id="046-deklarativnye-transformacii" idx="46" kind="content" title="Декларативные трансформации: ещё четыре подхода" digest="36f555a51812edf33b17ef52f5509cff05a8637e" />
+    <slide id="047-poleznye-ssylki" idx="47" kind="content" title="Полезные ссылки" digest="b9f1abecb7c6d08400bc9b34e124775be9d89474" />
+    <slide id="048-spasibo-za-vnimanie" idx="48" kind="closing" title="Спасибо за внимание!" digest="25e4f6792a929fa26f8e02ac863113136b79e664" />
+  </deck>
+  <deck slug="prefect" content="content/preza-prefect-content.yml" media-dir="data/images/prefect" visuals="code-tables" topic="prefect">
+    <slide id="001-sovremennaya-orkestraciya-ml" idx="1" kind="title" title="Современная оркестрация ML-пайплайнов (Prefect)" digest="3a2225eaf1eebd7da24d8957b9dc853b682c663a" />
+    <slide id="002-plan-lekcii" idx="2" kind="agenda" title="План лекции" digest="02aed1e325bd7a53438c5ddfa2d188dc028cc76d" />
+    <slide id="003-kontekst-istoriya-i-persony" idx="3" kind="section" title="Контекст, история и персоны" digest="5a286f1a1a0753a4a2d76b3fcf93723de757d291" />
+    <slide id="004-chto-takoe-prefect-i-mesto-v" idx="4" kind="content" title="Что такое Prefect и место в ML-стеке" digest="b307262b7b6cac9ab89fddf3fdc8d15464cd116a" />
+    <slide id="005-istoriya-i-persony" idx="5" kind="content" title="История и персоны" digest="8db5a048fd4514ea193792e829a942f1a4bd14fd" />
+    <slide id="006-pozitivnaya-i-negativnaya" idx="6" kind="content" title="Позитивная и негативная инженерия" digest="679c8fbbfc583742f4147a761157c58a91de3fd3" />
+    <slide id="007-evolyuciya-prefect-1-2-3" idx="7" kind="content" title="Эволюция: Prefect 1 → 2 → 3" digest="a435fd7db73859a706a4226e17cff06807d8a79f" />
+    <slide id="008-arhitektura-i-suschnosti" idx="8" kind="section" title="Архитектура и сущности" digest="c3b8d4e23d31469a7f3ade1e48fdf03ee9cbe2e0" />
+    <slide id="009-flow-i-task-bazovye-dekoratory" idx="9" kind="content" title="Flow и Task: базовые декораторы" digest="023545b58c6932c9bfc093ef19410012c26224ac" />
+    <slide id="010-parallelizm-submit-map-i-task" idx="10" kind="content" title="Параллелизм: .submit(), .map() и task runners" digest="f2d3efc67c98d65cbaa2276058782a2d862e4455" />
+    <slide id="011-sostoyaniya-retries-i-tajmauty" idx="11" kind="content" title="Состояния, retries и таймауты" digest="736e586b8aff73275d6979be70d7e425bc89a268" />
+    <slide id="012-results-i-keshirovanie" idx="12" kind="content" title="Results и кэширование" digest="9dcbb417f4701bfbbac5cf161d979d902ba1be3f" />
+    <slide id="013-deployments-ot-skripta-k" idx="13" kind="content" title="Deployments: от скрипта к управляемому процессу" digest="026f62ee02c1b7937ff2b0232d74a5e0bd4ee116" />
+    <slide id="014-work-pools-i-workers" idx="14" kind="content" title="Work pools и workers" digest="ae647687ee70aff74b7e3898197f04970dd78f1e" />
+    <slide id="015-blocks-i-variables" idx="15" kind="content" title="Blocks и Variables: конфигурация и секреты" digest="94687575805c3b0408213de93e9fdbe5da00e213" />
+    <slide id="016-artifacts-rezultaty-vidimye-v-ui" idx="16" kind="content" title="Artifacts: результаты, видимые в UI" digest="20f7878c3282c41badef2eb9c3335ba43fcd15ba" />
+    <slide id="017-events-i-automations-reakciya" idx="17" kind="content" title="Events и Automations: реакция на происходящее" digest="9c9a01259e300c80733ba3485fd65a82412af884" />
+    <slide id="018-dev-vs-prod" idx="18" kind="section" title="Dev vs Prod" digest="441c406f0b7467c9f80eb3577b5eae5ea004c999" />
+    <slide id="019-lokalnyj-zapusk-vs-deployment" idx="19" kind="table" title="Локальный запуск vs Deployment + Worker" digest="39597ad3b3c343d753598bc19ef8b8fd48436e69" />
+    <slide id="020-prefect-cloud-vs-prefect-oss" idx="20" kind="table" title="Prefect Cloud vs Prefect OSS (self-hosted)" digest="785ecb0c206070cb93679ee3a7cfc2630958963f" />
+    <slide id="021-cli-rabochie-komandy" idx="21" kind="content" title="CLI: рабочие команды" digest="927ef18c90b77f577807449d0d4856a112b026d6" />
+    <slide id="022-integracii-i-ekosistema" idx="22" kind="section" title="Интеграции и экосистема" digest="2897af82916d3afc2bff0f9b57521048d78d8d01" />
+    <slide id="023-integraciya-s-dbt-prefect-dbt" idx="23" kind="content" title="Интеграция с dbt: prefect-dbt" digest="9c2f5e41de8be80307f138e3a07bbdf6cc228283" />
+    <slide id="024-prefect-vs-dagster-vs-airflow" idx="24" kind="table" title="Prefect vs Dagster vs Airflow" digest="48ed11902f2720da79d543b598e88f116c31b6a9" />
+    <slide id="025-novost-prefect-priobretaet" idx="25" kind="content" title="Новость: Prefect приобретает Dagster Labs" digest="43acc2bd5fa2b9467403a2e8ff1c08c1164fcd95" />
+    <slide id="026-chto-eto-znachit-ostorozhnyj" idx="26" kind="content" title="Что это значит: осторожный прогноз" digest="aa43e1e7ca0b4432eab3fc786604e4e7182f18e9" />
+    <slide id="027-domashnee-zadanie" idx="27" kind="section" title="Домашнее задание" digest="6079346b63744f666e817733f95441f3ef3e85c7" />
+    <slide id="028-dz-orkestraciya-dbt-proekta" idx="28" kind="content" title="ДЗ: оркестрация dbt-проекта средствами Prefect" digest="0f8addcbbdceff324940341dd0eba5af2b684d30" />
+    <slide id="029-dz-kriterii-ocenki" idx="29" kind="table" title="ДЗ: критерии оценки" digest="bb4daa2935f33ead42ef72d83fab0b4a5410e9ed" />
+    <slide id="030-spasibo" idx="30" kind="closing" title="Спасибо" digest="2fad163ff2a821c8a8dacc2d2bf0448015fadda0" />
+  </deck>
+</picstore>

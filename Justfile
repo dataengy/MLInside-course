@@ -151,6 +151,50 @@ picstore-decks:
 picstore-taxonomy:
     cd {{_dir}} && {{_picstore}} taxonomy
 
+# Index deck slides into the catalog (needs ids — see picstore-ids-backfill)
+picstore-scan deck="":
+    cd {{_dir}} && {{_picstore}} scan {{ if deck == "" { "" } else { "--deck " + deck } }}
+
+# Write the deterministic XML projection (the MERGEABLE source of truth)
+picstore-export:
+    cd {{_dir}} && {{_picstore}} export
+
+# Recover from an unmergeable catalog.sqlite conflict: take either binary, hand-merge
+# catalog.xml, then rebuild the sqlite from it.
+picstore-rebuild:
+    cd {{_dir}} && {{_picstore}} import --rebuild
+
+# Assign the opaque `id:` slide key (assigned once, never rewritten). Dry by default.
+picstore-ids-backfill-dry:
+    cd {{_dir}} && {{_picstore}} ids backfill
+
+picstore-ids-backfill:
+    cd {{_dir}} && {{_picstore}} ids backfill --execute
+
+# Fail on missing / duplicate / malformed slide ids
+picstore-ids-check:
+    cd {{_dir}} && {{_picstore}} ids check
+
+# Slides whose position moved since their id was minted (informational)
+picstore-ids-drift:
+    cd {{_dir}} && {{_picstore}} ids drift
+
+# ── picstore (src/picstore submodule): find/catalog/apply deck illustrations ──
+_picstore := "PYTHONPATH=src python3 -m picstore.cli"
+
+# Provider availability matrix (keys, browsers, local roots). Run this FIRST —
+# an empty search is almost always a provider that quietly reported unavailable.
+picstore-doctor:
+    cd {{_dir}} && {{_picstore}} doctor
+
+# Decks under management (slug, visual profile, content path)
+picstore-decks:
+    cd {{_dir}} && {{_picstore}} decks
+
+# Picture types and styles usable with --types / --styles (omit = search all)
+picstore-taxonomy:
+    cd {{_dir}} && {{_picstore}} taxonomy
+
 # uv: sync the venv from pyproject (incl. dev extras)
 sync:
     cd {{_dir}} && uv sync --extra dev

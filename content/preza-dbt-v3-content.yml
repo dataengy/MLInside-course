@@ -9,6 +9,7 @@ deck:
   source_deck: data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
 content:
 - kind: title
+  id: 001-vvedenie-v-dbt
   title: Введение в dbt
   subtitle: ''
   notes: 'Приветствие. Сегодня разбираем **dbt** — инструмент трансформации данных, который стал стандартом __Analytics Engineering__.
@@ -16,6 +17,7 @@ content:
 
     Цель лекции — понять, !!что такое dbt и как устроен dbt Core!!, и как его применяют в реальных проектах: от **моделей** и **тестов** до **запуска в продакшене**. ~~Вопросы удобнее задавать по ходу.~~'
 - kind: agenda
+  id: 002-plan-lekcii
   title: План лекции
   bullets:
   - Введение, предпосылки и место dbt в data-стеке
@@ -29,12 +31,14 @@ content:
 
     Затем нырнём в !!устройство dbt Core!! — это ядро и самый практический блок: **проект**, **материализации**, **Jinja**, **команды**. После — **тестирование** и **пакеты**, и закончим **продакшеном** (оркестрация, CI/CD) и трендами. ~~Держим ориентир на этот план.~~'
 - kind: section
+  id: 003-vvedenie-i-ekosistema
   title: Введение и экосистема
   notes: 'Первый блок — вводный.
 
 
     Разберёмся с базовыми понятиями: **что такое dbt**, __откуда он взялся__, какое место занимает в data-платформе и какие продукты есть в экосистеме.'
 - kind: content
+  id: 004-chto-takoe-dbt
   title: Что такое dbt
   image: image28.png
   materials:
@@ -51,6 +55,7 @@ content:
 
     Ключевая идея: аналитическая логика становится __кодом__ — с **git**, **ревью**, **тестами** и **автодокументацией**, а зависимости складываются в **DAG**. Вместо императивных скриптов — **SQL + Jinja + YAML**. ~~На схеме — типичный конвейр: источники, загрузка, трансформация в dbt, витрины.~~'
 - kind: content
+  id: 005-predposylki-i-istoriya
   title: Предпосылки и история
   image: image23.jpeg
   materials:
@@ -67,6 +72,7 @@ content:
 
     С приходом дешёвых мощных **облачных DWH** (**Snowflake**, **BigQuery**, **Redshift**) логичнее стало грузить сырьё как есть и трансформировать уже внутри БД — это подход !!ELT!!. **dbt** появился в **2016** (Fishtown Analytics, ныне dbt Labs) и закрыл именно слой **T**. ~~Маленькая деталь: название пишется строчными буквами.~~'
 - kind: content
+  id: 006-mesto-dbt-i-rol-analytics
   title: Место dbt и роль Analytics Engineer
   image: image24.png
   bullets:
@@ -80,6 +86,7 @@ content:
 
     dbt породил отдельную роль — !!Analytics Engineer!!. **Data Engineer** отвечает за инфраструктуру и загрузку, **Data Analyst** — за инсайты и дашборды, а **Analytics Engineer** посередине: строит __надёжные, протестированные модели данных__, применяя инженерные практики к аналитике. ~~На схеме — как делятся зоны ответственности между тремя ролями.~~'
 - kind: content
+  id: 007-produkty-ekosistemy-dbt
   title: Продукты экосистемы dbt
   image: image27.png
   materials:
@@ -98,6 +105,7 @@ content:
 
     Вокруг: **dbt Cloud** как управляемая платформа; **Semantic Layer / MetricFlow** для метрик; **packages** для переиспользования кода; и свежий **dbt MCP** для интеграции с ИИ. ~~Сегодня фокус на Core, но важно видеть всю картину.~~'
 - kind: table
+  id: 008-dbt-core-vs-dbt-cloud
   title: dbt Core vs dbt Cloud
   table:
     headers:
@@ -132,12 +140,14 @@ content:
 
     Выбор: !!контроль и гибкость (Core) vs скорость старта без инфраструктуры (Cloud)!!. ~~Для обучения и полного контроля берём Core.~~'
 - kind: section
+  id: 009-dbt-core-arhitektura-i-proekt
   title: 'dbt Core: архитектура и проект'
   notes: 'Переходим к ядру.
 
 
     Разберём, как устроен **dbt Core** изнутри: __компиляция__, __DAG__, структура проекта, **материализации**, **Jinja** и **команды**. !!Это самый практический блок.!!'
 - kind: content
+  id: 010-dbt-core-chto-eto-i-arhitektura
   title: 'dbt Core: что это и архитектура'
   image: image33.png
   bullets:
@@ -151,6 +161,7 @@ content:
 
     Это **code-based ELT**: модели хранятся как код в **git**, а артефакты компиляции складываются в каталог **target/**. ~~На экране — типичный вывод dbt run: модели выполняются одна за другой.~~'
 - kind: content
+  id: 011-dbt-kak-kod-struktura-proekta
   title: 'dbt как код: структура проекта'
   image: image30.png
   materials:
@@ -167,6 +178,7 @@ content:
 
     Поскольку всё это **код**, работают привычные практики: !!ветки, ревью через MR/PR, история изменений!!. ~~На скриншоте — проект dbt в IDE.~~'
 - kind: content
+  id: 012-sql-kompilyaciya-obertka-koda
   title: SQL + компиляция (обёртка кода)
   image: image40.png
   bullets:
@@ -180,6 +192,7 @@ content:
 
     При запуске dbt раскрывает **Jinja** в чистый **SQL** под конкретную БД и оборачивает его в **create view** / **create table as select**. ~~Готовый SQL всегда можно посмотреть в папке target/compiled и target/run.~~'
 - kind: content
+  id: 013-model-skompilirovannyj-sql
   title: Модель → скомпилированный SQL
   code_caption: 'models/stg_orders.sql → target/run/…'
   code: |
@@ -212,6 +225,7 @@ content:
 
     Когда модель ведёт себя неожиданно, не гадаем: запускаем **dbt compile** и открываем target/compiled или target/run. ~~Там можно увидеть итоговый SQL, проверяемый warehouse, и отличить ошибку Jinja/конфига от ошибки самой логики SELECT.~~'
 - kind: content
+  id: 014-dag-zavisimostej
   title: DAG зависимостей
   image: image37.png
   bullets:
@@ -225,6 +239,7 @@ content:
 
     Бонусом получаем **lineage** — наглядную схему, откуда и куда текут данные; на нём же строятся **инкрементальные** и **частичные** запуски. ~~На картинке — простой граф: staging питает промежуточные модели, а те — витрины.~~'
 - kind: table
+  id: 015-jinja-i-makrosy
   title: Jinja и макросы
   table:
     headers:
@@ -259,6 +274,7 @@ content:
 
     Ключевые функции: !!ref, source, config!!. А **макросы** — ваши собственные переиспользуемые функции, как в обычном программировании. ~~Это позволяет писать параметризованный, DRY-SQL.~~'
 - kind: content
+  id: 016-makrosy-na-jinja-dry-dlya-sql
   title: Макросы на Jinja — DRY для SQL
   code_caption: macros/format_currency.sql
   code: |
@@ -286,6 +302,7 @@ content:
 
     Макрос оправдан, когда правило действительно __повторяется__ или отличается между СУБД. ~~Не стоит прятать в макрос единственный простой SELECT: такой SQL труднее читать и отлаживать.~~'
 - kind: table
+  id: 017-materializacii
   title: Материализации
   table:
     headers:
@@ -314,6 +331,7 @@ content:
 
     !!incremental — дозагружает только новое, ключ к большим данным!!. **ephemeral** не создаёт объект, а встраивается в другие модели как **CTE**. ~~Задаётся через config(materialized=...) или dbt_project.yml.~~'
 - kind: content
+  id: 018-inkrementalnaya-model
   title: Инкрементальная модель
   code_caption: models/orders_incremental.sql
   code: |
@@ -350,6 +368,7 @@ content:
 
     Самая частая ошибка — фильтровать только по max(order_date), когда старые заказы могут исправляться задним числом. Тогда выбирают lookback-окно, timestamp обновления или стратегию merge. ~~Инкрементальность ускоряет расчёт, но не отменяет продумывание полноты и идемпотентности.~~'
 - kind: content
+  id: 019-suschnosti-dbt
   title: Сущности dbt
   image: image41.png
   bullets:
@@ -363,6 +382,7 @@ content:
 
     **snapshots** историзируют изменения по типу !!SCD2!!. Плюс **tests**, **macros** и **exposures** — качество, переиспользование, витрины. ~~Всё это части одного проекта.~~'
 - kind: content
+  id: 020-sources-kontrakt-i-freshness
   title: 'Sources: контракт и freshness'
   code_caption: models/sources.yml
   code: |
@@ -390,6 +410,7 @@ content:
 
     Так dbt связывает ingestion и transform без смешивания их обязанностей. ~~Если источник опаздывает, лучше остановить зависимые витрины с понятным сигналом, чем тихо обновить отчёт старыми данными.~~'
 - kind: content
+  id: 021-snapshots-i-docs-istoriya
   title: 'Snapshots и docs: история + смысл поля'
   code_caption: snapshots/customers_scd.sql · models/_docs.sql
   code: |
@@ -419,6 +440,7 @@ content:
 
     Блок **{% docs %}** решает другую задачу — единый смысл атрибута. Его можно вставить в schema.yml и получить в **dbt docs generate**, поэтому описание меняется вместе с моделью в том же MR. ~~Это особенно ценно для метрик и финансовых полей, где «сумма» без правил расчёта мало что означает.~~'
 - kind: content
+  id: 022-konfigi-dbt-project-yml-i
   title: 'Конфиги: dbt_project.yml и profiles.yml'
   image: image42.png
   materials:
@@ -441,6 +463,7 @@ content:
 
     **profiles.yml** — подключение к БД, живёт отдельно (обычно в **~/.dbt/**), а секреты подтягиваются через !!env_var()!!. Такое __разделение логики и окружения__ позволяет один и тот же проект гонять в **dev / staging / prod**.'
 - kind: content
+  id: 023-dbt-project-yml-konfig-proekta
   title: dbt_project.yml — конфиг проекта
   code_caption: dbt_project.yml
   code: |
@@ -472,6 +495,7 @@ content:
 
     Самое полезное — задавать **материализацию по папкам**: здесь всё в stg/ строится как **view**, а в core/ — как **table** с тегом daily. ~~Так настройки не дублируются в каждой модели, а живут в одном месте и переопределяются точечно.~~'
 - kind: table
+  id: 024-osnovnye-komandy-dbt
   title: Основные команды dbt
   materials:
   - label: dbt build
@@ -505,6 +529,7 @@ content:
 
     Отдельно — **seed**, **snapshot** и **docs generate**. И почти к любой команде можно добавить __--select / --exclude__, чтобы запустить не весь проект, а только нужные модели (**state:modified** и др.). ~~Это основа Slim CI.~~'
 - kind: table
+  id: 025-adaptery
   title: Адаптеры
   materials:
   - label: About connections
@@ -547,12 +572,14 @@ content:
 
     Для многих других, включая **ClickHouse** и **DuckDB**, — качественные **community**-адаптеры. Ставится нужный адаптер отдельным пакетом (**dbt-postgres**, **dbt-clickhouse**…), и !!один и тот же проект в разумных пределах переносим между платформами!!.'
 - kind: section
+  id: 026-testirovanie-dokumentaciya
   title: Тестирование, документация, пакеты
   notes: 'Следующий блок — про **качество** и **переиспользование**.
 
 
     Как __тестировать данные__, как получать **документацию** почти бесплатно и как подключать готовые **пакеты**, чтобы не изобретать велосипед.'
 - kind: content
+  id: 027-dokumentirovanie-v-dbt
   title: Документирование в dbt
   image: image45.png
   bullets:
@@ -566,6 +593,7 @@ content:
 
     Главное — он __всегда актуален__, потому что генерируется из того же кода. Для аналитиков это фактически **каталог данных**. ~~Полезно и стейкхолдерам.~~'
 - kind: content
+  id: 028-testirovanie
   title: Тестирование
   image: image48.png
   materials:
@@ -586,6 +614,7 @@ content:
 
     **Singular** — произвольный SQL, который должен вернуть !!ноль «плохих» строк!!. Плюс относительно новые **unit-тесты** для логики моделей на фиктивных входах. А пакеты (**dbt_utils**, **dbt_expectations**) сильно расширяют арсенал. ~~С них удобно начинать.~~'
 - kind: content
+  id: 029-generic-testy-kontrakt-v
   title: 'Generic-тесты: контракт в schema.yml'
   code_caption: models/schema.yml
   code: |
@@ -611,6 +640,7 @@ content:
 
     Тест — часть модели и той же ревьюируемой поставки. ~~Не нужно ждать ночного мониторинга: dbt build и CI остановят изменение до того, как оно попадёт в production.~~'
 - kind: content
+  id: 030-unit-test-logika-modeli-na
   title: 'Unit-тест: логика модели на фикстурах'
   code_caption: models/schema.yml
   code: |
@@ -640,6 +670,7 @@ content:
 
     Unit-тесты не заменяют generic-тесты: первые отвечают «правильно ли мы считаем?», вторые — «качественны ли реальные данные?». ~~Вместе они дают быстрый сигнал до дорогого прогона на warehouse.~~'
 - kind: content
+  id: 031-pakety-dbt-podklyuchenie
   title: 'Пакеты dbt: подключение'
   image: image46.jpg
   materials:
@@ -658,6 +689,7 @@ content:
 
     Основной каталог — **hub.getdbt.com** (вот он на экране); можно из **git** и локальных путей. Свой пакет — чтобы __переиспользовать код между проектами команды__. ~~Экономят время и стандартизируют практики.~~'
 - kind: table
+  id: 032-klyuchevye-pakety
   title: Ключевые пакеты
   materials:
   - label: dbt-utils
@@ -693,6 +725,7 @@ content:
 
     **audit_helper** незаменим при __рефакторинге__ (сравнивает старую и новую модель). **elementary** следит за аномалиями, **project_evaluator** проверяет соответствие best-practices, **dbtVault/AutomateDV** — Data Vault. ~~С них удобно начинать.~~'
 - kind: content
+  id: 033-dbt-utils-v-dele
   title: dbt_utils в деле
   code_caption: models/orders_enriched.sql
   code: |
@@ -731,12 +764,14 @@ content:
 
     Главная выгода — **переносимость**: один и тот же проект может компилироваться под __ClickHouse, Postgres и Snowflake__. ~~Пакет уменьшает boilerplate, но команда должна версионировать его и понимать generated SQL при обновлении.~~'
 - kind: section
+  id: 034-zapusk-v-prodakshene
   title: Запуск в продакшене
   notes: 'Теперь — как всё это запускать не с ноутбука, а __надёжно в продакшене__.
 
 
     **Оркестрация**, расписания, изоляция окружений и **CI/CD**.'
 - kind: content
+  id: 035-kak-zapuskat-dbt-v-prode
   title: Как запускать dbt в проде
   bullets:
   - 'Цель: надёжно и повторяемо выполнять build/run/test'
@@ -754,6 +789,7 @@ content:
 
     И сам проект __деплоится через CI__, а не копируется руками: так конфиг, зависимости и SQL всегда проходят один и тот же путь от ревью до prod. ~~Дальше — чем именно оркеструем.~~'
 - kind: content
+  id: 036-airflow-dbt-orkestraciya
   title: 'Airflow + dbt: оркестрация через Cosmos'
   code_caption: Концептуальная композиция DAG
   code: |
@@ -783,6 +819,7 @@ content:
 
     Важный практический шов — подключение к DWH. Cosmos умеет использовать существующий Airflow connection через profile mapping, поэтому секрет не надо хранить одновременно в двух форматах. ~~Если задача — только SQL-transform без внешних зависимостей, полный Airflow может быть тяжелее, чем сам dbt Cloud или простой scheduler.~~'
 - kind: content
+  id: 037-dagster-dbt-modeli-kak-data
   title: 'Dagster + dbt: модели как data assets'
   code_caption: defs/dbt_ingest/defs.yaml
   code: |
@@ -813,6 +850,7 @@ content:
 
     Партиции и backfill важны для исторических данных: задаём окно дат, получаем наблюдаемый прогон и не пишем собственный цикл по периодам. ~~Это сильный выбор для asset-oriented платформы; для простого cron-запуска одного dbt-проекта такая модель может быть избыточной.~~'
 - kind: content
+  id: 038-ci-cd-dlya-dbt
   title: CI/CD для dbt
   materials:
   - label: dbt-checkpoint
@@ -830,6 +868,7 @@ content:
 
     Отдельно — !!Slim CI: прогоняем только изменённые модели и их зависимых!! (**state:modified**), а не весь проект — это сильно экономит **время и деньги**.'
 - kind: content
+  id: 039-pre-commit-bystraya-zaschita
   title: 'Pre-commit: быстрая защита до push'
   code_caption: .pre-commit-config.yaml
   code: |
@@ -858,6 +897,7 @@ content:
 
     Полезное разделение: pre-commit отвечает за __быструю обратную связь__, CI — за независимую проверку в чистом окружении. ~~Не стоит помещать в хук долгий полный dbt build: тогда команда начнёт его отключать.~~'
 - kind: content
+  id: 040-gitlab-ci-obyazatelnyj-barer
   title: 'GitLab CI: обязательный барьер merge'
   code_caption: .gitlab-ci.yml
   code: |
@@ -887,12 +927,14 @@ content:
 
     На больших проектах полный прогон каждый раз слишком дорог. Тогда **Slim CI** выбирает state:modified и зависимые узлы, но production-процесс всё равно должен регулярно проверять полный граф. ~~Цель CI — не «красивый pipeline», а не дать непроверенной логике попасть в main.~~'
 - kind: section
+  id: 041-dopolnitelnye-vozmozhnosti-i
   title: Дополнительные возможности и тренды
   notes: 'Финальный блок — что ещё умеет dbt за пределами базового SQL, и __куда движется экосистема__.
 
 
     **Python-модели**, **Semantic Layer**, интеграция с **ИИ**, альтернативы dbt и платформенные декларативные подходы к трансформациям.'
 - kind: content
+  id: 042-python-modeli-mikrobatching
   title: Python-модели, микробатчинг, каталоги
   image: image60.png
   materials:
@@ -914,6 +956,7 @@ content:
 
     А артефакты, которые dbt генерирует — !!manifest.json, catalog.json, run_results.json!! — становятся источником **метаданных** и **lineage** для внешних каталогов (**DataHub**, **OpenMetadata**, **OpenLineage**). ~~В хорошем стеке dbt не просто строит таблицы, а поставляет описание самого проекта наружу.~~'
 - kind: content
+  id: 043-semantic-layer-metricflow
   title: Semantic Layer / MetricFlow
   image: image62.png
   materials:
@@ -935,6 +978,7 @@ content:
 
     Практический смысл для команды — __одна формула, один владелец, один контур тестирования__. ~~Консистентность и переиспользование бизнес-логики.~~'
 - kind: content
+  id: 044-dbt-i-ai
   title: dbt и AI
   image: image67.png
   materials:
@@ -955,6 +999,7 @@ content:
 
     Важно: ИИ **ускоряет рутину**, но результат — это по-прежнему **код**, который проходит __ревью и тесты__. ~~Самая сильная схема — не автогенерация вместо инженера, а ассистент, который снимает повторяющуюся работу и уменьшает трение.~~'
 - kind: table
+  id: 045-sqlmesh-i-dbt-upravlenie
   title: 'SQLMesh и dbt: управление изменениями'
   materials:
   - label: SQLMesh plans
@@ -991,6 +1036,7 @@ content:
 
     У dbt зрелая экосистема, привычные packages и простой workflow **build + CI**; у SQLMesh сильнее акцент на plan/apply, impact analysis и виртуальном продвижении. ~~Выбор зависит от команды и warehouse: это сравнение подходов к изменению данных, а не универсальный рейтинг инструментов.~~'
 - kind: content
+  id: 046-deklarativnye-transformacii
   title: 'Декларативные трансформации: ещё четыре подхода'
   materials:
   - label: Bruin overview
@@ -1015,6 +1061,7 @@ content:
 
     В Snowflake **Dynamic Tables** позволяют определить результат SQL-запросом и TARGET_LAG; Snowflake сам поддерживает порядок refresh и, где возможно, incremental processing. Для процедурной логики, точного cron или сложного MERGE остаются streams/tasks. __dbt выигрывает переносимостью и экосистемой__, нативные средства — меньшим количеством операционного кода внутри своей платформы. ~~Современный стек часто сочетает эти подходы, а не выбирает ровно один.~~'
 - kind: content
+  id: 047-poleznye-ssylki
   title: Полезные ссылки
   materials:
   - label: docs.getdbt.com
@@ -1037,6 +1084,7 @@ content:
 
     Для быстрых справок полезно держать рядом официальные reference pages и docs по конкретному адаптеру. ~~Ссылки будут в материалах.~~'
 - kind: closing
+  id: 048-spasibo-za-vnimanie
   title: Спасибо за внимание!
   subtitle: ''
   notes: 'Спасибо! Кратко резюме: !!dbt делает трансформации кодом!! — с **тестами**, **документацией** и **DAG** зависимостей из коробки, а вокруг ядра выросла целая __экосистема__.

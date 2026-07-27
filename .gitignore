@@ -23,6 +23,11 @@ data/.state/
 .uv-cache/
 uv.lock
 
+# picstore: provider response + blob cache, and regenerable review artifacts.
+# data/images/** and .picstore/catalog.{sqlite,xml} ARE tracked (see .gitattributes).
+.picstore-cache/
+data/images/.picstore/reports/
+
 # .tmp/ dev-QA artifacts (scripts + docs tracked; generated artifacts ignored)
 .tmp/render/
 .tmp/media/
