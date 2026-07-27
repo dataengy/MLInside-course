@@ -84,6 +84,29 @@ preza-validate-all:
         --settings settings/config.yml --visuals code-tables || exit 1; \
     done
 
+# Review a deck against its lecture's accents (content/presentations.yml) + the DE-tool outline.
+# Writes docs/reviews/<out_name>.{md,findings.yml}; exits 1 on a missing must-have accent.
+preza-review content *ARGS:
+    cd {{_dir}} && python3 {{_preza_skill}}/review_content.py {{content}} \
+      --plan content/presentations.yml --settings settings/config.yml {{ARGS}}
+
+# Review every deck the plan maps to a content file.
+preza-review-all *ARGS:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    cd {{_dir}}
+    mapfile -t decks < <(python3 -c "import yaml,pathlib; d=yaml.safe_load(pathlib.Path('content/presentations.yml').read_text()) or {}; [print(e['content']) for e in (d.get('presentations') or []) if e.get('content')]")
+    if [ ${#decks[@]} -eq 0 ]; then
+      echo "No decks mapped in content/presentations.yml — run 'just presentations-plan' and fill content:" >&2
+      exit 1
+    fi
+    rc=0
+    for f in "${decks[@]}"; do
+      python3 {{_preza_skill}}/review_content.py "$f" \
+        --plan content/presentations.yml --settings settings/config.yml {{ARGS}} || rc=1
+    done
+    exit $rc
+
 # Resolve the slug/out_name a new topic would get (dry helper for the skill).
 preza-slug topic:
     cd {{_dir}} && python3 {{_preza_skill}}/resolve_slug.py {{quote(topic)}}
@@ -179,25 +202,30 @@ picstore-ids-check:
 picstore-ids-drift:
     cd {{_dir}} && {{_picstore}} ids drift
 
-# ── picstore (src/picstore submodule): find/catalog/apply deck illustrations ──
-_picstore := "PYTHONPATH=src python3 -m picstore.cli"
-
-# Provider availability matrix (keys, browsers, local roots). Run this FIRST —
-# an empty search is almost always a provider that quietly reported unavailable.
-picstore-doctor:
-    cd {{_dir}} && {{_picstore}} doctor
-
-# Decks under management (slug, visual profile, content path)
-picstore-decks:
-    cd {{_dir}} && {{_picstore}} decks
-
-# Picture types and styles usable with --types / --styles (omit = search all)
-picstore-taxonomy:
-    cd {{_dir}} && {{_picstore}} taxonomy
-
 # uv: sync the venv from pyproject (incl. dev extras)
+# ── course schedule sheet → presentations plan (src/schedule + integrations/google/sheets) ──
+# One-time auth (opens a browser): just -f integrations/google/sheets/Justfile auth
+# Smoke-test auth: print the schedule sheet's tab names.
+gsheet-tabs:
+    cd {{_dir}} && PYTHONPATH=src python3 -m schedule tabs
+
+# Fetch the sheet verbatim → settings/schedule.yml (generated; never hand-edit)
+gsheet-dump *ARGS:
+    cd {{_dir}} && PYTHONPATH=src python3 -m schedule dump {{ARGS}}
+
+# Upsert content/presentations.yml from the dump (hand-curated fields survive)
+presentations-plan *ARGS:
+    cd {{_dir}} && PYTHONPATH=src python3 -m schedule plan {{ARGS}}
+
+presentations-plan-dry:
+    just presentations-plan --dry
+
+# Print the current lecture → deck plan
+presentations-show:
+    cd {{_dir}} && PYTHONPATH=src python3 -m schedule show
+
 sync:
-    cd {{_dir}} && uv sync --extra dev
+    cd {{_dir}} && uv sync --extra dev --extra gsheets
 
 test:
     cd {{_dir}} && python3 -m pytest
