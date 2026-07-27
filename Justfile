@@ -135,6 +135,22 @@ librarian-catalog:
 librarian-docprops +paths:
     cd {{_dir}} && PYTHONPATH=src python3 -m librarian.cli docprops {{paths}}
 
+# ── picstore (src/picstore submodule): find/catalog/apply deck illustrations ──
+_picstore := "PYTHONPATH=src python3 -m picstore.cli"
+
+# Provider availability matrix (keys, browsers, local roots). Run this FIRST —
+# an empty search is almost always a provider that quietly reported unavailable.
+picstore-doctor:
+    cd {{_dir}} && {{_picstore}} doctor
+
+# Decks under management (slug, visual profile, content path)
+picstore-decks:
+    cd {{_dir}} && {{_picstore}} decks
+
+# Picture types and styles usable with --types / --styles (omit = search all)
+picstore-taxonomy:
+    cd {{_dir}} && {{_picstore}} taxonomy
+
 # uv: sync the venv from pyproject (incl. dev extras)
 sync:
     cd {{_dir}} && uv sync --extra dev
