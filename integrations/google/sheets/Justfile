@@ -1,0 +1,29 @@
+# Justfile — Google Sheets integration (MLInside-course).
+# Project-owned; the root Justfile delegates its gsheet-* targets here.
+_prj_root := justfile_directory() + "/../../.."
+_account := env_var_or_default("GSHEET_ACCOUNT", "hnkovr@gmail.com")
+# cloud-platform is MANDATORY for `application-default login` — gcloud refuses a scope list
+# without it. The extra reach is gcloud's requirement, not this reader's: auth.py only ever
+# requests the two readonly Sheets/Drive scopes when building the service.
+_scopes := "openid,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/spreadsheets.readonly,https://www.googleapis.com/auth/drive.readonly"
+
+default:
+    @just --list
+
+# One-time: log in with Application Default Credentials (opens a browser).
+auth account=_account:
+    gcloud auth application-default login --account={{account}} --scopes={{_scopes}}
+
+# Show which credentials are active.
+auth-status:
+    @gcloud auth list
+    @ls -l ~/.config/gcloud/application_default_credentials.json 2>/dev/null \
+      || echo "no ADC — run: just auth"
+
+# Smoke test: print the schedule sheet's tab names.
+tabs:
+    cd {{_prj_root}} && PYTHONPATH=src python3 -m schedule tabs
+
+# Dump every configured tab verbatim → settings/schedule.yml
+dump *ARGS:
+    cd {{_prj_root}} && PYTHONPATH=src python3 -m schedule dump {{ARGS}}

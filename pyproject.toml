@@ -16,6 +16,8 @@ dependencies = [
 [project.optional-dependencies]
 pdf = ["weasyprint>=62"]           # backlog: HTML->PDF (alt engine: playwright)
 orchestration = ["prefect>=3.4", "requests>=2.32"]   # Prefect flow + ingest URL fetch
+# schedule sheet reader — integrations/google/sheets (ADC auth; see its README)
+gsheets = ["google-api-python-client>=2.100", "google-auth>=2.23"]
 dev = ["pytest>=8", "ruff>=0.6", "ty>=0.0.1a1"]
 
 [project.scripts]
