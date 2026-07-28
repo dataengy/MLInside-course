@@ -2,6 +2,41 @@
 
 Canonical project changelog (finalize-issue passes migrate shipped work here).
 
+## 2026-07-28 — Foreign-deck import + unfinished-deck detection
+
+- **`just preza-import-pptx <pptx>`** (`pptx_to_content.py`, beside `review_content.py`) — imports
+  a deck this repo did not generate into a review-shaped content YAML under `content/imported/`.
+  Lossy and one-way: layout, theme and picture bytes are dropped; only what the reviewer searches
+  survives. Never build from the result. All scalars in `review.yml → pptx_import`.
+- **`generated: false`** on a plan entry marks a deck the course did not generate. Its missing
+  `— Сгенерировано:` stamp is demoted to `info` instead of failing the run — the alternative was
+  stamping a hand-authored deck with an authorship that never happened. Every other schema error
+  still fails. Applied to the hand-authored dbt deck (its 2 long-standing errors are now info)
+  and to the imported Airflow deck.
+- **Unfinished-deck detection** — titles still carrying outline scaffolding (`Слайд 28: …`,
+  `TODO`, `WIP`) are an **error**; verbatim-repeated slides a warning. Scanned across `title` and
+  `bullets`, since a long heading lands in bullets. Patterns: `review.yml → draft_scaffolding`,
+  one SSoT shared by the reviewer and the importer.
+- **Lecture 5 Airflow deck** (`data/decks/5_Оркестрация_данных_Apache_Airflow.pptx`, ingested by
+  librarian) reviewed: 43 slides, **10 placeholder slides** (30, 34–42), slide 40 a verbatim dupe
+  of 39, **zero speaker notes**. Whether it supersedes or complements our generated Airflow deck
+  is an open decision — [`.ai/tasks/0005`](../.ai/tasks/0005-airflow-external-deck.md). Its file
+  author is **Любовь**, same as `1_`/`2_` in `data/decks/` — a colleague's deck from the same
+  numbered course series.
+- Three bugs found and fixed while wiring this up: the scaffolding scan missed a placeholder that
+  the 120-char title rule had pushed into `bullets`; stringifying preza_gen's nested-bullet form
+  `["текст", 1]` made a finished dbt slide read as scaffolding; and the importer wrote
+  `code_caption` while the reviewer counts `code`, so a deck with 16 code panels reported 0.
+  Monospace frames now become real `code:` blocks (font list kept in sync with librarian's).
+  The first two are covered by tests.
+- **Tracker policy recorded globally**: this repo binds to **GitHub Issues only** — "JT" here
+  means a GH Issue, never a Jira task. Written to `~/.ai/skills/settings/tracker_binding.yml`
+  (`projects.MLInside-course`), `docs_standards.yml` (`jt_title.term_resolution` + a
+  `github_issue` link pattern), `~/.ai/docs/tracker-binding.md`, the `tracker-hygiene-keeper`
+  agent, `/smart-commit`, `/open-all-mentioned-jts`, and project memory.
+- `src/*.egg-info/` gitignored. Backlog: [`0005`](../.ai/tasks/0005-airflow-external-deck.md),
+  [`0006`](../.ai/tasks/0006-review-accents-axis.md) (accent axis still never run on real data).
+
 ## 2026-07-27 — Course schedule sheet reader + `/preza-review`
 
 - **`integrations/google/sheets/`** — first `integrations/` dir in this repo. `connector.py`,

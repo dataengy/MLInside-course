@@ -16,13 +16,13 @@ stats:
   accents_partial: 0
   accents_missing: 0
 findings:
-- severity: error
-  kind: schema_invalid
+- severity: info
+  kind: provenance_hand_authored
   slides: []
   message: 'Схема/политика: provenance stamp missing from FIRST slide notes (expected ''— Сгенерировано:'')
-    — run stamp_provenance.py (см. `just preza-validate content/preza-dbt-v3-content.yml`)'
-- severity: error
-  kind: schema_invalid
+    — run stamp_provenance.py — дек написан вручную, штамп генерации к нему неприменим'
+- severity: info
+  kind: provenance_hand_authored
   slides: []
   message: 'Схема/политика: provenance stamp missing from LAST slide notes (expected ''— Сгенерировано:'')
-    — run stamp_provenance.py (см. `just preza-validate content/preza-dbt-v3-content.yml`)'
+    — run stamp_provenance.py — дек написан вручную, штамп генерации к нему неприменим'

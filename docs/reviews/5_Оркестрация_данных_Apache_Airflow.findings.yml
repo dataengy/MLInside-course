@@ -1,0 +1,79 @@
+deck: 5_Оркестрация_данных_Apache_Airflow
+content: content/imported/5_Оркестрация_данных_Apache_Airflow.yml
+lecture:
+  n: null
+  topic: 'Оркестрация данных: Apache Airflow (внешний дек, лекция 5)'
+  owner: null
+  status: draft
+stats:
+  slides: 43
+  notes_coverage: 0.0
+  tables: 0
+  code_slides: 16
+  materials_slides: 0
+  accents_total: 0
+  accents_hit: 0
+  accents_partial: 0
+  accents_missing: 0
+findings:
+- severity: info
+  kind: provenance_hand_authored
+  slides: []
+  message: 'Схема/политика: provenance stamp missing from FIRST slide notes (expected ''— Сгенерировано:'')
+    — run stamp_provenance.py — дек написан вручную, штамп генерации к нему неприменим'
+- severity: info
+  kind: provenance_hand_authored
+  slides: []
+  message: 'Схема/политика: provenance stamp missing from LAST slide notes (expected ''— Сгенерировано:'')
+    — run stamp_provenance.py — дек написан вручную, штамп генерации к нему неприменим'
+- severity: warn
+  kind: empty_notes
+  slides:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  - 20
+  message: Заметки докладчика пусты на 43 из 43 слайдов
+- severity: info
+  kind: no_tables
+  slides: []
+  message: 'Мало сравнительных таблиц: 0/43 (0%, порог 5%)'
+- severity: info
+  kind: no_materials
+  slides: []
+  message: 'Мало слайдов со ссылками на материалы: 0/43 (0%, порог 10%)'
+- severity: error
+  kind: placeholder_slide
+  slides:
+  - 30
+  - 34
+  - 35
+  - 36
+  - 37
+  - 38
+  - 39
+  - 40
+  - 41
+  - 42
+  message: Черновые заголовки-заглушки на 10 слайдах — дек не доделан
+- severity: warn
+  kind: duplicate_slide
+  slides:
+  - 40
+  message: 'Слайды дублируют предыдущие: [40]'

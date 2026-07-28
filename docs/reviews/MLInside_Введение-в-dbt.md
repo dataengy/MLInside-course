@@ -3,7 +3,7 @@
 - Контент: `/Users/nk.myg/github/@dataengy/MLInside-course/content/preza-dbt-v3-content.yml`
 - Слайдов: **48** · заметки 100% · таблиц 7 · код 13 · материалы 25
 - Лекция №? «Введение в dbt» · — · статус `draft`
-- Итог: **2 error · 0 warn · 0 info**
+- Итог: **0 error · 0 warn · 2 info**
 
 ## Акценты из плана лекции
 
@@ -28,8 +28,8 @@ _В плане нет акцентов для этой лекции — запо
 
 ## Что поправить
 
-- **[error]** Схема/политика: provenance stamp missing from FIRST slide notes (expected '— Сгенерировано:') — run stamp_provenance.py (см. `just preza-validate content/preza-dbt-v3-content.yml`)
-- **[error]** Схема/политика: provenance stamp missing from LAST slide notes (expected '— Сгенерировано:') — run stamp_provenance.py (см. `just preza-validate content/preza-dbt-v3-content.yml`)
+- **[info]** Схема/политика: provenance stamp missing from FIRST slide notes (expected '— Сгенерировано:') — run stamp_provenance.py — дек написан вручную, штамп генерации к нему неприменим
+- **[info]** Схема/политика: provenance stamp missing from LAST slide notes (expected '— Сгенерировано:') — run stamp_provenance.py — дек написан вручную, штамп генерации к нему неприменим
 
 ---
 

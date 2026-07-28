@@ -29,6 +29,7 @@ just airflow-build   # Apache Airflow lecture deck
 just preza-validate-all         # schema + slide-count + provenance gate for all DE-tool decks
 just preza-review <content>     # score a deck against its lecture's accents + the DE-tool outline
 just preza-review-all           # …every deck mapped in content/presentations.yml
+just preza-import-pptx <pptx>   # import a foreign .pptx → content/imported/ so it can be reviewed
 just gsheet-tabs                # smoke-test Sheets auth (tab names of the schedule sheet)
 just gsheet-dump                # schedule sheet → settings/schedule.yml (verbatim)
 just presentations-plan         # upsert content/presentations.yml (curated fields survive)
@@ -68,6 +69,12 @@ Each entry's `accents:` is the rubric `/preza-review` scores the deck against �
 back ✅ hit / 🟡 partial / ❌ missing with slide numbers, alongside a structure check against the
 canonical 12-section DE-tool outline. Reports land in `docs/reviews/<out_name>.{md,findings.yml}`;
 a missing must-have accent exits non-zero, so it can gate a build.
+
+A deck that arrived as a finished `.pptx` has no content source, so `just preza-import-pptx`
+extracts a reviewable one into `content/imported/` (lossy, one-way — fix the `.pptx` and re-import,
+never hand-edit the result). Its plan entry takes `generated: false`, which demotes the
+provenance-stamp errors: a deck this repo did not generate must never be given a fake generation
+stamp. Imported decks live in `content/imported/`; `data/decks/` holds the `.pptx` itself.
 
 Auth is one-time Application Default Credentials — see
 [`integrations/google/sheets/README.md`](integrations/google/sheets/README.md).
