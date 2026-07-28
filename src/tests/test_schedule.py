@@ -159,3 +159,75 @@ def test_no_lecture_means_no_accent_findings(review, review_cfg):
     findings, data = review.build_findings(doc, None, review_cfg, None)
     assert data["stats"]["accents_total"] == 0
     assert not [f for f in findings if f["kind"].startswith("accent_")]
+
+
+def test_nested_bullets_are_not_mistaken_for_scaffolding(review, review_cfg):
+    """preza_gen writes an indented bullet as ["текст", 1]; stringifying it read as a placeholder."""
+    slides = [{"title": "Конфиги", "bullets": ["dbt_project.yml", ["Настройки по папкам", 1]]}]
+    assert review.scaffolding_findings(slides, review_cfg["draft_scaffolding"]) == []
+
+
+def test_placeholder_and_duplicate_slides_are_reported(review, review_cfg):
+    slides = [
+        {"title": "Что такое DAG?"},
+        {"title": "Слайд 28: Триггеры и сбойные ситуации"},
+        {"title": "Что такое DAG?"},
+    ]
+    found = dict((kind, nums) for kind, nums, _ in
+                 review.scaffolding_findings(slides, review_cfg["draft_scaffolding"]))
+    assert found["placeholder_slide"] == [2]
+    assert found["duplicate_slide"] == [3]
+    assert review_cfg["severity"]["placeholder_slide"] == "error"
+
+
+def _run_review(review, tmp_path, monkeypatch, *, generated):
+    """Review an unstamped deck through the CLI, with `generated:` set or omitted in the plan."""
+    from click.testing import CliRunner
+
+    # Schema-valid except for the provenance stamp, so the stamp is the ONLY thing under test:
+    # required deck keys present and the slide count inside the default [20, 50] bounds.
+    slides = [{"kind": "title", "title": "Тема", "notes": "вступление"}]
+    slides += [
+        {"kind": "content", "title": f"Слайд {i}", "notes": "заметки"} for i in range(2, 21)
+    ]
+    slides += [{"kind": "closing", "title": "Спасибо", "notes": "финал"}]
+    deck = tmp_path / "deck.yml"
+    deck.write_text(
+        yaml.safe_dump(
+            {
+                "deck": {"out_name": "Unstamped", "naming": "auto", "source_deck": None},
+                "content": slides,
+            },
+            allow_unicode=True,
+        ),
+        encoding="utf-8",
+    )
+    entry = {"topic": "Тема", "accents": [], "content": "deck.yml"}
+    if generated is not None:
+        entry["generated"] = generated
+    plan = tmp_path / "plan.yml"
+    plan.write_text(yaml.safe_dump({"presentations": [entry]}, allow_unicode=True), encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    result = CliRunner().invoke(
+        review.main,
+        [str(deck), "--plan", str(plan), "--settings", "absent.yml", "--out-dir", str(tmp_path / "out")],
+    )
+    findings = yaml.safe_load((tmp_path / "out" / "Unstamped.findings.yml").read_text(encoding="utf-8"))
+    provenance = [f for f in findings["findings"] if "Сгенерировано" in f["message"]]
+    return result, provenance
+
+
+def test_hand_authored_deck_does_not_fail_on_a_missing_provenance_stamp(review, tmp_path, monkeypatch):
+    result, provenance = _run_review(review, tmp_path, monkeypatch, generated=False)
+    assert len(provenance) == 2, "both first- and last-slide stamps should still be reported"
+    assert {f["severity"] for f in provenance} == {"info"}
+    assert {f["kind"] for f in provenance} == {"provenance_hand_authored"}
+    assert result.exit_code == 0
+
+
+def test_generated_deck_still_fails_on_a_missing_provenance_stamp(review, tmp_path, monkeypatch):
+    result, provenance = _run_review(review, tmp_path, monkeypatch, generated=None)
+    assert {f["severity"] for f in provenance} == {"error"}
+    assert {f["kind"] for f in provenance} == {"schema_invalid"}
+    assert result.exit_code == 1
