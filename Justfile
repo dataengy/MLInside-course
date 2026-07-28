@@ -84,6 +84,12 @@ preza-validate-all:
         --settings settings/config.yml --visuals code-tables || exit 1; \
     done
 
+# Import a FOREIGN .pptx (one this repo did not generate) into a reviewable content YAML.
+# Lossy and one-way — never build from the result. Add a plan entry with `generated: false`.
+preza-import-pptx pptx out="":
+    cd {{_dir}} && python3 {{_preza_skill}}/pptx_to_content.py {{quote(pptx)}} \
+      -o {{ if out == "" { "content/imported/" + file_stem(pptx) + ".yml" } else { out } }}
+
 # Review a deck against its lecture's accents (content/presentations.yml) + the DE-tool outline.
 # Writes docs/reviews/<out_name>.{md,findings.yml}; exits 1 on a missing must-have accent.
 preza-review content *ARGS:

@@ -23,15 +23,25 @@ presentations:
   status: draft
   accents: []
   visuals: reuse-source      # this deck reuses ppt/media from the 2025 source deck
+  generated: false           # hand-authored (predates create-preza-about-de-tool) — it carries
+                             # no `— Сгенерировано:` stamp and must never be given a fake one
   content: content/preza-dbt-v3-content.yml
   out_name: MLInside_Введение-в-dbt
-  slides: 48
+  slides: 51
+  homework:                  # ДЗ этой лекции — submodule homework/mlinside-hw-olist
+    repo: https://github.com/hnkovr/mlinside-hw-olist
+    spec: homework/mlinside-hw-olist/docs/HW1-dbt.md
+    slides: [048-domashnee-zadanie, 049-dz-vitriny-na-datasete-olist, 050-dz-kriterii-ocenki]
 - topic: 'Современная оркестрация ML-пайплайнов: Dagster'
   status: draft
   accents: []
   content: content/preza-dagster-content.yml
   out_name: MLInside_Современная-оркестрация-ML-пайплайнов-Dagster
   slides: 50
+  homework:                  # ДЗ этой лекции — надстройка над ДЗ по dbt
+    repo: https://github.com/hnkovr/mlinside-hw-olist
+    spec: homework/mlinside-hw-olist/docs/HW2-dagster.md
+    slides: [047-domashnee-zadanie, 048-dz-orkestriruem-dbt-proekt-v, 049-dz-kriterii-ocenki]
 - topic: 'Современная оркестрация ML-пайплайнов: Prefect'
   status: draft
   accents: []
@@ -50,3 +60,14 @@ presentations:
   content: content/preza-apache-airflow-content.yml
   out_name: MLInside_Оркестрация-данных-Apache-Airflow
   slides: 40
+# Imported 2026-07-28 from data/decks/5_Оркестрация_данных_Apache_Airflow.pptx — a FOREIGN deck
+# on the same lecture as the entry above. Kept as a separate topic so the upsert never merges the
+# two; whether it supersedes, complements or loses to our generated deck is an open decision.
+- topic: 'Оркестрация данных: Apache Airflow (внешний дек, лекция 5)'
+  status: draft
+  accents: []
+  generated: false           # imported from pptx — no generation stamp exists or should be faked
+  visuals: image-pipeline    # 25 embedded pictures; `code-tables` would flag every one as an error
+  content: content/imported/5_Оркестрация_данных_Apache_Airflow.yml
+  out_name: 5_Оркестрация_данных_Apache_Airflow
+  slides: 43
