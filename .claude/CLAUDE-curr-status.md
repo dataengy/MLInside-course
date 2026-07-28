@@ -1,5 +1,48 @@
 # CLAUDE-curr-status — MLInside-course
 
+## Session 2026-07-27/28 — schedule-sheet reader + `/preza-review` (committed, NOT pushed)
+
+**Shipped** (5 commits `547b499..7765d86` here + `a8ad588` in `~/.ai`):
+
+- `integrations/google/sheets/` — first `integrations/` dir. `connector.py`/`utils.py`/`__init__.py`
+  **hardlinked** from `~/pdp.deploy_dev/scripts/tools-utils/gsheets` (registry:
+  `~/.ai/integrations/_relink-actualized.py`). Editing them changes pdp too — re-link with
+  `ln -f` after any editor save. Project-owned `auth.py` = ADC-first branch.
+- `src/schedule/` — `python -m schedule {tabs,dump,plan,show}`; `content/presentations.yml`
+  seeded by hand with the 5 decks. `just gsheet-*` / `presentations-*` / `preza-review*`.
+- `/preza-review` — catalog skill + `create-preza-about-de-tool/scripts/review_content.py`;
+  tunables in `preza-review/settings/review.yml`. Reports → `docs/reviews/`.
+
+**⚠️ BLOCKER — the accent axis is untested.** `just gsheet-tabs` needs Application Default
+Credentials. Two `gcloud auth application-default login --account=hnkovr@gmail.com` runs were
+started and both stopped before consent, so `~/.config/gcloud/application_default_credentials.json`
+does not exist. gcloud **forces** `cloud-platform` into the scope list (a sheets-only list is
+rejected), and `print-access-token --scopes=…sheets` cannot mint one non-interactively.
+Alternative that needs no gcloud login: share the sheet with
+`gsheets-reader@for-prodamus-1-494316.iam.gserviceaccount.com` and add this repo to that
+account's `projects:` in `~/.ai/settings/gcloud.yml`.
+Next: `just gsheet-tabs` → `gsheet-dump` → write `settings/gsheet.yml` with the real headers →
+`just presentations-plan` → `just preza-review-all`.
+
+**⚠️ PUSH BLOCKED — needs a decision.** 8 commits ahead on protected `main`:
+- the tracker gate marks all 8 unbound (this repo has never used tracker refs);
+- pushing carries the parallel session's 3 picstore commits along with mine.
+
+**Parallel-session collision (resolved, worth knowing).** `ffab5c2` committed a `Justfile` newer
+than the copy on disk; committing the working copy would have deleted three `picstore-*` recipes.
+It also appended a **second** picstore block without removing the first → duplicate `_picstore`
+variable + duplicate recipes → `just` refused to parse *anything*. `c1b267a` restores their
+version, re-applies my recipes and removes the redundant block (all 10 unique picstore recipes
+kept). **Lesson: re-read the Justfile from disk and run `just --list` before every commit here.**
+
+**Known-red:** `just preza-review content/preza-dbt-v3-content.yml` exits 1 — that deck has no
+provenance stamp in its first/last notes (pre-existing; it is the one deck excluded from
+`preza-validate-all`). Fix with `just preza-stamp`.
+
+**Left uncommitted on purpose:** `.ai/.codex/`, `.tmp/.last-review-nudge`, the three
+`content/preza-*-v1-content.yml` Codex drafts, `src/preza_gen.egg-info/` (wants gitignoring),
+`src/picstore` submodule pointer.
+
 ## Interrupted Task
 
 > Interrupted: 2026-07-27 — resume with: `claude --resume 799821fd-9e53-4233-b48d-7962c4feaacb`
