@@ -47,6 +47,7 @@ deck_generation:
     - content/preza-prefect-content.yml
     - content/preza-cicd-observability-content.yml
     - content/preza-apache-airflow-content.yml
+    - content/preza-ogip-content.yml        # OGIP showcase (portfolio artifact, not a lecture)
 
 # ── Slide generation / rework tooling ───────────────────────────────────────
 slide_generation:

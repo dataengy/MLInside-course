@@ -15,6 +15,7 @@ _dagster_content := "content/preza-dagster-content.yml"
 _prefect_content := "content/preza-prefect-content.yml"
 _cicd_obs_content := "content/preza-cicd-observability-content.yml"
 _airflow_content := "content/preza-apache-airflow-content.yml"
+_ogip_content := "content/preza-ogip-content.yml"
 
 # Deck-generation skill (canonical catalog) — scripts used by the validate/new targets below.
 _preza_skill := "~/.ai/skills/_catalog/docs/pptx/create-preza-about-de-tool/scripts"
@@ -71,6 +72,11 @@ airflow-build:
     cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --pptx --html \
       --settings {{_settings}} --content {{_airflow_content}}
 
+# Build the OGIP showcase deck (PPTX + HTML) — portfolio artifact, not a course lecture.
+ogip-build:
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --pptx --html \
+      --settings {{_settings}} --content {{_ogip_content}}
+
 # ── deck generation skill (create-preza-about-de-tool) ──────────────────────
 # Validate one deck content file against the schema, slide bounds and provenance stamp.
 preza-validate content:
@@ -79,7 +85,7 @@ preza-validate content:
 
 # Validate every generated DE-tool deck at once.
 preza-validate-all:
-    cd {{_dir}} && for f in {{_dagster_content}} {{_prefect_content}} {{_cicd_obs_content}} {{_airflow_content}}; do \
+    cd {{_dir}} && for f in {{_dagster_content}} {{_prefect_content}} {{_cicd_obs_content}} {{_airflow_content}} {{_ogip_content}}; do \
       python3 {{_preza_skill}}/validate_content.py "$f" \
         --settings settings/config.yml --visuals code-tables || exit 1; \
     done

@@ -71,3 +71,13 @@ presentations:
   content: content/imported/5_Оркестрация_данных_Apache_Airflow.yml
   out_name: 5_Оркестрация_данных_Apache_Airflow
   slides: 43
+# Added 2026-07-30 — OGIP showcase deck: a PORTFOLIO artifact (project walkthrough for a
+# senior data-engineering reviewer), NOT a lecture from the schedule sheet. Kept in the plan so
+# the deck is visible to /preza-review and the build/validate recipes; a sheet sync will never
+# match this topic, so the entry survives untouched.
+- topic: 'OGIP — Open Games Intelligence Platform: один spec, три engine-сетапа (showcase)'
+  status: draft
+  accents: []
+  content: content/preza-ogip-content.yml
+  out_name: MLInside_OGIP-Open-Games-Intelligence-Platform
+  slides: 31
