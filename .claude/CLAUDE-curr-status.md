@@ -1,6 +1,38 @@
 # CLAUDE-curr-status — MLInside-course
 
-## Session 2026-07-27/28 — schedule-sheet reader + `/preza-review` (committed, NOT pushed)
+## Session 2026-08-11 — workstation bootstrap: всё закоммичено и ЗАПУШЕНО
+
+**Push-блокер РАЗРЕШЁН.** Причиной «Repository not found» была потеря collaborator-доступа
+hnkovr к приватному `dataengy/MLInside-course` (репо цел, не удалён): re-invite от аккаунта
+dataengy (второй в gh keyring) + accept → `main` запушен (`57460a4..442ff4a`, 21 коммит,
+LFS ok). Все 6 сабмодулей и отдельный клон `~/github/@dataengy/mlinside-hw-olist`
+сверены с live-remote (`ls-remote`) — в синхроне.
+
+**Tracker включён**: репо теперь реально использует GH Issues —
+[#1](https://github.com/dataengy/MLInside-course/issues/1) зонт этой сессии,
+[#2](https://github.com/dataengy/MLInside-course/issues/2)–[#5](https://github.com/dataengy/MLInside-course/issues/5)
+ретро-биндинг июльских коммитов (`git filter-branch --msg-filter` по unpushed-диапазону —
+после пуша так уже нельзя). Гейт `sc-verify-tracker-binding` (SC_TRACKERS=github) зелёный.
+
+**Secrets — два лейна** (`scripts/secrets-sync.sh`, `just secrets-*`, ранбук
+`docs/secrets-sync.md`): Bitwarden secure notes (транспорт) + git-secret
+(`settings/.env.secrets.secret` закоммичен; ключ `tg-eventer <hnkovr@gmail.com>`).
+`settings/.env.secrets.template` = контракт имён; `just secrets-doctor` зелёный.
+**⏳ PENDING (нужен мастер-пароль):** `export BW_SESSION=$(bw unlock --raw)` →
+`just secrets-push` + `bash scripts/secrets-sync.sh bw-push-gpg`.
+
+**Новое в .claude/**: агент `workstation-bootstrapper` (инвариант «committed/pushed/
+reproducible»), SessionStart-хук `scripts/hooks/repo-sync-status.sh` (ahead/dirty/
+submodule-drift/staleness `.secret`-блоба; сработает со следующей сессии).
+
+**⚠️ ОТКРЫТО (не решено этой сессией):** конкурирующие семьи колод. Codex-драфты
+`content/preza-{dagster,prefect,cicd-observability}-v1-content.yml` ЗАКОММИЧЕНЫ ради
+сохранности (два из трёх ниже минимума 20 слайдов), но Justfile по-прежнему указывает
+на длинноимённую семью — вопрос «какая семья каноническая» остаётся за пользователем
+(см. блокер сессии 2026-07-27 ниже). Тесты: 201 passed (счётчики dbt-деки обновлены
+под Olist-ДЗ: 51 слайд, 14 код-панелей).
+
+
 
 **Shipped** (5 commits `547b499..7765d86` here + `a8ad588` in `~/.ai`):
 
