@@ -2,6 +2,36 @@
 
 Canonical project changelog (finalize-issue passes migrate shipped work here).
 
+## 2026-08-11 — Secrets sync + workstation bootstrap; Olist homework wired in
+
+- **Secrets sync, two lanes** (`scripts/secrets-sync.sh`, `just secrets-*`, runbook
+  [`docs/secrets-sync.md`](secrets-sync.md)): Bitwarden secure notes as transport
+  (`secrets-push`/`secrets-pull`, plus base64 file notes for service-account JSONs and the
+  GPG key itself) and git-secret as the in-repo fallback — `settings/.env.secrets.secret`
+  (GPG, recipient hnkovr@gmail.com) is committed, plaintext never is.
+  `settings/.env.secrets.template` is the blank-value names contract;
+  `just secrets-doctor` flags template drift and missing file-typed secrets.
+  New workstation = `git clone --recurse-submodules` → `just secrets-bootstrap`.
+- **Origin access repaired**: github.com/dataengy/MLInside-course is a PRIVATE repo under
+  the `dataengy` account; hnkovr (the keychain identity that pushes) had lost access —
+  reads 404'd, which looked like a deleted repo. Fixed by re-inviting hnkovr as
+  collaborator (admin) via the dataengy gh keyring account and accepting the invite.
+  The failure mode and repair are recorded in the `workstation-bootstrapper` agent.
+- **`workstation-bootstrapper` agent** (`.claude/agents/`) — owns the "whole repo
+  committed, pushed, reproducible on a new workstation" invariant: worktree/submodule/
+  clone inventory, submodules-first push order, secrets lanes, origin-access repair.
+- **SessionStart hook** (`scripts/hooks/repo-sync-status.sh`, `.claude/settings.json`) —
+  prints ahead/behind, dirty count, submodule gitlink drift and secrets staleness
+  (`.env.secrets` newer than its `.secret` blob) at session start; fail-open, offline.
+- **Olist homework submodule** — `homework/mlinside-hw-olist`
+  ([hnkovr/mlinside-hw-olist](https://github.com/hnkovr/mlinside-hw-olist)) recorded in
+  `.gitmodules`; `docs/data-structure.md` documents why `homework/` lives outside
+  librarian's `data/` tree.
+- **Deck content**: dbt-v3 deck gains the Olist ДЗ section; Dagster deck ДЗ reworked to
+  the Olist orchestration skeleton; three new deck sources committed
+  (`preza-dagster-v1`, `preza-prefect-v1`, `preza-cicd-observability-v1`).
+  `.ai/.codex/skills/` ports the five de-tool deck skills for Codex parity.
+
 ## 2026-07-28 — Foreign-deck import + unfinished-deck detection
 
 - **`just preza-import-pptx <pptx>`** (`pptx_to_content.py`, beside `review_content.py`) — imports
