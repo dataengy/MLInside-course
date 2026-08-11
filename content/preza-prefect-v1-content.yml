@@ -1,0 +1,162 @@
+deck:
+  out_name: MLInside_Prefect
+  naming: increment
+  version_major: 1
+  downloads_dir: null
+  source_deck: data/source/MLinside-шаблон-презентаций.pptx
+content:
+- kind: title
+  title: 'Современная оркестрация ML-пайплайнов (Prefect)'
+  subtitle: 'MLInside · 2026'
+  notes: 'Разбираем Prefect как Python-first orchestrator: от локального flow до production deployment, work pool и worker. Отдельно обсудим, где Prefect дополняет Dagster и где asset-centric модель лучше подходит data platform.'
+- kind: agenda
+  title: План
+  bullets: [Проблема orchestration и история Prefect, Модель flow/task/run, Deployments и work pools, Dev/prod и надёжность, ML/LLMOps паттерны, Dagster/Airflow/Kestra сравнение, Практическая работа]
+  notes: 'В центре — execution model. Prefect отвечает за то, как динамическая работа надёжно выполняется, а не только за статический граф.'
+- kind: section
+  title: Контекст и mental model
+  notes: 'Начинаем с различия между workflow definition и конкретным flow run.'
+- kind: content
+  title: 'Prefect: Python-код становится наблюдаемым workflow'
+  image: image23.jpeg
+  bullets:
+  - Python flow — композиция бизнес-логики и orchestration boundary
+  - Task — retryable, cacheable и наблюдаемый шаг
+  - Flow run / task run имеют состояния и историю
+  - Deployment — удалённый контракт запуска, schedule или event trigger
+  - Server / Cloud хранит состояние; compute выполняется worker или push-инфраструктурой
+  materials:
+  - label: Prefect flows
+    url: https://docs.prefect.io/v3/concepts/flows
+  notes: 'Prefect 3 описывает flow как декорированную Python-функцию. Flow и task — шаблоны; состояние появляется у их конкретных runs. Это удобная модель для динамических ветвлений, циклов и параметризованных ML jobs.'
+- kind: content
+  title: 'Минимальный flow и retry'
+  code_caption: train_flow.py
+  code: |
+    from prefect import flow, task
+
+    @task(retries=2, retry_delay_seconds=30)
+    def load_features(day: str):
+        return read_feature_table(day)
+
+    @flow(log_prints=True)
+    def train(day: str, model_name: str = "churn"):
+        features = load_features(day)
+        return fit_and_register(features, model_name)
+
+    if __name__ == "__main__":
+        train("2026-07-19")
+  bullets: ["Flow — deployable unit и top-level observability", "Task — граница retry/cache/concurrency", "Код можно запускать локально без отдельного runtime", "В production параметры и secrets приходят из deployment environment"]
+  notes: 'Сильная сторона — короткий путь от обычной Python-функции к контролируемому запуску. Но не превращайте каждую строку в task: task должен быть логическим шагом или существенным side effect.'
+- kind: table
+  title: Основные сущности Prefect
+  table:
+    headers: [Сущность, Роль, Пример]
+    rows:
+    - [Flow, 'композиция workflow', 'train_model']
+    - [Task, 'retry/cache/наблюдаемость шага', 'load_features']
+    - [Run, 'конкретный execution + state', 'train / 2026-07-19']
+    - [Deployment, 'remote trigger contract', 'nightly-training']
+    - [Work pool, 'мост control plane → compute', 'kubernetes-pool']
+    - [Worker, 'poll / provision / monitor', 'Kubernetes worker']
+    - [Work queue, 'приоритет и concurrency boundary', 'gpu-high-priority']
+  notes: 'Work pool и worker разделяют orchestration от инфраструктуры. Это даёт платформенной команде opinionated job templates и позволяет авторам flows выбирать sanctioned compute.'
+- kind: content
+  title: 'Deployments и work pools'
+  code_caption: deploy.py
+  code: |
+    from prefect import flow
+
+    @flow
+    def batch_inference(day: str):
+        return run_inference(day)
+
+    if __name__ == "__main__":
+        batch_inference.deploy(
+            name="batch-inference",
+            work_pool_name="kubernetes-ml",
+            image="registry/ml-inference:2026-07-19",
+            cron="0 5 * * *",
+        )
+  bullets: ["Deployment хранит schedule, parameters, entrypoint и infrastructure intent", "Work pool типизирует compute: process, Docker, Kubernetes, ECS, serverless", "Worker polling — hybrid boundary", "Push pool уменьшает операционный overhead, но требует больше доверия к managed service"]
+  materials:
+  - label: Prefect work pools
+    url: https://docs.prefect.io/v3/concepts/work-pools
+  notes: 'В production deployment не должен быть единственным местом конфигурации. Image digest, secrets, resource limits и concurrency должны быть частью release process и policy.'
+- kind: table
+  title: Dev, staging и prod
+  table:
+    headers: [Область, Dev, Prod]
+    rows:
+    - [Запуск, 'python flow.py / local server', 'deployment + API']
+    - [Compute, 'process / Docker', 'Kubernetes / ECS / serverless']
+    - [Secrets, '.env / local block', 'secret manager + IAM']
+    - [Code, 'working tree', 'immutable image / commit']
+    - [Control, 'manual runs', 'schedules, events, concurrency limits']
+    - [Recovery, 'rerun manually', 'retry, timeout, cancellation, runbook']
+  notes: 'Dev должен быть быстрым, prod — воспроизводимым. Один и тот же flow-код не означает одну и ту же конфигурацию инфраструктуры.'
+- kind: content
+  title: 'ML pipeline: feature → train → registry → serve'
+  image: image37.png
+  bullets:
+  - Ingest и feature computation — отдельные flows/tasks с идемпотентными keys
+  - Training run фиксирует dataset version, code SHA, parameters и metrics
+  - Model registry — внешний system of record, не только Prefect state
+  - Approval gate перед production deployment
+  - Drift / quality signal может запускать retraining через event
+  notes: 'Prefect хорошо подходит для динамических ML workflows: разные модели, параметры, GPU-пулы и conditional branches. Модельная lineage и data contracts всё равно требуют отдельного слоя metadata/registry.'
+- kind: content
+  title: 'LLMOps: orchestration вокруг модели'
+  bullets: [Dataset and prompt versioning, Batch inference и evaluation suites, Human approval для промптов и model release, Cost/token/latency telemetry, Guardrails и PII checks, Event-triggered re-evaluation]
+  notes: 'Для LLM pipeline важны не только успешные runs: стоимость, latency, safety score и качество должны стать first-class metadata. AI-агент может предложить rerun или diagnose, но write actions требуют policy и approval.'
+- kind: content
+  title: 'Надёжность: retries — это не idempotency'
+  code_caption: safe_task.py
+  code: |
+    @task(retries=3, retry_jitter_factor=2)
+    def publish_features(batch_id: str):
+        if already_published(batch_id):
+            return "skip"
+        write_atomic(batch_id, build_features(batch_id))
+        return "published"
+  bullets: ["Retry безопасен только при идемпотентном side effect", "Timeout и cancellation должны освобождать ресурсы", "Concurrency limits защищают warehouse и GPU", "Late / zombie runs требуют heartbeat и operational alert"]
+  notes: 'Ретрай повторяет функцию, но не исправляет двойную запись. Сначала проектируем idempotency key, atomic commit и состояние внешней системы.'
+- kind: table
+  title: Prefect, Dagster и Airflow
+  table:
+    headers: [Критерий, Prefect, Dagster, Airflow]
+    rows:
+    - [Mental model, 'flow/task/run', 'asset/definition/materialization', 'task/DAG/run']
+    - [Сильная сторона, 'dynamic Python execution', 'asset lineage и data products', 'ecosystem и enterprise scheduling']
+    - [ML fit, 'гибкие параметризованные jobs', 'ML asset lineage', 'operators + mature platform']
+    - [dbt fit, 'CLI/API integration', 'model-level assets', 'Cosmos task graph']
+    - [Compute boundary, 'work pools/workers', 'code locations/executors', 'workers/executors']
+    - [Главный риск, 'двойной state с asset catalog', 'Python complexity', 'task explosion']
+  notes: 'Выбор делается по unit of ownership. Для ML-heavy dynamic execution Prefect естественен; для data products и asset observability Dagster часто выразительнее; Airflow выигрывает при уже стандартизованной enterprise platform.'
+- kind: content
+  title: 'CLI и operational loop'
+  code_caption: terminal
+  code: |
+    prefect server start
+    prefect work-pool create --type kubernetes kubernetes-ml
+    prefect deploy --all
+    prefect worker start --pool kubernetes-ml
+    prefect deployment run train/batch-inference
+    prefect flow-run ls --state Failed
+  bullets: ["CLI создаёт repeatable runbook", "Healthcheck worker и API должен входить в monitoring", "Pin Prefect/integration/image versions", "Сначала локальный flow, затем deployment и controlled promotion"]
+  notes: 'Команды актуальны для Prefect 3 docs на момент подготовки; перед live demo сверяйте CLI reference конкретной версии.'
+- kind: section
+  title: Архитектура на большом проекте
+  notes: 'Рассматриваем boundary между Prefect и другими orchestrators.'
+- kind: content
+  title: 'Интеграция нескольких orchestrators'
+  bullets: ["Prefect как ML execution plane рядом с Dagster asset plane", "Airflow как legacy enterprise boundary → trigger Prefect deployment", "Kestra как event/YAML integration layer", "Argo как Kubernetes-native batch substrate", "Один владелец schedule/retry для каждого workflow", "Events и external run IDs связывают lineage без двойного контроля"]
+  notes: 'Комбинация оправдана только при явной ownership matrix. Не допускайте, чтобы два orchestrators одновременно планировали и ретраили один side effect.'
+- kind: content
+  title: 'Домашняя работа: ML pipeline под Prefect'
+  bullets: ["Взять dbt HW или feature dataset", "Собрать flow: extract → features → train → evaluate", "Добавить retries, timeout, idempotency и concurrency limit", "Создать deployment и work pool для локального или Docker execution", "Сохранить model/data/code metadata", "Сравнить реализацию с Dagster и Airflow+Cosmos", "Добавить LLM evaluation или drift-trigger extension"]
+  notes: 'Сдать код, deployment manifest, screenshot runs и короткий incident runbook: что проверяем при missing worker, failed task и duplicate publish.'
+- kind: closing
+  title: Главное
+  bullets: ["Prefect делает Python execution remote, durable и observable", "Deployment — контракт запуска; work pool — контракт compute", "Retries, states и workers требуют production discipline", "Для ML/LLMOps важны metadata, cost, quality и approval", "Выбираем orchestrator по ownership и failure model"]
+  notes: 'Главная формула: **flow definition + controlled deployment + reliable execution**.'

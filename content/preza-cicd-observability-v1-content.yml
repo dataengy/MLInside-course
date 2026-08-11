@@ -1,0 +1,155 @@
+deck:
+  out_name: MLInside_CICD_Observability
+  naming: increment
+  version_major: 1
+  downloads_dir: null
+  source_deck: data/source/MLinside-шаблон-презентаций.pptx
+content:
+- kind: title
+  title: 'Автоматизация и мониторинг: CI/CD + Observability'
+  subtitle: 'GitLab/GitHub · runners на VM · Prometheus/Grafana · logs · AI'
+  notes: 'Собираем production-контур: code change → CI runner → deploy → metrics/logs/traces → alert → human or AI-assisted response.'
+- kind: agenda
+  title: План
+  bullets: [CI/CD mental model, GitLab и GitHub CLI, Runner на VM, Prometheus/Grafana, Legacy и modern observability stack, Loki/ELK/Victoria, Alerting в Telegram/Mattermost, AI для Observability, MLOps/LLMOps, Практика]
+  notes: 'Цель — не установить все продукты, а понимать границы: CI/CD доставляет изменения, observability объясняет состояние системы, alerting маршрутизирует действие.'
+- kind: section
+  title: CI/CD как control loop
+  notes: 'Разделим delivery pipeline, deployment runtime и monitoring feedback.'
+- kind: content
+  title: 'От commit до сигнала'
+  image: image28.png
+  bullets: ["Commit / PR / MR запускает pipeline", "Runner выполняет lint, tests, build и security checks", "Artifact/image получает immutable tag", "Deploy меняет runtime через environment policy", "Metrics/logs/traces подтверждают SLO", "Alert возвращает feedback команде"]
+  notes: 'CI/CD не заканчивается зелёным pipeline. Production verification и rollback — часть delivery.'
+- kind: table
+  title: GitLab CI и GitHub Actions
+  table:
+    headers: [Аспект, GitLab, GitHub]
+    rows:
+    - [Конфигурация, '.gitlab-ci.yml', '.github/workflows/*.yml']
+    - [CLI, 'glab pipeline/job/repo', 'gh run/pr/workflow']
+    - [Runner model, 'GitLab Runner tags/executors', 'GitHub-hosted/self-hosted runners']
+    - [Сильная сторона, 'integrated DevSecOps и environments', 'ecosystem, marketplace и PR UX']
+    - [Secrets, 'CI/CD variables + protected env', 'Actions secrets/environments']
+    - [Риск, 'runner drift и privileged jobs', 'action supply chain и token scope']
+  notes: 'Обе системы решают одну задачу, но отличаются control plane и security defaults. В большой организации выбирайте platform standard, а не дублируйте pipelines без необходимости.'
+- kind: content
+  title: 'CLI: glab и gh в ежедневном runbook'
+  code_caption: terminal
+  code: |
+    glab mr create --fill
+    glab pipeline list --per-page 10
+    glab pipeline status
+    glab pipeline retry <pipeline-id>
+
+    gh pr create --fill
+    gh run list --limit 10
+    gh run watch <run-id>
+    gh workflow run deploy.yml -f environment=staging
+  bullets: ["CLI удобен для repeatable incident/runbook действий", "Токены должны иметь минимальный scope", "Не прячем destructive retry/deploy за alias без audit", "MCP/AI использует CLI/API только через approval boundary"]
+  materials:
+  - label: GitHub workflow CLI
+    url: https://cli.github.com/manual/gh_workflow_run
+  notes: 'glab и gh — операционные интерфейсы, а не замена CI definitions. Для automation фиксируйте version, auth context и target project.'
+- kind: content
+  title: 'Базовый runner на VM: безопасная схема'
+  code_caption: runner.sh
+  code: |
+    # conceptual checklist; pin versions in image/config
+    sudo useradd --system ci-runner
+    sudo install -d -o ci-runner /srv/runner
+    # register with a short-lived, scoped token
+    ./config.sh --url "$CI_URL" --token "$RUNNER_TOKEN"
+    sudo systemctl enable --now ci-runner
+    # verify: tags, concurrency, outbound allowlist, disk cleanup
+  bullets: ["Separate runner user, workspace and service account", "Prefer ephemeral VM/container executor for untrusted PRs", "Pin runner, Docker/buildkit and action/plugin versions", "Monitor CPU, disk, queue latency, heartbeats and failed jobs", "Never expose cloud metadata or production secrets to fork jobs"]
+  notes: 'Это базовый setup pattern, не copy-paste production install. Registration token и URL должны приходить из secret manager/settings, а не из репозитория.'
+- kind: section
+  title: 'Observability stack: legacy → modern'
+  notes: 'Теперь строим signals: metrics, logs, traces, profiles и events.'
+- kind: table
+  title: Stack comparison
+  table:
+    headers: [Стек, Сильная сторона, Компромисс]
+    rows:
+    - [ELK, 'богатый поиск и зрелая log analytics', 'ресурсоёмкость и сложность эксплуатации']
+    - [Prometheus + Grafana, 'metrics, PromQL, dashboards, alerting', 'high-cardinality и retention требуют дизайна']
+    - [Loki + Grafana, 'дешёвые label-oriented logs', 'поиск не как полнотекстовый ES']
+    - [VictoriaMetrics, 'эффективный metrics storage и long retention', 'экосистема отличается от vanilla Prometheus']
+    - [OpenTelemetry, 'единый collection/transport для signals', 'нужны backend и schema discipline']
+    - [Cloud observability, 'managed scale и integrations', 'стоимость, lock-in, data residency']
+  notes: 'Modern stack часто не означает полный отказ от ELK. Выбираем backend по signal, query pattern, retention, cardinality и операционной зрелости команды.'
+- kind: content
+  title: 'Metrics: Prometheus → Grafana → Alertmanager'
+  code_caption: prometheus.yml
+  code: |
+    groups:
+    - name: pipeline
+      rules:
+      - alert: RunnerQueueTooLong
+        expr: ci_runner_queue_seconds > 600
+        for: 10m
+        labels: {severity: page}
+        annotations:
+          summary: "CI queue is blocked"
+
+    # Grafana: dashboard + contact point + mute timing
+  bullets: ["Counter, gauge, histogram и summary имеют разные semantics", "SLO alert: error budget burn, а не только host CPU", "Alertmanager/Grafana маршрутизирует, дедуплицирует и silences", "Labels должны быть bounded: не кладём user_id или run_id в metric labels"]
+  materials:
+  - label: Grafana Alerting
+    url: https://grafana.com/docs/grafana/latest/alerting/set-up/configure-alertmanager/
+  notes: 'Alert — это решение о действии. Метрика без owner, severity, runbook и routing превращается в шум.'
+- kind: content
+  title: 'Logs: ELK и Loki'
+  code_caption: structured-log.json
+  code: |
+    {
+      "ts": "2026-07-19T10:00:00Z",
+      "service": "training",
+      "run_id": "run-123",
+      "level": "ERROR",
+      "event": "model_publish_failed",
+      "error_type": "RegistryTimeout"
+    }
+  bullets: ["Structured logs дают correlation keys", "ELK подходит для полнотекстового расследования", "Loki индексирует labels, а тело хранит дешевле", "Не отправляем secrets/PII в logs", "Retention и sampling — часть cost design"]
+  notes: 'Выбирайте logging backend по расследованию: что ищет on-call, сколько хранить и как связать log с trace/run/deployment.'
+- kind: content
+  title: 'Alerting: Telegram и Mattermost'
+  code_caption: routing concept
+  code: |
+    alert rule
+      -> Alertmanager / Grafana contact point
+      -> route by severity + service + environment
+      -> Telegram for on-call page
+      -> Mattermost for team channel + incident thread
+      -> runbook link + silence / acknowledge
+  bullets: ["Telegram удобен для urgent mobile page", "Mattermost сохраняет team context и incident discussion", "Webhook secrets only from secret manager", "Deduplication, grouping, inhibition and quiet hours reduce fatigue", "Every page links to dashboard and runbook"]
+  notes: 'Мессенджер не должен быть единственным incident system. Он доставляет сигнал; состояние инцидента и postmortem живут в tracker/incident tool.'
+- kind: content
+  title: 'AI for Observability: полезное и опасное'
+  bullets: ["Summarize correlated logs, metrics, traces and recent deploys", "Suggest likely root cause and next read-only queries", "Cluster recurring failures and detect alert storms", "Generate dashboards/runbooks from service metadata", "Never let an agent auto-remediate production without policy", "Protect telemetry from prompt injection, secrets and tenant leakage"]
+  notes: 'AI усиливает triage, но не отменяет instrumentation. Лучший первый шаг — read-only investigation copilot с цитатами на telemetry и human-approved action.'
+- kind: table
+  title: MLOps / LLMOps observability
+  table:
+    headers: [Signal, MLOps, LLMOps]
+    rows:
+    - [Quality, 'accuracy, drift, freshness', 'groundedness, safety, eval score']
+    - [Performance, 'latency, GPU, throughput', 'tokens/sec, time-to-first-token']
+    - [Cost, 'compute and storage', 'tokens, provider/model spend']
+    - [Lineage, 'dataset/code/model version', 'prompt/model/tool/retrieval version']
+    - [Failure, 'data skew, training job', 'rate limit, hallucination, prompt injection']
+    - [Action, 'retrain / rollback', 'route / prompt rollback / human review']
+  notes: 'В MLOps и LLMOps observability включает качество результата. CPU и HTTP 200 недостаточны: система может быть технически healthy и бизнесово бесполезной.'
+- kind: content
+  title: 'Production checklist'
+  bullets: ["CI: lint, tests, security scan, SBOM, signed artifact", "CD: staged rollout, health check, rollback", "Runner: least privilege, isolation, heartbeat, disk policy", "Metrics: SLI/SLO, bounded labels, retention", "Logs: structured, correlation IDs, PII policy", "Alerts: owner, severity, runbook, channel, silence", "AI: read-only first, audit trail, approval gates"]
+  notes: 'Чеклист связывает delivery и operations. Владелец каждого сигнала должен быть известен до первого production deploy.'
+- kind: content
+  title: 'Практика: CI + observability для ML-пайплайна'
+  bullets: ["Собрать GitLab или GitHub pipeline: test → build → deploy staging", "Запустить self-hosted runner на VM в sandbox", "Добавить Prometheus metrics для queue, duration, failures", "Показать Grafana dashboard и один SLO alert", "Отправить alert в Telegram или Mattermost", "Добавить Loki/ELK structured logs с run_id", "Сделать AI read-only incident summary prompt", "Сравнить glab и gh operational workflows"]
+  notes: 'Финальный артефакт — не screenshot зелёного pipeline, а reproducible demo: намеренно сломать job, получить signal, найти run_id, объяснить причину и восстановить систему.'
+- kind: closing
+  title: Главное
+  bullets: ["CI/CD доставляет изменение, observability доказывает состояние", "Metrics, logs и traces требуют общей identity модели", "Alerting — routing и decision policy, не просто webhook", "Legacy ELK и modern Prometheus/Loki/Victoria сосуществуют", "AI ускоряет расследование, но не заменяет ownership и safety"]
+  notes: 'Сильная платформа — это feedback loop: код → доставка → сигнал → действие → улучшение.'
