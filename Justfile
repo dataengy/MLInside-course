@@ -253,3 +253,34 @@ typecheck:
 
 # lint + typecheck + tests
 check: lint typecheck test
+
+# ── secrets sync (Bitwarden ⇄ settings/.env.secrets ⇄ git-secret) — docs/secrets-sync.md ──
+# Bitwarden lane needs an unlocked vault first: export BW_SESSION=$(bw unlock --raw)
+
+# Health check: tools, vault, GPG key, template drift, file-typed secrets
+secrets-doctor:
+    cd {{_dir}} && bash scripts/secrets-sync.sh doctor
+
+# New workstation: pull secrets (Bitwarden first, git-secret fallback) + doctor
+secrets-bootstrap:
+    cd {{_dir}} && bash scripts/secrets-sync.sh bootstrap
+
+# Old workstation → vault: .env.secrets as a secure note
+secrets-push:
+    cd {{_dir}} && bash scripts/secrets-sync.sh bw-push
+
+# Vault → this workstation: overwrite settings/.env.secrets
+secrets-pull:
+    cd {{_dir}} && bash scripts/secrets-sync.sh bw-pull
+
+# One-time: generate/enroll the GPG key for the git-secret lane
+secrets-gpg-init:
+    cd {{_dir}} && bash scripts/secrets-sync.sh gpg-init
+
+# Encrypt settings/.env.secrets → .env.secrets.secret (committed to git)
+secrets-hide:
+    cd {{_dir}} && bash scripts/secrets-sync.sh hide
+
+# Decrypt .env.secrets.secret → settings/.env.secrets
+secrets-reveal:
+    cd {{_dir}} && bash scripts/secrets-sync.sh reveal

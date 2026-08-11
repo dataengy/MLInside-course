@@ -17,6 +17,8 @@ lecture materials, deck generators and the course data library.
 | `integrations/google/sheets/` | Google Sheets client — `connector.py`/`utils.py` hardlinked from pdp, project-owned `auth.py` ([README](integrations/google/sheets/README.md)) |
 | `src/schedule/` | course schedule sheet → `settings/schedule.yml` → `content/presentations.yml` |
 | `docs/reviews/` | per-deck review reports from `/preza-review` |
+| `homework/` | authored course assignments — submodule [hnkovr/mlinside-hw-olist](https://github.com/hnkovr/mlinside-hw-olist) |
+| `scripts/` | repo ops — `secrets-sync.sh` (Bitwarden ⇄ `.env.secrets` ⇄ git-secret, [runbook](docs/secrets-sync.md)) |
 
 ## Common commands (`just --list` for all)
 
@@ -39,6 +41,8 @@ just check           # lint + typecheck + tests
 just librarian-plan "<root>"   # plan dedupe/categorize/version moves into data/
 just librarian-apply           # execute the reviewed plan
 just librarian-catalog         # regenerate data/CATALOG.md
+just secrets-bootstrap         # new workstation: pull secrets (docs/secrets-sync.md)
+just secrets-doctor            # secrets health: tools, vault, GPG, template drift
 ```
 
 ## Deck generation (`create-preza-about-de-tool`)
