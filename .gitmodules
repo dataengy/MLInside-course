@@ -13,3 +13,6 @@
 [submodule "src/picstore"]
 	path = src/picstore
 	url = https://github.com/hnkovr/picstore.git
+[submodule "homework/mlinside-hw-olist"]
+	path = homework/mlinside-hw-olist
+	url = https://github.com/hnkovr/mlinside-hw-olist.git

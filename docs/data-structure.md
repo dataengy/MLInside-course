@@ -39,6 +39,12 @@ data/
 - **Naming**: destination filenames replace spaces with `-` (repo convention).
 - **Never hand-move files** between categories — rerun `just librarian-plan` /
   `just librarian-apply` so the plan stays the audit trail (`data/.state/librarian-plan.yml`).
+- **`homework/` is outside this tree.** Authored course assignments live in a
+  sibling top-level directory (`homework/mlinside-hw-olist`, a submodule), *not*
+  under `data/code/`. Librarian's `data_root` is `data`, so it neither scans nor
+  catalogs `homework/` — no `CATALOG.md` row appears for it, and that is intended.
+  `data/code/` stays what it is: mirrors of *incoming* student submissions
+  (ДЗ 4-5), which librarian does track.
 
 ## Proposed next iteration (not yet applied)
 
