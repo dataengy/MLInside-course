@@ -2,17 +2,17 @@ deck: MLInside_Современная-оркестрация-ML-пайплайн
 content: content/preza-dagster-content.yml
 lecture:
   n: null
-  topic: 'Современная оркестрация ML-пайплайнов: Dagster'
-  owner: null
+  topic: Современная оркестрация ML-пайплайнов (Dagster)
+  owner: Николай Крупий
   status: draft
 stats:
-  slides: 50
+  slides: 51
   notes_coverage: 1.0
   tables: 10
-  code_slides: 25
-  materials_slides: 10
-  accents_total: 0
-  accents_hit: 0
+  code_slides: 26
+  materials_slides: 11
+  accents_total: 4
+  accents_hit: 4
   accents_partial: 0
   accents_missing: 0
 findings: []

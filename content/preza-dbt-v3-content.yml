@@ -49,7 +49,7 @@ content:
   - 'Реализует «T» в ELT: преобразования внутри DWH'
   - SQL + Jinja + YAML вместо императивного кода
   - 'Из коробки: версионирование, тесты, документация, DAG зависимостей'
-  - Инструмент Analytics Engineering — код вместо ручных выгрузок
+  - Подход Analytics Engineering — перенос логики трансформации данных из Python-скриптов на уровень SQL
   notes: '**dbt** (Data Build Tool) отвечает за букву !!«T» в ELT!! — трансформацию. Данные уже загружены в хранилище, а dbt превращает **сырые таблицы** в **чистые витрины** с помощью обычного **SQL**.
 
 
@@ -177,6 +177,22 @@ content:
 
 
     Поскольку всё это **код**, работают привычные практики: !!ветки, ревью через MR/PR, история изменений!!. ~~На скриншоте — проект dbt в IDE.~~'
+- kind: content
+  id: 052-sloi-dbt-proekta
+  title: 'Слои dbt-проекта: sources → staging → marts'
+  materials:
+  - label: How we structure our dbt projects
+    url: https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview
+  bullets:
+  - 'Структурирование dbt-проекта: источники (sources) → staging → витрины (marts)'
+  - sources — контракт на сырые таблицы, объявленный в YAML
+  - 'staging — промежуточные модели: типизация и чистка, 1:1 к источнику'
+  - marts — финальные витрины признаков и метрик для BI и ML
+  - 'Поток source → staging → (intermediate) → marts — так устроено и ДЗ на Olist'
+  notes: 'Слои — это __конвенция структурирования dbt-проекта__, а не требование инструмента. **Sources** объявляют сырые таблицы источников и дают на них контракт (freshness, тесты). **Staging** — промежуточные модели, которые __типизируют и чистят__ данные строго 1:1 к источнику, без бизнес-логики.
+
+
+    **Marts** — !!финальные витрины признаков!! и метрик: то, что читают BI-инструменты и ML-пайплайны. Между staging и marts при росте проекта появляется слой **intermediate**. Ровно по этой схеме устроено наше ~~домашнее задание на датасете Olist~~ — см. финальные слайды.'
 - kind: content
   id: 012-sql-kompilyaciya-obertka-koda
   title: SQL + компиляция (обёртка кода)
@@ -357,6 +373,7 @@ content:
   - is_incremental() отделяет стартовую логику от повторного запуска
   - this — ссылка на текущую целевую relation, без имени руками
   - Предикат дельты выбираем по правилам обновления источника
+  - Оптимизация расчетов — обновление только новых данных прямо в ClickHouse
   materials:
   - label: Incremental models
     url: https://docs.getdbt.com/docs/build/incremental-models
@@ -604,6 +621,7 @@ content:
   - label: unit testing
     url: https://github.com/EqualExperts/dbt-unit-testing
   bullets:
+  - 'Качество данных: автоматическое тестирование ограничений (уникальность, null, связи) и генерация документации'
   - 'Generic-тесты: not_null, unique, accepted_values, relationships'
   - Задаются декларативно в schema.yml на колонках
   - Singular-тесты — произвольный SQL, возвращающий «плохие» строки

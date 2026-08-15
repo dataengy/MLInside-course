@@ -1,7 +1,3 @@
-# preza-dagster-content.yml — WHAT deck: output naming, source media deck, and slides.
-# Visual profile: code-tables (no `image:` keys — visuals are code panels + tables).
-# Notes use emphasis markup (see settings.notes_emphasis) + blank-line paragraphs.
-
 deck:
   out_name: MLInside_Современная-оркестрация-ML-пайплайнов-Dagster
   naming: increment
@@ -9,19 +5,20 @@ deck:
   downloads_dir: ~/Downloads
   source_deck: data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
 content:
-
-# ── Титул + план ──────────────────────────────────────────────────────────────
 - kind: title
   id: 001-sovremennaya-orkestraciya-ml
   title: Современная оркестрация ML-пайплайнов
   subtitle: Dagster
-  notes: |
-    Приветствие. Сегодня разбираем **Dagster** — оркестратор, который предложил принципиально другую модель: не «запусти задачи в правильном порядке», а !!опиши, какие данные должны существовать!!.
+  notes: 'Приветствие. Сегодня разбираем **Dagster** — оркестратор, который предложил принципиально другую
+    модель: не «запусти задачи в правильном порядке», а !!опиши, какие данные должны существовать!!.
 
-    Цель лекции — понять __архитектуру и все сущности Dagster__, увидеть разницу между **dev** и **prod**, глубоко разобрать **интеграцию с dbt**, сравнить с **Airflow**, **Prefect** и другими, и закончить домашним заданием. ~~Вопросы удобнее задавать по ходу.~~
 
-    — Сгенерировано: model=claude-opus-4-8 · harness=Claude Code · effort=max · version=v1.0 · 2026-07-20
+    Цель лекции — понять __архитектуру и все сущности Dagster__, увидеть разницу между **dev** и **prod**,
+    глубоко разобрать **интеграцию с dbt**, сравнить с **Airflow**, **Prefect** и другими, и закончить
+    домашним заданием. ~~Вопросы удобнее задавать по ходу.~~
 
+
+    — Сгенерировано: model=claude-fable-5 · harness=Claude Code · effort=max · version=v1.1 · 2026-08-13'
 - kind: agenda
   id: 002-plan-lekcii
   title: План лекции
@@ -34,20 +31,25 @@ content:
   - CLI и MCP
   - Рынок, покупка со стороны Prefect, конкуренты и будущее
   - Домашнее задание
-  notes: |
-    Пройдёмся по плану. Начнём с того, __зачем вообще нужен оркестратор__ и почему после Airflow появилось новое поколение инструментов.
+  notes: 'Пройдёмся по плану. Начнём с того, __зачем вообще нужен оркестратор__ и почему после Airflow
+    появилось новое поколение инструментов.
 
-    Основная и самая практическая часть — !!сущности Dagster!!: **assets**, **jobs**, **schedules**, **sensors**, **partitions**, **backfills**, **code locations**. Затем — **dev vs prod**, блок про **dbt** (это ключевая связка для нашего курса), сравнения с конкурентами и **ДЗ**. ~~Держим ориентир на этот план.~~
 
-# ── §1 Контекст, история, настоящее ───────────────────────────────────────────
+    Основная и самая практическая часть — !!сущности Dagster!!: **assets**, **jobs**, **schedules**, **sensors**,
+    **partitions**, **backfills**, **code locations**. Затем — **dev vs prod**, блок про **dbt** (это
+    ключевая связка для нашего курса), сравнения с конкурентами и **ДЗ**. ~~Держим ориентир на этот план.~~
+
+    '
 - kind: section
   id: 003-kontekst-istoriya-i-nastoyaschee
   title: Контекст, история и настоящее
-  notes: |
-    Первый блок — вводный и исторический.
+  notes: 'Первый блок — вводный и исторический.
 
-    Разберёмся, __какую боль решает оркестратор__, откуда взялся **Dagster**, кто за ним стоит и в каком состоянии проект находится сегодня.
 
+    Разберёмся, __какую боль решает оркестратор__, откуда взялся **Dagster**, кто за ним стоит и в каком
+    состоянии проект находится сегодня.
+
+    '
 - kind: content
   id: 004-zachem-nuzhen-orkestrator
   title: Зачем нужен оркестратор
@@ -57,39 +59,43 @@ content:
   - cron не знает про зависимости и падения соседей
   - Ручные запуски не воспроизводимы и не документированы
   - 'Оркестратор даёт: DAG, состояние, историю, алерты'
-  notes: |
-    Как только пайплайн перестаёт быть одним скриптом, появляется **граф зависимостей**: загрузка → трансформации → витрины → обучение модели. Между шагами возникают отношения «после» и «на основе», и их надо кем-то соблюдать.
+  notes: 'Как только пайплайн перестаёт быть одним скриптом, появляется **граф зависимостей**: загрузка
+    → трансформации → витрины → обучение модели. Между шагами возникают отношения «после» и «на основе»,
+    и их надо кем-то соблюдать.
 
-    **cron** этого не умеет: он запускает по времени и ничего не знает про то, что предыдущий шаг упал. Оркестратор даёт !!зависимости, состояние, повторные запуски, бэкфиллы и наблюдаемость!! из коробки. ~~Практически: без оркестратора вы рано или поздно пишете свой плохой оркестратор.~~
 
+    **cron** этого не умеет: он запускает по времени и ничего не знает про то, что предыдущий шаг упал.
+    Оркестратор даёт !!зависимости, состояние, повторные запуски, бэкфиллы и наблюдаемость!! из коробки.
+    ~~Практически: без оркестратора вы рано или поздно пишете свой плохой оркестратор.~~
+
+    '
 - kind: content
   id: 005-mesto-dagster-v-data-i-ml-steke
   title: Место Dagster в data- и ML-стеке
   code_caption: 'Типичный контур: ingestion → transform → serving'
-  code: |
-    ┌───────────┐   ┌────────────┐   ┌───────────┐   ┌──────────┐
-    │  sources  │ → │  ingestion │ → │    DWH    │ → │  BI / ML │
-    │ API, БД,  │   │ dlt,       │   │ClickHouse │   │ DataLens,│
-    │ файлы     │   │ Airbyte    │   │ + dbt     │   │ модели   │
-    └───────────┘   └────────────┘   └───────────┘   └──────────┘
-            ▲              ▲               ▲              ▲
-            └──────────────┴───────────────┴──────────────┘
-                                  │
-                        ┌─────────────────────┐
-                        │      DAGSTER        │  расписания, зависимости,
-                        │  (оркестрация +     │  ретраи, партиции, качество,
-                        │   каталог активов)  │  lineage, наблюдаемость
-                        └─────────────────────┘
+  code: "┌───────────┐   ┌────────────┐   ┌───────────┐   ┌──────────┐\n│  sources  │ → │  ingestion │\
+    \ → │    DWH    │ → │  BI / ML │\n│ API, БД,  │   │ dlt,       │   │ClickHouse │   │ DataLens,│\n\
+    │ файлы     │   │ Airbyte    │   │ + dbt     │   │ модели   │\n└───────────┘   └────────────┘   └───────────┘\
+    \   └──────────┘\n        ▲              ▲               ▲              ▲\n        └──────────────┴───────────────┴──────────────┘\n\
+    \                              │\n                    ┌─────────────────────┐\n                  \
+    \  │      DAGSTER        │  расписания, зависимости,\n                    │  (оркестрация +     │\
+    \  ретраи, партиции, качество,\n                    │   каталог активов)  │  lineage, наблюдаемость\n\
+    \                    └─────────────────────┘\n"
   bullets:
   - Dagster не хранит данные — он управляет их производством
   - Видит весь путь от источника до витрины и модели
   - Один граф на ingestion, трансформации и ML
   - Lineage и метаданные — побочный продукт описания
-  notes: |
-    Dagster сам __не хранит и не обрабатывает данные__ — он управляет тем, **что**, **когда** и **в каком порядке** производится. Хранилище остаётся за ClickHouse, трансформации за dbt, загрузка за dlt или Airbyte.
+  notes: 'Dagster сам __не хранит и не обрабатывает данные__ — он управляет тем, **что**, **когда** и
+    **в каком порядке** производится. Хранилище остаётся за ClickHouse, трансформации за dbt, загрузка
+    за dlt или Airbyte.
 
-    Важное отличие от Airflow: Dagster держит !!единый граф активов!! на весь контур — от сырых источников до ML-моделей. Поэтому **lineage** и **метаданные** получаются автоматически, а не как отдельный инструмент сверху. ~~На схеме видно, что оркестратор — поперечный слой, а не ещё один этаж.~~
 
+    Важное отличие от Airflow: Dagster держит !!единый граф активов!! на весь контур — от сырых источников
+    до ML-моделей. Поэтому **lineage** и **метаданные** получаются автоматически, а не как отдельный инструмент
+    сверху. ~~На схеме видно, что оркестратор — поперечный слой, а не ещё один этаж.~~
+
+    '
 - kind: content
   id: 006-istoriya-i-persony
   title: История и персоны
@@ -99,49 +105,67 @@ content:
   - label: Software-Defined Assets (манифест)
     url: https://dagster.io/blog/software-defined-assets
   bullets:
-  - 'Ник Шрок (Nick Schrock) — сооснователь, до этого сооснователь GraphQL в Facebook'
+  - Ник Шрок (Nick Schrock) — сооснователь, до этого сооснователь GraphQL в Facebook
   - 2018 — старт проекта, компания Elementl
   - 2020–2021 — публичные релизы, рост сообщества
   - 2022 — Software-Defined Assets, смена парадигмы
   - 2023 — Elementl переименована в Dagster Labs; Pete Hunt — CEO
   - 2022 — Dagster 1.0, стабильный API
-  notes: |
-    Автор Dagster — **Ник Шрок**, до этого один из создателей **GraphQL** в Facebook. Это важно для понимания философии: Шрок пришёл из мира __типизированных схем и деклараций__, и перенёс этот подход на данные.
+  notes: 'Автор Dagster — **Ник Шрок**, до этого один из создателей **GraphQL** в Facebook. Это важно
+    для понимания философии: Шрок пришёл из мира __типизированных схем и деклараций__, и перенёс этот
+    подход на данные.
 
-    Ключевой перелом — **2022 год** и концепция !!Software-Defined Assets!!: центральной единицей стала не задача, а **актив данных**. Компания **Elementl** в 2023 переименовалась в **Dagster Labs**, CEO стал **Pete Hunt** (тоже выходец из Facebook, один из авторов React). ~~Эти имена ещё всплывут в блоке про новости рынка.~~
 
+    Ключевой перелом — **2022 год** и концепция !!Software-Defined Assets!!: центральной единицей стала
+    не задача, а **актив данных**. Компания **Elementl** в 2023 переименовалась в **Dagster Labs**, CEO
+    стал **Pete Hunt** (тоже выходец из Facebook, один из авторов React). ~~Эти имена ещё всплывут в блоке
+    про новости рынка.~~
+
+    '
 - kind: content
   id: 007-dagster-segodnya
   title: Dagster сегодня
   code_caption: 'Dagster 1.11: dg CLI + Components'
-  code: |
-    # современный стартовый путь (1.11+)
+  code: '# современный стартовый путь (1.11+)
+
     uvx create-dagster project my_project
+
     cd my_project && dg dev          # поднять UI + инстанс одной командой
 
+
     dg list defs                     # что вообще определено в проекте
+
     dg check defs                    # валидация без запуска
+
     dg launch --assets stg_transactions
+
+    '
   bullets:
   - Ветка 1.x стабильна, обратная совместимость публичного API
   - '1.11: dg CLI и Components — стабильные'
   - 'Components: переиспользуемые блоки в YAML или Python'
   - Готовые компоненты для dbt, Fivetran, Airbyte, Sling, dlt
   - 'Два издания: OSS (Apache 2.0) и Dagster+ (управляемое)'
-  notes: |
-    Сегодня Dagster — зрелый проект в **ветке 1.x** с обещанием обратной совместимости публичного API. Самое заметное недавнее изменение — релиз **1.11**, где стабилизировались !!dg CLI и Components!!.
+  notes: 'Сегодня Dagster — зрелый проект в **ветке 1.x** с обещанием обратной совместимости публичного
+    API. Самое заметное недавнее изменение — релиз **1.11**, где стабилизировались !!dg CLI и Components!!.
 
-    **Components** — это переиспользуемые строительные блоки, которые описываются в **YAML или Python**; для dbt, Fivetran, Airbyte, Sling и dlt есть готовые. Практический смысл: __типовую интеграцию теперь не пишут кодом, а конфигурируют__. ~~Мы вернёмся к Components в блоке про dbt.~~
 
-# ── §2 Архитектура и сущности ─────────────────────────────────────────────────
+    **Components** — это переиспользуемые строительные блоки, которые описываются в **YAML или Python**;
+    для dbt, Fivetran, Airbyte, Sling и dlt есть готовые. Практический смысл: __типовую интеграцию теперь
+    не пишут кодом, а конфигурируют__. ~~Мы вернёмся к Components в блоке про dbt.~~
+
+    '
 - kind: section
   id: 008-arhitektura-i-suschnosti
   title: Архитектура и сущности
-  notes: |
-    Главный и самый практический блок лекции.
+  notes: 'Главный и самый практический блок лекции.
 
-    Пройдём !!все ключевые сущности Dagster!! по очереди: **assets**, **ops/graphs/jobs**, **schedules**, **sensors**, **resources**, **partitions**, **backfills**, **code locations**, **daemon** и **asset checks**.
 
+    Пройдём !!все ключевые сущности Dagster!! по очереди: **assets**, **ops/graphs/jobs**, **schedules**,
+    **sensors**, **resources**, **partitions**, **backfills**, **code locations**, **daemon** и **asset
+    checks**.
+
+    '
 - kind: content
   id: 009-klyuchevaya-ideya-software
   title: Ключевая идея — Software-Defined Assets
@@ -150,100 +174,100 @@ content:
     url: https://dagster.io/blog/software-defined-assets
   - label: Документация Dagster
     url: https://docs.dagster.io
-  code_caption: 'Императивно (Airflow) против декларативно (Dagster)'
-  code: |
-    # Airflow-подход: описываем ЗАДАЧИ и порядок
+  code_caption: Императивно (Airflow) против декларативно (Dagster)
+  code: '# Airflow-подход: описываем ЗАДАЧИ и порядок
+
     extract >> transform >> load
+
     # оркестратор знает "что запустить", но не знает "что получилось"
 
+
     # Dagster-подход: описываем АКТИВЫ — что должно существовать
+
     import dagster as dg
 
+
     @dg.asset
+
     def raw_transactions() -> None: ...
 
+
     @dg.asset(deps=[raw_transactions])
+
     def stg_transactions() -> None: ...
+
     # зависимость выводится из кода; граф активов строится сам
+
+    '
   bullets:
+  - 'Data-Driven подход: отличие от Airflow — концепция программно-определяемых ассетов (Software-Defined
+    Assets)'
   - 'Актив — объект данных: таблица, файл, модель, дашборд'
   - Описываем результат, а не последовательность шагов
   - Граф зависимостей выводится из сигнатур функций
-  - 'Запуск = «материализовать актив» (materialize)'
+  - Запуск = «материализовать актив» (materialize)
   - Lineage, каталог и метаданные появляются бесплатно
-  notes: |
-    Это !!центральная идея всего Dagster!!. **Актив (asset)** — это объект данных, который должен существовать: таблица в ClickHouse, файл в S3, обученная модель, дашборд.
+  notes: 'Это !!центральная идея всего Dagster!!. **Актив (asset)** — это объект данных, который должен
+    существовать: таблица в ClickHouse, файл в S3, обученная модель, дашборд.
 
-    Вместо «запусти A, потом B» мы говорим «__должна существовать таблица stg_transactions, и она делается вот так, на основе вот этого__». Зависимости Dagster выводит сам, а запуск называется **материализацией**. Побочный, но огромный бонус — **lineage** и **каталог данных** без отдельного инструмента. ~~Если вы поняли этот слайд, дальше всё складывается.~~
 
+    Вместо «запусти A, потом B» мы говорим «__должна существовать таблица stg_transactions, и она делается
+    вот так, на основе вот этого__». Зависимости Dagster выводит сам, а запуск называется **материализацией**.
+    Побочный, но огромный бонус — **lineage** и **каталог данных** без отдельного инструмента. ~~Если
+    вы поняли этот слайд, дальше всё складывается.~~
+
+    '
 - kind: content
   id: 010-asset-kod-metadannye
   title: Asset — код, метаданные, материализация
-  code_caption: 'assets.py — типовой ассет с ресурсом и метаданными'
-  code: |
-    import dagster as dg
-
-    @dg.asset(
-        group_name="staging",              # группа в UI
-        kinds={"clickhouse"},              # иконка/тип в графе
-        description="Очищенные транзакции",
-        deps=["raw_transactions"],         # зависимость по имени
-    )
-    def stg_transactions(
-        context: dg.AssetExecutionContext,
-        ch: ClickHouseResource,            # ресурс — через аргумент
-    ) -> dg.MaterializeResult:
-        rows = ch.execute("INSERT INTO stg_transactions SELECT ... FROM raw")
-        context.log.info("loaded %s rows", rows)
-        return dg.MaterializeResult(
-            metadata={"rows": rows, "preview": dg.MetadataValue.md("...")}
-        )
+  code_caption: assets.py — типовой ассет с ресурсом и метаданными
+  code: "import dagster as dg\n\n@dg.asset(\n    group_name=\"staging\",              # группа в UI\n\
+    \    kinds={\"clickhouse\"},              # иконка/тип в графе\n    description=\"Очищенные транзакции\"\
+    ,\n    deps=[\"raw_transactions\"],         # зависимость по имени\n)\ndef stg_transactions(\n   \
+    \ context: dg.AssetExecutionContext,\n    ch: ClickHouseResource,            # ресурс — через аргумент\n\
+    ) -> dg.MaterializeResult:\n    rows = ch.execute(\"INSERT INTO stg_transactions SELECT ... FROM raw\"\
+    )\n    context.log.info(\"loaded %s rows\", rows)\n    return dg.MaterializeResult(\n        metadata={\"\
+    rows\": rows, \"preview\": dg.MetadataValue.md(\"...\")}\n    )\n"
   bullets:
   - Функция с декоратором @dg.asset — и это уже узел графа
   - deps задаёт зависимости, ресурсы приходят аргументами
   - MaterializeResult возвращает метаданные в UI
   - 'Метаданные: строки, превью, ссылки, любые значения'
   - Группы и kinds делают большой граф читаемым
-  notes: |
-    Практически ассет — это **обычная Python-функция с декоратором**. Всё остальное — метаданные: `group_name` для группировки в UI, `kinds` для иконки, `deps` для явных зависимостей.
+  notes: 'Практически ассет — это **обычная Python-функция с декоратором**. Всё остальное — метаданные:
+    `group_name` для группировки в UI, `kinds` для иконки, `deps` для явных зависимостей.
 
-    Особое внимание на !!MaterializeResult!!: возвращая метаданные (число строк, превью, ссылку на дашборд), вы наполняете **каталог активов**, и в UI по каждой материализации видно, __что именно произошло и сколько данных приехало__. ~~Это то, чего в Airflow приходится добиваться руками.~~
 
+    Особое внимание на !!MaterializeResult!!: возвращая метаданные (число строк, превью, ссылку на дашборд),
+    вы наполняете **каталог активов**, и в UI по каждой материализации видно, __что именно произошло и
+    сколько данных приехало__. ~~Это то, чего в Airflow приходится добиваться руками.~~
+
+    '
 - kind: content
   id: 011-ops-graphs-i-jobs
   title: Ops, Graphs и Jobs
   code_caption: 'Императивный слой: когда активов недостаточно'
-  code: |
-    import dagster as dg
-
-    @dg.op
-    def fetch_api() -> list[dict]: ...
-
-    @dg.op
-    def push_to_crm(rows: list[dict]) -> None: ...
-
-    @dg.graph
-    def sync_crm():
-        push_to_crm(fetch_api())
-
-    sync_crm_job = sync_crm.to_job(name="sync_crm")
-
-    # job поверх активов — «материализовать это подмножество»
-    daily_marts_job = dg.define_asset_job(
-        name="daily_marts",
-        selection=dg.AssetSelection.groups("marts"),
-    )
+  code: "import dagster as dg\n\n@dg.op\ndef fetch_api() -> list[dict]: ...\n\n@dg.op\ndef push_to_crm(rows:\
+    \ list[dict]) -> None: ...\n\n@dg.graph\ndef sync_crm():\n    push_to_crm(fetch_api())\n\nsync_crm_job\
+    \ = sync_crm.to_job(name=\"sync_crm\")\n\n# job поверх активов — «материализовать это подмножество»\n\
+    daily_marts_job = dg.define_asset_job(\n    name=\"daily_marts\",\n    selection=dg.AssetSelection.groups(\"\
+    marts\"),\n)\n"
   bullets:
-  - 'Op — единица вычисления; Graph — композиция ops'
-  - 'Job — то, что реально запускается (по расписанию/сенсору)'
+  - Op — единица вычисления; Graph — композиция ops
+  - Job — то, что реально запускается (по расписанию/сенсору)
   - define_asset_job — job поверх выборки активов
   - Ops нужны, когда результат — не данные (нотификации, вызовы API)
   - Большинство задач в аналитике решается активами
-  notes: |
-    Помимо активов есть **императивный слой**: **op** — единица вычисления, **graph** — их композиция, **job** — то, что реально запускается по расписанию или сенсору.
+  notes: 'Помимо активов есть **императивный слой**: **op** — единица вычисления, **graph** — их композиция,
+    **job** — то, что реально запускается по расписанию или сенсору.
 
-    Правило выбора простое: если результат работы — __данные, которые где-то лежат__, пишите **asset**. Если результат — **действие без артефакта** (отправить в CRM, послать уведомление, дёрнуть внешний API), уместен **op**. Для активов job создаётся через !!define_asset_job!! с выборкой. ~~В аналитике 80–90% задач — это активы.~~
 
+    Правило выбора простое: если результат работы — __данные, которые где-то лежат__, пишите **asset**.
+    Если результат — **действие без артефакта** (отправить в CRM, послать уведомление, дёрнуть внешний
+    API), уместен **op**. Для активов job создаётся через !!define_asset_job!! с выборкой. ~~В аналитике
+    80–90% задач — это активы.~~
+
+    '
 - kind: table
   id: 012-asset-ili-op-kak-vybrat
   title: Asset или Op — как выбрать
@@ -268,78 +292,77 @@ content:
     - - Типичный пример
       - dbt-модель, витрина, датасет
       - уведомление, вызов API, cleanup
-    col_ratios: [3, 4, 4]
-  notes: |
-    Эта таблица — практический ответ на самый частый вопрос новичка: __«мне писать asset или op?»__.
+    col_ratios:
+    - 3
+    - 4
+    - 4
+  notes: 'Эта таблица — практический ответ на самый частый вопрос новичка: __«мне писать asset или op?»__.
 
-    Если сомневаетесь — !!пишите asset!!. Вы почти ничего не теряете, но получаете **lineage**, **партиции**, **бэкфиллы** и место в **каталоге**. Op остаётся нишевым инструментом для побочных эффектов. ~~Исторически ops появились раньше активов, поэтому в старых примерах их много — не копируйте это вслепую.~~
 
+    Если сомневаетесь — !!пишите asset!!. Вы почти ничего не теряете, но получаете **lineage**, **партиции**,
+    **бэкфиллы** и место в **каталоге**. Op остаётся нишевым инструментом для побочных эффектов. ~~Исторически
+    ops появились раньше активов, поэтому в старых примерах их много — не копируйте это вслепую.~~
+
+
+    И ещё один бонус активов — **версионирование данных**: Dagster отслеживает происхождение (**lineage**)
+    датасетов и версии моделей — от сырого источника до обученной модели видно, из чего собран каждый
+    артефакт.
+
+    '
 - kind: content
   id: 013-schedules-zapusk-po-vremeni
   title: Schedules — запуск по времени
-  code_caption: 'schedules.py'
-  code: |
-    import dagster as dg
-
-    # 1) простой вариант — расписание для job
-    daily_schedule = dg.ScheduleDefinition(
-        name="daily_marts_schedule",
-        job=daily_marts_job,
-        cron_schedule="0 3 * * *",          # каждый день в 03:00
-        execution_timezone="Europe/Moscow",
-        default_status=dg.DefaultScheduleStatus.RUNNING,
-    )
-
-    # 2) гибкий вариант — решаем в коде, что и с каким конфигом запускать
-    @dg.schedule(job=daily_marts_job, cron_schedule="0 3 * * *")
-    def parametrized_schedule(context: dg.ScheduleEvaluationContext):
-        day = context.scheduled_execution_time.strftime("%Y-%m-%d")
-        return dg.RunRequest(run_key=day, run_config={"ops": {"date": day}})
+  code_caption: schedules.py
+  code: "import dagster as dg\n\n# 1) простой вариант — расписание для job\ndaily_schedule = dg.ScheduleDefinition(\n\
+    \    name=\"daily_marts_schedule\",\n    job=daily_marts_job,\n    cron_schedule=\"0 3 * * *\",  \
+    \        # каждый день в 03:00\n    execution_timezone=\"Europe/Moscow\",\n    default_status=dg.DefaultScheduleStatus.RUNNING,\n\
+    )\n\n# 2) гибкий вариант — решаем в коде, что и с каким конфигом запускать\n@dg.schedule(job=daily_marts_job,\
+    \ cron_schedule=\"0 3 * * *\")\ndef parametrized_schedule(context: dg.ScheduleEvaluationContext):\n\
+    \    day = context.scheduled_execution_time.strftime(\"%Y-%m-%d\")\n    return dg.RunRequest(run_key=day,\
+    \ run_config={\"ops\": {\"date\": day}})\n"
   bullets:
   - Расписание = cron + job (+ таймзона)
   - '@dg.schedule позволяет считать конфиг запуска в коде'
   - RunRequest с run_key защищает от дублей
   - default_status включает расписание при деплое
   - Выполняется демоном, а не веб-сервером
-  notes: |
-    **Schedule** — это связка «**cron** + **job**». В простом случае достаточно `ScheduleDefinition`; когда нужно вычислить конфиг запуска (например, подставить дату), берём декоратор `@dg.schedule`.
+  notes: '**Schedule** — это связка «**cron** + **job**». В простом случае достаточно `ScheduleDefinition`;
+    когда нужно вычислить конфиг запуска (например, подставить дату), берём декоратор `@dg.schedule`.
 
-    Два практических момента. Первый — !!execution_timezone!!: без него легко получить запуск по UTC и расхождение в три часа. Второй — **run_key** в `RunRequest`: он __защищает от дублирующихся запусков__. И помните, что расписания исполняет **демон**. ~~Забытый демон — причина №1 «расписание не сработало».~~
 
+    Два практических момента. Первый — !!execution_timezone!!: без него легко получить запуск по UTC и
+    расхождение в три часа. Второй — **run_key** в `RunRequest`: он __защищает от дублирующихся запусков__.
+    И помните, что расписания исполняет **демон**. ~~Забытый демон — причина №1 «расписание не сработало».~~
+
+    '
 - kind: content
   id: 014-sensors-reakciya-na-sobytiya
   title: Sensors — реакция на события
-  code_caption: 'sensors.py — три типовых сенсора'
-  code: |
-    import dagster as dg
-
-    # 1) внешнее событие: появился новый файл
-    @dg.sensor(job=ingest_job, minimum_interval_seconds=30)
-    def new_file_sensor(context: dg.SensorEvaluationContext):
-        for path in list_new_files(since=context.cursor):
-            yield dg.RunRequest(run_key=path, run_config={"path": path})
-        context.update_cursor(now_marker())
-
-    # 2) реакция на материализацию другого актива
-    @dg.asset_sensor(asset_key=dg.AssetKey("raw_transactions"), job=stg_job)
-    def on_raw_loaded(context, asset_event):
-        yield dg.RunRequest(run_key=str(asset_event.timestamp))
-
-    # 3) реакция на статус чужого запуска
-    @dg.run_status_sensor(run_status=dg.DagsterRunStatus.FAILURE)
-    def alert_on_failure(context):
-        send_telegram(f"Упал запуск: {context.dagster_run.run_id}")
+  code_caption: sensors.py — три типовых сенсора
+  code: "import dagster as dg\n\n# 1) внешнее событие: появился новый файл\n@dg.sensor(job=ingest_job,\
+    \ minimum_interval_seconds=30)\ndef new_file_sensor(context: dg.SensorEvaluationContext):\n    for\
+    \ path in list_new_files(since=context.cursor):\n        yield dg.RunRequest(run_key=path, run_config={\"\
+    path\": path})\n    context.update_cursor(now_marker())\n\n# 2) реакция на материализацию другого\
+    \ актива\n@dg.asset_sensor(asset_key=dg.AssetKey(\"raw_transactions\"), job=stg_job)\ndef on_raw_loaded(context,\
+    \ asset_event):\n    yield dg.RunRequest(run_key=str(asset_event.timestamp))\n\n# 3) реакция на статус\
+    \ чужого запуска\n@dg.run_status_sensor(run_status=dg.DagsterRunStatus.FAILURE)\ndef alert_on_failure(context):\n\
+    \    send_telegram(f\"Упал запуск: {context.dagster_run.run_id}\")\n"
   bullets:
   - 'Сенсор опрашивает мир и решает: запускать или нет'
   - 'Виды: обычный, asset_sensor, run_status_sensor, freshness'
   - Cursor хранит позицию между опросами
   - run_key обеспечивает идемпотентность
   - 'Типовое применение: файлы, очереди, алерты о падениях'
-  notes: |
-    **Sensor** — это противоположность расписанию: он не ждёт времени, а __опрашивает внешний мир__ и решает, нужен ли запуск. Интервал опроса задаётся `minimum_interval_seconds`.
+  notes: '**Sensor** — это противоположность расписанию: он не ждёт времени, а __опрашивает внешний мир__
+    и решает, нужен ли запуск. Интервал опроса задаётся `minimum_interval_seconds`.
 
-    Три вида покрывают почти всё: обычный сенсор для **внешних событий** (файл, очередь), !!asset_sensor!! для реакции на **материализацию другого актива**, и **run_status_sensor** для **алертов о падениях** — именно так делают уведомления в Telegram. Ключевые механики — **cursor** (позиция между опросами) и **run_key** (идемпотентность). ~~Сенсоры тоже исполняет демон.~~
 
+    Три вида покрывают почти всё: обычный сенсор для **внешних событий** (файл, очередь), !!asset_sensor!!
+    для реакции на **материализацию другого актива**, и **run_status_sensor** для **алертов о падениях**
+    — именно так делают уведомления в Telegram. Ключевые механики — **cursor** (позиция между опросами)
+    и **run_key** (идемпотентность). ~~Сенсоры тоже исполняет демон.~~
+
+    '
 - kind: table
   id: 015-schedule-ili-sensor
   title: Schedule или Sensor
@@ -364,271 +387,297 @@ content:
     - - Типовой кейс
       - ночной пересчёт витрин
       - «приехал файл», «упал job»
-    col_ratios: [3, 4, 4]
-  notes: |
-    Выбор между ними — это выбор между «__я знаю, когда__» и «__я знаю, после чего__».
+    col_ratios:
+    - 3
+    - 4
+    - 4
+  notes: 'Выбор между ними — это выбор между «__я знаю, когда__» и «__я знаю, после чего__».
 
-    На практике в проде живут **оба**: ночной пересчёт витрин — расписанием, а реакция на прилетевший файл и !!алерты о падениях!! — сенсорами. ~~Если начинаете часто опрашивать расписанием каждые пять минут «а не появилось ли» — вам нужен сенсор.~~
 
+    На практике в проде живут **оба**: ночной пересчёт витрин — расписанием, а реакция на прилетевший
+    файл и !!алерты о падениях!! — сенсорами. ~~Если начинаете часто опрашивать расписанием каждые пять
+    минут «а не появилось ли» — вам нужен сенсор.~~
+
+    '
 - kind: content
   id: 016-resources-i-io-managers
   title: Resources и IO managers
-  code_caption: 'resources.py — конфигурируемое подключение + управление хранением'
-  code: |
-    import dagster as dg
-
-    class ClickHouseResource(dg.ConfigurableResource):
-        host: str
-        user: str
-        password: str                       # приедет из EnvVar, не из кода
-
-        def execute(self, sql: str) -> int: ...
-
-    class ParquetIOManager(dg.ConfigurableIOManager):
-        base_dir: str
-
-        def handle_output(self, context, obj):      # как СОХРАНИТЬ результат
-            obj.to_parquet(f"{self.base_dir}/{context.asset_key.path[-1]}.parquet")
-
-        def load_input(self, context):              # как ПРОЧИТАТЬ для потребителя
-            return pd.read_parquet(f"{self.base_dir}/{...}.parquet")
-
-    defs = dg.Definitions(
-        assets=[stg_transactions],
-        resources={
-            "ch": ClickHouseResource(
-                host=dg.EnvVar("CH_HOST"), user=dg.EnvVar("CH_USER"),
-                password=dg.EnvVar("CH_PASSWORD"),
-            ),
-            "io_manager": ParquetIOManager(base_dir="data/warehouse"),
-        },
-    )
+  code_caption: resources.py — конфигурируемое подключение + управление хранением
+  code: "import dagster as dg\n\nclass ClickHouseResource(dg.ConfigurableResource):\n    host: str\n \
+    \   user: str\n    password: str                       # приедет из EnvVar, не из кода\n\n    def\
+    \ execute(self, sql: str) -> int: ...\n\nclass ParquetIOManager(dg.ConfigurableIOManager):\n    base_dir:\
+    \ str\n\n    def handle_output(self, context, obj):      # как СОХРАНИТЬ результат\n        obj.to_parquet(f\"\
+    {self.base_dir}/{context.asset_key.path[-1]}.parquet\")\n\n    def load_input(self, context):    \
+    \          # как ПРОЧИТАТЬ для потребителя\n        return pd.read_parquet(f\"{self.base_dir}/{...}.parquet\"\
+    )\n\ndefs = dg.Definitions(\n    assets=[stg_transactions],\n    resources={\n        \"ch\": ClickHouseResource(\n\
+    \            host=dg.EnvVar(\"CH_HOST\"), user=dg.EnvVar(\"CH_USER\"),\n            password=dg.EnvVar(\"\
+    CH_PASSWORD\"),\n        ),\n        \"io_manager\": ParquetIOManager(base_dir=\"data/warehouse\"\
+    ),\n    },\n)\n"
   bullets:
   - 'Resource — внешняя зависимость: БД, API, S3, клиент'
   - EnvVar подставляет секреты в рантайме, а не в коде
-  - 'IO manager отвечает за «где лежит результат»'
+  - IO manager отвечает за «где лежит результат»
   - Смена окружения = смена ресурсов, код активов не меняется
-  - Ресурсы легко подменяются моками в тестах
-  notes: |
-    **Resource** — это внешняя зависимость: подключение к ClickHouse, S3-клиент, API-токен. Она объявляется как класс и передаётся активам **аргументом**, что делает код !!тестируемым!!: в тестах подставляем мок.
+  - 'Изоляция кода: использование фабрик ресурсов — локальное тестирование пайплайнов без развертывания
+    инфраструктуры'
+  notes: '**Resource** — это внешняя зависимость: подключение к ClickHouse, S3-клиент, API-токен. Она
+    объявляется как класс и передаётся активам **аргументом**, что делает код !!тестируемым!!: в тестах
+    подставляем мок.
 
-    **IO manager** отвечает на отдельный вопрос — __где физически лежит результат актива__ и как его прочитает следующий актив. Разделение важное: логика в активе, транспорт — в IO-менеджере. И обратите внимание на **EnvVar**: секрет читается в рантайме и **не попадает в код**. ~~Именно ресурсы дают dev/prod-разделение, о котором поговорим дальше.~~
 
+    **IO manager** отвечает на отдельный вопрос — __где физически лежит результат актива__ и как его прочитает
+    следующий актив. Разделение важное: логика в активе, транспорт — в IO-менеджере. И обратите внимание
+    на **EnvVar**: секрет читается в рантайме и **не попадает в код**. ~~Именно ресурсы дают dev/prod-разделение,
+    о котором поговорим дальше.~~
+
+    '
+- kind: content
+  id: 051-ml-pajplajn-kak-cepochka-assetov
+  title: ML-пайплайн как цепочка зависимых активов
+  materials:
+  - label: Dagster for ML pipelines
+    url: https://docs.dagster.io/guides/build/ml-pipelines
+  code_caption: ml_pipeline.py — Загрузка → Препроцессинг → Обучение → Валидация
+  code: 'import dagster as dg
+
+
+    @dg.asset
+
+    def raw_data(ch: ClickHouseResource): ...            # Загрузка
+
+
+    @dg.asset(deps=[raw_data])
+
+    def preprocessed_features(): ...                     # Препроцессинг
+
+
+    @dg.asset(deps=[preprocessed_features])
+
+    def trained_model(trainer: TrainerResource): ...     # Обучение
+
+
+    @dg.asset(deps=[trained_model])
+
+    def validation_report(): ...                         # Валидация
+
+    '
+  bullets:
+  - ML-пайплайн — описание шагов «Загрузка → Препроцессинг → Обучение → Валидация»
+  - Каждый шаг — актив в цепочке зависимых ресурсов
+  - Модель и отчёт валидации — такие же активы, как таблицы
+  - 'Перезапуск с любого шага: материализуется только хвост цепочки'
+  notes: 'Соберём всё вместе на главном сценарии курса. **ML-пайплайн** в Dagster — это описание шагов
+    !!«Загрузка → Препроцессинг → Обучение → Валидация»!! как **цепочки зависимых активов**: каждый шаг
+    объявляет, от какого артефакта он зависит, а внешние зависимости (БД, трейнер) приходят **ресурсами**.
+
+
+    Выигрыш по сравнению с task-подходом: __обученная модель и отчёт валидации — полноправные активы__
+    с lineage и метаданными. Упала валидация — материализуем только её, без пересчёта всей цепочки. ~~Это
+    же ДЗ: оркестрируем dbt-проект Olist, а поверх — шаги обучения.~~
+
+    '
 - kind: content
   id: 017-partitions-razrezaem-aktiv-po
   title: Partitions — разрезаем актив по измерению
-  code_caption: 'partitions.py'
-  code: |
-    import dagster as dg
-
-    daily = dg.DailyPartitionsDefinition(start_date="2026-01-01")
-
-    @dg.asset(partitions_def=daily)
-    def transactions_daily(context: dg.AssetExecutionContext, ch: ClickHouseResource):
-        day = context.partition_key                 # '2026-03-14'
-        ch.execute(f"""
-            INSERT INTO stg_transactions
-            SELECT * FROM raw.transactions WHERE toDate(ts) = '{day}'
-        """)
-
-    # другие виды разбиения
-    regions = dg.StaticPartitionsDefinition(["msk", "spb", "ekb"])
-    both = dg.MultiPartitionsDefinition({"date": daily, "region": regions})
+  code_caption: partitions.py
+  code: "import dagster as dg\n\ndaily = dg.DailyPartitionsDefinition(start_date=\"2026-01-01\")\n\n@dg.asset(partitions_def=daily)\n\
+    def transactions_daily(context: dg.AssetExecutionContext, ch: ClickHouseResource):\n    day = context.partition_key\
+    \                 # '2026-03-14'\n    ch.execute(f\"\"\"\n        INSERT INTO stg_transactions\n \
+    \       SELECT * FROM raw.transactions WHERE toDate(ts) = '{day}'\n    \"\"\")\n\n# другие виды разбиения\n\
+    regions = dg.StaticPartitionsDefinition([\"msk\", \"spb\", \"ekb\"])\nboth = dg.MultiPartitionsDefinition({\"\
+    date\": daily, \"region\": regions})\n"
   bullets:
   - 'Партиция — независимо обрабатываемый срез: день, регион, клиент'
   - 'Виды: Daily/Hourly, Static, Multi, Dynamic'
   - Каждая партиция имеет свой статус материализации
   - Пересчитать можно один день, а не всю таблицу
   - Основа для инкрементальной загрузки и бэкфиллов
-  notes: |
-    **Партиция** — это независимо обрабатываемый срез актива: обычно **день**, но бывает регион, клиент или их комбинация через `MultiPartitionsDefinition`.
+  notes: '**Партиция** — это независимо обрабатываемый срез актива: обычно **день**, но бывает регион,
+    клиент или их комбинация через `MultiPartitionsDefinition`.
 
-    Практическая ценность огромна: в UI видно !!статус каждой партиции отдельно!!, и если сломался один день — пересчитываете **именно его**, а не всю таблицу за два года. Это же основа **инкрементальной загрузки**: `context.partition_key` подставляется в фильтр запроса. ~~Партиции — то, ради чего многие и переходят на Dagster.~~
 
+    Практическая ценность огромна: в UI видно !!статус каждой партиции отдельно!!, и если сломался один
+    день — пересчитываете **именно его**, а не всю таблицу за два года. Это же основа **инкрементальной
+    загрузки**: `context.partition_key` подставляется в фильтр запроса. ~~Партиции — то, ради чего многие
+    и переходят на Dagster.~~
+
+    '
 - kind: content
   id: 018-backfills-massovyj-pereschet
   title: Backfills — массовый пересчёт истории
-  code_caption: 'Бэкфилл из UI и из CLI'
-  code: |
-    # пересчитать диапазон партиций одного актива
-    dagster asset backfill \
-        --select transactions_daily \
-        --partition-range 2026-01-01...2026-06-30
-
-    # пересчитать целую группу активов
-    dagster asset backfill --select "group:marts" --all-partitions
+  code_caption: Бэкфилл из UI и из CLI
+  code: "# пересчитать диапазон партиций одного актива\ndagster asset backfill \\\n    --select transactions_daily\
+    \ \\\n    --partition-range 2026-01-01...2026-06-30\n\n# пересчитать целую группу активов\ndagster\
+    \ asset backfill --select \"group:marts\" --all-partitions\n"
   bullets:
   - Бэкфилл = массовая материализация набора партиций
   - Запускается из UI (матрица партиций) или из CLI
   - Исполняется демоном, уважает лимиты параллелизма
   - Прогресс и падения видны по каждой партиции
   - 'Частый сценарий: изменилась логика — пересчитать историю'
-  notes: |
-    **Backfill** — это массовая материализация набора партиций. Классический повод: __поменялась бизнес-логика витрины, и надо пересчитать полгода истории__.
+  notes: '**Backfill** — это массовая материализация набора партиций. Классический повод: __поменялась
+    бизнес-логика витрины, и надо пересчитать полгода истории__.
 
-    В Dagster это !!штатная операция!!, а не героический скрипт: в UI выделяете диапазон на матрице партиций, и демон запускает их с учётом **лимитов параллелизма**, показывая прогресс и падения __по каждой партиции отдельно__. ~~Сравните с бэкфиллом в Airflow, где это исторически было болезненной темой.~~
 
+    В Dagster это !!штатная операция!!, а не героический скрипт: в UI выделяете диапазон на матрице партиций,
+    и демон запускает их с учётом **лимитов параллелизма**, показывая прогресс и падения __по каждой партиции
+    отдельно__. ~~Сравните с бэкфиллом в Airflow, где это исторически было болезненной темой.~~
+
+    '
 - kind: content
   id: 019-code-locations-i-workspace
   title: Code locations и workspace
-  code_caption: 'workspace.yaml — несколько независимых кодовых локаций'
-  code: |
-    load_from:
-      # локация 1: основной проект
-      - python_module:
-          module_name: my_project.definitions
-          location_name: core
-
-      # локация 2: dbt-проект со своими зависимостями
-      - python_module:
-          module_name: dbt_project.definitions
-          location_name: dbt
-
-      # локация 3: удалённый gRPC-сервер (свой контейнер и образ)
-      - grpc_server:
-          host: dagster-ml-code
-          port: 4000
-          location_name: ml
+  code_caption: workspace.yaml — несколько независимых кодовых локаций
+  code: "load_from:\n  # локация 1: основной проект\n  - python_module:\n      module_name: my_project.definitions\n\
+    \      location_name: core\n\n  # локация 2: dbt-проект со своими зависимостями\n  - python_module:\n\
+    \      module_name: dbt_project.definitions\n      location_name: dbt\n\n  # локация 3: удалённый\
+    \ gRPC-сервер (свой контейнер и образ)\n  - grpc_server:\n      host: dagster-ml-code\n      port:\
+    \ 4000\n      location_name: ml\n"
   bullets:
   - Code location — изолированный процесс с кодом и зависимостями
   - У каждой локации свой образ, venv и версия библиотек
   - Ошибка в одной локации не роняет остальные
   - Перезагрузка локации не требует рестарта веб-сервера
   - Основа для мультикомандной работы
-  notes: |
-    **Code location** — это изолированный процесс, где живут ваши определения. У каждой локации !!свои зависимости и свой образ!!.
+  notes: '**Code location** — это изолированный процесс, где живут ваши определения. У каждой локации
+    !!свои зависимости и свой образ!!.
 
-    Это решает реальную боль больших проектов: команда ML хочет один набор версий, команда аналитики — другой. В Airflow это __исторически сложно__, а здесь локации просто разные процессы. Бонусы: **ошибка импорта в одной локации не роняет остальные**, а перезагрузка кода не требует рестарта веб-сервера. ~~На больших проектах это ключевая сущность.~~
 
+    Это решает реальную боль больших проектов: команда ML хочет один набор версий, команда аналитики —
+    другой. В Airflow это __исторически сложно__, а здесь локации просто разные процессы. Бонусы: **ошибка
+    импорта в одной локации не роняет остальные**, а перезагрузка кода не требует рестарта веб-сервера.
+    ~~На больших проектах это ключевая сущность.~~
+
+    '
 - kind: content
   id: 020-instance-daemon-webserver
   title: Instance, Daemon, Webserver
-  code_caption: 'Три процесса и dagster.yaml'
-  code: |
-    ┌──────────────┐   ┌──────────────┐   ┌────────────────────┐
-    │  Webserver   │   │    Daemon    │   │   Code locations   │
-    │  (UI, GraphQL│   │ расписания,  │   │  ваш код в своих   │
-    │   запуск рук)│   │ сенсоры,     │   │  процессах (gRPC)  │
-    │              │   │ очередь, BF  │   │                    │
-    └──────┬───────┘   └──────┬───────┘   └─────────┬──────────┘
-           └──────────────────┴─────────────────────┘
-                              │
-                    ┌───────────────────┐
-                    │  Dagster Instance │  dagster.yaml
-                    │  run storage      │  Postgres в проде
-                    │  event log        │  (SQLite в dev)
-                    │  schedule storage │
-                    └───────────────────┘
+  code_caption: Три процесса и dagster.yaml
+  code: "┌──────────────┐   ┌──────────────┐   ┌────────────────────┐\n│  Webserver   │   │    Daemon\
+    \    │   │   Code locations   │\n│  (UI, GraphQL│   │ расписания,  │   │  ваш код в своих   │\n│ \
+    \  запуск рук)│   │ сенсоры,     │   │  процессах (gRPC)  │\n│              │   │ очередь, BF  │ \
+    \  │                    │\n└──────┬───────┘   └──────┬───────┘   └─────────┬──────────┘\n       └──────────────────┴─────────────────────┘\n\
+    \                          │\n                ┌───────────────────┐\n                │  Dagster Instance\
+    \ │  dagster.yaml\n                │  run storage      │  Postgres в проде\n                │  event\
+    \ log        │  (SQLite в dev)\n                │  schedule storage │\n                └───────────────────┘\n"
   bullets:
-  - 'Webserver — UI и GraphQL API; раньше назывался Dagit'
-  - 'Daemon — расписания, сенсоры, очередь запусков, бэкфиллы'
+  - Webserver — UI и GraphQL API; раньше назывался Dagit
+  - Daemon — расписания, сенсоры, очередь запусков, бэкфиллы
   - 'Instance — общее состояние: запуски, события, расписания'
   - dagster.yaml настраивает хранилища и лимиты
-  - 'В проде хранилище — Postgres, в dev — SQLite'
-  notes: |
-    Три процесса, которые надо различать. **Webserver** — это UI и GraphQL API (историческое имя — **Dagit**). **Daemon** — фоновый процесс, который исполняет !!расписания, сенсоры, очередь запусков и бэкфиллы!!.
+  - В проде хранилище — Postgres, в dev — SQLite
+  notes: 'Три процесса, которые надо различать. **Webserver** — это UI и GraphQL API (историческое имя
+    — **Dagit**). **Daemon** — фоновый процесс, который исполняет !!расписания, сенсоры, очередь запусков
+    и бэкфиллы!!.
 
-    **Instance** — не процесс, а __общее состояние__: где хранятся запуски, лог событий и расписания; настраивается в `dagster.yaml`. В деве это SQLite, в проде — **Postgres**. Запомните главное: **без запущенного демона не работают ни расписания, ни сенсоры**. ~~Это самая частая ошибка первого прод-деплоя.~~
 
+    **Instance** — не процесс, а __общее состояние__: где хранятся запуски, лог событий и расписания;
+    настраивается в `dagster.yaml`. В деве это SQLite, в проде — **Postgres**. Запомните главное: **без
+    запущенного демона не работают ни расписания, ни сенсоры**. ~~Это самая частая ошибка первого прод-деплоя.~~
+
+    '
 - kind: content
   id: 021-asset-checks-i-svezhest-dannyh
   title: Asset checks и свежесть данных
-  code_caption: 'checks.py — качество как часть графа'
-  code: |
-    import dagster as dg
-
-    @dg.asset_check(asset=stg_transactions, blocking=True)
-    def no_null_ids(ch: ClickHouseResource) -> dg.AssetCheckResult:
-        nulls = ch.scalar("SELECT count() FROM stg_transactions WHERE id IS NULL")
-        return dg.AssetCheckResult(
-            passed=(nulls == 0),
-            severity=dg.AssetCheckSeverity.ERROR,
-            metadata={"nulls": nulls},
-        )
-
-    @dg.asset_check(asset=stg_transactions)
-    def fresh_enough(ch: ClickHouseResource) -> dg.AssetCheckResult:
-        lag_h = ch.scalar("SELECT dateDiff('hour', max(ts), now()) FROM stg_transactions")
-        return dg.AssetCheckResult(passed=(lag_h < 24), metadata={"lag_hours": lag_h})
+  code_caption: checks.py — качество как часть графа
+  code: "import dagster as dg\n\n@dg.asset_check(asset=stg_transactions, blocking=True)\ndef no_null_ids(ch:\
+    \ ClickHouseResource) -> dg.AssetCheckResult:\n    nulls = ch.scalar(\"SELECT count() FROM stg_transactions\
+    \ WHERE id IS NULL\")\n    return dg.AssetCheckResult(\n        passed=(nulls == 0),\n        severity=dg.AssetCheckSeverity.ERROR,\n\
+    \        metadata={\"nulls\": nulls},\n    )\n\n@dg.asset_check(asset=stg_transactions)\ndef fresh_enough(ch:\
+    \ ClickHouseResource) -> dg.AssetCheckResult:\n    lag_h = ch.scalar(\"SELECT dateDiff('hour', max(ts),\
+    \ now()) FROM stg_transactions\")\n    return dg.AssetCheckResult(passed=(lag_h < 24), metadata={\"\
+    lag_hours\": lag_h})\n"
   bullets:
   - Проверка привязана к активу и видна в его карточке
-  - 'blocking=True останавливает зависимые активы'
-  - 'severity различает WARN и ERROR'
+  - blocking=True останавливает зависимые активы
+  - severity различает WARN и ERROR
   - Проверки свежести ловят «тихо устаревшие» витрины
   - dbt-тесты подтягиваются как asset checks автоматически
-  notes: |
-    **Asset check** — это проверка качества, __привязанная к конкретному активу__ и видимая прямо в его карточке в UI. Не отдельный джоб «проверить всё», а часть описания актива.
+  notes: '**Asset check** — это проверка качества, __привязанная к конкретному активу__ и видимая прямо
+    в его карточке в UI. Не отдельный джоб «проверить всё», а часть описания актива.
 
-    Два важных параметра. !!blocking=True!! означает, что при провале **зависимые активы не поедут** — плохие данные не расползутся по витринам. **severity** разделяет «предупредить» и «остановить». Отдельно отмечу **проверки свежести**: они ловят самый коварный класс инцидентов — __витрина не упала, она просто тихо перестала обновляться__. ~~Хорошая новость: dbt-тесты Dagster подтягивает как asset checks сам.~~
 
+    Два важных параметра. !!blocking=True!! означает, что при провале **зависимые активы не поедут** —
+    плохие данные не расползутся по витринам. **severity** разделяет «предупредить» и «остановить». Отдельно
+    отмечу **проверки свежести**: они ловят самый коварный класс инцидентов — __витрина не упала, она
+    просто тихо перестала обновляться__. ~~Хорошая новость: dbt-тесты Dagster подтягивает как asset checks
+    сам.~~
+
+    '
 - kind: content
   id: 022-dg-cli-i-components
   title: dg CLI и Components
   materials:
   - label: 'Релиз Dagster 1.11: dg + Components'
     url: https://dagster.io/blog/dagster-1-11-build-me-up-buttercup
-  code_caption: 'defs.yaml — интеграция без единой строчки Python'
-  code: |
-    # dbt-проект как компонент: описали — получили граф активов
-    type: dagster_dbt.DbtProjectComponent
-
-    attributes:
-      project: "{{ project_root }}/dbt"
-      select: "fqn:*"
-      translation:
-        group_name: dbt_marts
-        key: "target/{{ node.name }}"
-    ---
-    # рабочий цикл
-    dg scaffold defs dagster_dbt.DbtProjectComponent dbt_ingest
-    dg list defs && dg check defs
-    dg dev
+  code_caption: defs.yaml — интеграция без единой строчки Python
+  code: "# dbt-проект как компонент: описали — получили граф активов\ntype: dagster_dbt.DbtProjectComponent\n\
+    \nattributes:\n  project: \"{{ project_root }}/dbt\"\n  select: \"fqn:*\"\n  translation:\n    group_name:\
+    \ dbt_marts\n    key: \"target/{{ node.name }}\"\n---\n# рабочий цикл\ndg scaffold defs dagster_dbt.DbtProjectComponent\
+    \ dbt_ingest\ndg list defs && dg check defs\ndg dev\n"
   bullets:
-  - 'Component — переиспользуемый блок в YAML или Python'
+  - Component — переиспользуемый блок в YAML или Python
   - Готовые компоненты для dbt, Fivetran, Airbyte, Sling, dlt
   - dg scaffold создаёт заготовку нужного типа
   - dg check валидирует определения без запуска
   - Понижает порог входа для не-инженеров
-  notes: |
-    **Components** — самое заметное нововведение ветки 1.11. Идея: __типовую интеграцию не пишут кодом, а описывают конфигом__, и Dagster разворачивает её в полноценный граф активов.
+  notes: '**Components** — самое заметное нововведение ветки 1.11. Идея: __типовую интеграцию не пишут
+    кодом, а описывают конфигом__, и Dagster разворачивает её в полноценный граф активов.
 
-    Готовые компоненты уже есть для **dbt**, **Fivetran**, **Airbyte**, **Sling** и **dlt**. Практический эффект двойной: во-первых, !!меньше шаблонного кода!!; во-вторых, __аналитик без глубокого Python может добавить источник__, отредактировав YAML. **dg check** при этом валидирует определения, не запуская пайплайн. ~~Это прямой ответ на упрёк «Dagster слишком инженерный».~~
 
-# ── §3 Dev vs Prod ────────────────────────────────────────────────────────────
+    Готовые компоненты уже есть для **dbt**, **Fivetran**, **Airbyte**, **Sling** и **dlt**. Практический
+    эффект двойной: во-первых, !!меньше шаблонного кода!!; во-вторых, __аналитик без глубокого Python
+    может добавить источник__, отредактировав YAML. **dg check** при этом валидирует определения, не запуская
+    пайплайн. ~~Это прямой ответ на упрёк «Dagster слишком инженерный».~~
+
+    '
 - kind: section
   id: 023-dev-i-prod-rezhimy
   title: Dev- и prod-режимы
-  notes: |
-    Разберём, чем __локальная разработка отличается от продакшена__ и что меняется при деплое.
+  notes: 'Разберём, чем __локальная разработка отличается от продакшена__ и что меняется при деплое.
+
 
     И сразу сравним **Dagster OSS** с коммерческим **Dagster+**, чтобы понимать, за что берут деньги.
 
+    '
 - kind: content
   id: 024-lokalnaya-razrabotka
   title: Локальная разработка
-  code_caption: 'Один процесс, SQLite, мгновенная перезагрузка кода'
-  code: |
-    dg dev              # современный путь (1.11+)
+  code_caption: Один процесс, SQLite, мгновенная перезагрузка кода
+  code: 'dg dev              # современный путь (1.11+)
+
     dagster dev         # классический эквивалент
+
     # → webserver на http://localhost:3000 + встроенный daemon
 
+
     # точечные запуски без UI
+
     dagster asset materialize --select stg_transactions
+
     dagster job execute -j daily_marts
 
+
     # DAGSTER_HOME определяет, где лежит инстанс (dagster.yaml, SQLite)
+
     export DAGSTER_HOME=$PWD/.dagster
+
+    '
   bullets:
-  - 'dg dev поднимает UI и демон одной командой'
+  - dg dev поднимает UI и демон одной командой
   - Хранилище — SQLite в DAGSTER_HOME
   - Код перечитывается без рестарта (кнопка Reload)
   - Ресурсы указывают на локальные/тестовые системы
   - Полноценный UI доступен уже локально
-  notes: |
-    Локально всё запускается !!одной командой!!: `dg dev` (или классический `dagster dev`) поднимает **веб-сервер и демон** в одном процессе, состояние кладётся в **SQLite** внутри `DAGSTER_HOME`.
+  notes: 'Локально всё запускается !!одной командой!!: `dg dev` (или классический `dagster dev`) поднимает
+    **веб-сервер и демон** в одном процессе, состояние кладётся в **SQLite** внутри `DAGSTER_HOME`.
 
-    Ключевое удобство — __в деве доступен ровно тот же UI, что и в проде__: граф активов, история запусков, логи, матрица партиций. Изменили код — нажали **Reload** в интерфейсе, рестарт не нужен. ~~Обратите внимание на DAGSTER_HOME: без него инстанс будет временным, и история запусков потеряется.~~
 
+    Ключевое удобство — __в деве доступен ровно тот же UI, что и в проде__: граф активов, история запусков,
+    логи, матрица партиций. Изменили код — нажали **Reload** в интерфейсе, рестарт не нужен. ~~Обратите
+    внимание на DAGSTER_HOME: без него инстанс будет временным, и история запусков потеряется.~~
+
+    '
 - kind: table
   id: 025-dev-protiv-prod
   title: Dev против Prod
@@ -659,12 +708,20 @@ content:
     - - Наблюдаемость
       - логи в терминал
       - метрики, алерты, дежурство
-    col_ratios: [3, 4, 4]
-  notes: |
-    Главное, что стоит запомнить: !!код активов при переходе в прод не меняется!! — меняется **конфигурация ресурсов и инстанса**. В этом и смысл того, что подключения вынесены в ресурсы.
+    col_ratios:
+    - 3
+    - 4
+    - 4
+  notes: 'Главное, что стоит запомнить: !!код активов при переходе в прод не меняется!! — меняется **конфигурация
+    ресурсов и инстанса**. В этом и смысл того, что подключения вынесены в ресурсы.
 
-    Три пункта, на которых спотыкаются чаще всего: **SQLite → Postgres** (иначе конкурентные запуски начнут блокироваться), **демон должен быть запущен отдельно**, и __секреты приходят из окружения__, а не из `.env` в репозитории. ~~Ещё одна классика: забыть default_status и удивляться, что расписания в проде выключены.~~
 
+    Три пункта, на которых спотыкаются чаще всего: **SQLite → Postgres** (иначе конкурентные запуски начнут
+    блокироваться), **демон должен быть запущен отдельно**, и __секреты приходят из окружения__, а не
+    из `.env` в репозитории. ~~Ещё одна классика: забыть default_status и удивляться, что расписания в
+    проде выключены.~~
+
+    '
 - kind: content
   id: 026-deploj-v-prodakshen
   title: Деплой в продакшен
@@ -672,35 +729,29 @@ content:
   - label: 'Dagster: деплой'
     url: https://docs.dagster.io/guides/deploy
   code_caption: 'docker-compose: разделение ролей'
-  code: |
-    services:
-      dagster-webserver:                 # UI
-        image: my-dagster:1.11
-        command: dagster-webserver -h 0.0.0.0 -p 3000 -w workspace.yaml
-        environment: [DAGSTER_HOME=/opt/dagster/home]
-
-      dagster-daemon:                    # расписания, сенсоры, очередь, бэкфиллы
-        image: my-dagster:1.11
-        command: dagster-daemon run
-        environment: [DAGSTER_HOME=/opt/dagster/home]
-
-      dagster-code-dbt:                  # кодовая локация как отдельный сервис
-        image: my-dbt-code:2026.07
-        command: dagster api grpc -h 0.0.0.0 -p 4000 -m dbt_project.definitions
-
-      postgres:                          # run storage + event log
-        image: postgres:16
+  code: "services:\n  dagster-webserver:                 # UI\n    image: my-dagster:1.11\n    command:\
+    \ dagster-webserver -h 0.0.0.0 -p 3000 -w workspace.yaml\n    environment: [DAGSTER_HOME=/opt/dagster/home]\n\
+    \n  dagster-daemon:                    # расписания, сенсоры, очередь, бэкфиллы\n    image: my-dagster:1.11\n\
+    \    command: dagster-daemon run\n    environment: [DAGSTER_HOME=/opt/dagster/home]\n\n  dagster-code-dbt:\
+    \                  # кодовая локация как отдельный сервис\n    image: my-dbt-code:2026.07\n    command:\
+    \ dagster api grpc -h 0.0.0.0 -p 4000 -m dbt_project.definitions\n\n  postgres:                  \
+    \        # run storage + event log\n    image: postgres:16\n"
   bullets:
-  - 'Webserver и daemon — отдельные сервисы (демон обязателен)'
+  - Webserver и daemon — отдельные сервисы (демон обязателен)
   - Кодовые локации — свои образы и свой релизный цикл
-  - 'Postgres хранит запуски, события и расписания'
-  - 'В Kubernetes — официальный Helm-чарт, запуск на под'
+  - Postgres хранит запуски, события и расписания
+  - В Kubernetes — официальный Helm-чарт, запуск на под
   - Обновление локации не требует остановки UI
-  notes: |
-    В проде роли **разъезжаются по контейнерам**: отдельно **webserver**, отдельно **daemon**, отдельно **кодовые локации**, и общий **Postgres** под состояние.
+  notes: 'В проде роли **разъезжаются по контейнерам**: отдельно **webserver**, отдельно **daemon**, отдельно
+    **кодовые локации**, и общий **Postgres** под состояние.
 
-    Самое ценное в этой схеме — !!независимый релизный цикл кодовых локаций!!: команда dbt катит свой образ, не трогая ни UI, ни чужой код. В **Kubernetes** есть официальный **Helm-чарт**, где каждый запуск — __отдельный под__, что даёт честную изоляцию и лимиты ресурсов. ~~Ещё раз: без сервиса daemon расписания и сенсоры молча не работают.~~
 
+    Самое ценное в этой схеме — !!независимый релизный цикл кодовых локаций!!: команда dbt катит свой
+    образ, не трогая ни UI, ни чужой код. В **Kubernetes** есть официальный **Helm-чарт**, где каждый
+    запуск — __отдельный под__, что даёт честную изоляцию и лимиты ресурсов. ~~Ещё раз: без сервиса daemon
+    расписания и сенсоры молча не работают.~~
+
+    '
 - kind: table
   id: 027-dagster-oss-protiv-dagster
   title: Dagster OSS против Dagster+
@@ -708,7 +759,7 @@ content:
     headers:
     - Возможность
     - OSS (Apache 2.0)
-    - 'Dagster+ (dagster.io)'
+    - Dagster+ (dagster.io)
     rows:
     - - Ядро оркестрации
       - полностью
@@ -734,21 +785,30 @@ content:
     - - Цена
       - бесплатно
       - подписка
-    col_ratios: [3, 3, 4]
-  notes: |
-    **OSS-версия функционально полноценна**: ядро оркестрации, партиции, бэкфиллы, checks — всё там. За деньги продают не «настоящий Dagster», а !!эксплуатацию и командные функции!!.
+    col_ratios:
+    - 3
+    - 3
+    - 4
+  notes: '**OSS-версия функционально полноценна**: ядро оркестрации, партиции, бэкфиллы, checks — всё
+    там. За деньги продают не «настоящий Dagster», а !!эксплуатацию и командные функции!!.
 
-    Практически ценнее всего в Dagster+ две вещи: **Branch Deployments** — __превью-окружение на каждый pull request__, и **Insights** — статистика стоимости и длительности запусков. Плюс корпоративные **RBAC/SSO/аудит**. В **Hybrid**-режиме данные не покидают ваш контур: облако держит только control plane. ~~Для учебного проекта и для многих компаний OSS более чем достаточно.~~
 
-# ── §4 dbt и трансформации ────────────────────────────────────────────────────
+    Практически ценнее всего в Dagster+ две вещи: **Branch Deployments** — __превью-окружение на каждый
+    pull request__, и **Insights** — статистика стоимости и длительности запусков. Плюс корпоративные
+    **RBAC/SSO/аудит**. В **Hybrid**-режиме данные не покидают ваш контур: облако держит только control
+    plane. ~~Для учебного проекта и для многих компаний OSS более чем достаточно.~~
+
+    '
 - kind: section
   id: 028-integraciya-s-dbt-scenarii-i
   title: 'Интеграция с dbt: сценарии и практика'
-  notes: |
-    Ключевой для нашего курса блок: **Dagster + dbt** — самая частая связка в аналитических платформах.
+  notes: 'Ключевой для нашего курса блок: **Dagster + dbt** — самая частая связка в аналитических платформах.
 
-    Разберём __как это устроено внутри__, какие бывают **сценарии интеграции**, что делать с **несколькими dbt-проектами**, и сравним с **Airflow + Cosmos**.
 
+    Разберём __как это устроено внутри__, какие бывают **сценарии интеграции**, что делать с **несколькими
+    dbt-проектами**, и сравним с **Airflow + Cosmos**.
+
+    '
 - kind: content
   id: 029-dagster-dbt-kak-eto-rabotaet
   title: dagster-dbt — как это работает
@@ -757,34 +817,30 @@ content:
     url: https://docs.dagster.io/integrations/libraries/dbt
   - label: dbt docs
     url: https://docs.getdbt.com/docs/introduction
-  code_caption: 'dbt-модели становятся активами Dagster'
-  code: |
-    from pathlib import Path
-    import dagster as dg
-    from dagster_dbt import DbtCliResource, DbtProject, dbt_assets
-
-    dbt_project = DbtProject(project_dir=Path("dbt"))
-    dbt_project.prepare_if_dev()          # соберёт manifest.json в деве
-
-    @dbt_assets(manifest=dbt_project.manifest_path)
-    def dbt_models(context: dg.AssetExecutionContext, dbt: DbtCliResource):
-        yield from dbt.cli(["build"], context=context).stream()
-
-    defs = dg.Definitions(
-        assets=[dbt_models],
-        resources={"dbt": DbtCliResource(project_dir=dbt_project)},
-    )
+  code_caption: dbt-модели становятся активами Dagster
+  code: "from pathlib import Path\nimport dagster as dg\nfrom dagster_dbt import DbtCliResource, DbtProject,\
+    \ dbt_assets\n\ndbt_project = DbtProject(project_dir=Path(\"dbt\"))\ndbt_project.prepare_if_dev()\
+    \          # соберёт manifest.json в деве\n\n@dbt_assets(manifest=dbt_project.manifest_path)\ndef\
+    \ dbt_models(context: dg.AssetExecutionContext, dbt: DbtCliResource):\n    yield from dbt.cli([\"\
+    build\"], context=context).stream()\n\ndefs = dg.Definitions(\n    assets=[dbt_models],\n    resources={\"\
+    dbt\": DbtCliResource(project_dir=dbt_project)},\n)\n"
   bullets:
-  - 'Источник правды — manifest.json из dbt'
+  - Источник правды — manifest.json из dbt
   - Каждая dbt-модель превращается в отдельный актив
   - Зависимости ref() становятся рёбрами графа Dagster
-  - 'dbt-тесты подтягиваются как asset checks'
+  - dbt-тесты подтягиваются как asset checks
   - 'Один общий граф: источники, dbt-модели, ML — вместе'
-  notes: |
-    Механика простая и в этом её сила. Dagster читает !!manifest.json!! — артефакт, который dbt генерирует при компиляции, — и разворачивает __каждую dbt-модель в отдельный ассет__, а связи `ref()` — в рёбра графа.
+  notes: 'Механика простая и в этом её сила. Dagster читает !!manifest.json!! — артефакт, который dbt
+    генерирует при компиляции, — и разворачивает __каждую dbt-модель в отдельный ассет__, а связи `ref()`
+    — в рёбра графа.
 
-    Отсюда два больших следствия. Первое: **гранулярность до модели** — можно перезапустить одну витрину, а не весь `dbt run`. Второе: **dbt-тесты становятся asset checks** и видны в UI рядом с активом. И главное — dbt-модели живут в !!одном графе!! с загрузкой и ML. ~~`prepare_if_dev()` избавляет от ручного `dbt parse` при разработке.~~
 
+    Отсюда два больших следствия. Первое: **гранулярность до модели** — можно перезапустить одну витрину,
+    а не весь `dbt run`. Второе: **dbt-тесты становятся asset checks** и видны в UI рядом с активом. И
+    главное — dbt-модели живут в !!одном графе!! с загрузкой и ML. ~~`prepare_if_dev()` избавляет от ручного
+    `dbt parse` при разработке.~~
+
+    '
 - kind: table
   id: 030-scenarii-integracii-dbt-i
   title: Сценарии интеграции dbt и Dagster
@@ -795,7 +851,7 @@ content:
     - Плюсы
     - Минусы
     rows:
-    - - 'Чёрный ящик'
+    - - Чёрный ящик
       - один op вызывает `dbt build`
       - проще некуда
       - нет lineage, перезапуск только целиком
@@ -803,56 +859,60 @@ content:
       - manifest → активы, стрим событий
       - гранулярность, checks, lineage
       - нужен собранный manifest
-    - - 'Component (YAML)'
+    - - Component (YAML)
       - '`DbtProjectComponent` в defs.yaml'
       - минимум кода, низкий порог
       - меньше гибкости при кастомизации
-    - - 'Кастомный translator'
+    - - Кастомный translator
       - свой `DagsterDbtTranslator`
       - свои ключи, группы, метаданные
       - больше кода и поддержки
-    - - 'Отдельная code location'
+    - - Отдельная code location
       - dbt в своём образе и процессе
       - изоляция зависимостей и релизов
       - сложнее инфраструктура
-    col_ratios: [3, 4, 3, 4]
-  notes: |
-    Пять сценариев по возрастанию зрелости. **Чёрный ящик** («просто вызови `dbt build` из одного op») встречается часто и почти всегда — ошибка: вы теряете __всё, ради чего ставили Dagster__.
+    col_ratios:
+    - 3
+    - 4
+    - 3
+    - 4
+  notes: 'Пять сценариев по возрастанию зрелости. **Чёрный ящик** («просто вызови `dbt build` из одного
+    op») встречается часто и почти всегда — ошибка: вы теряете __всё, ради чего ставили Dagster__.
 
-    Рабочий стандарт сегодня — !!@dbt_assets!!, а для типовых случаев ещё проще **Component в YAML**. **Кастомный translator** нужен, когда надо переопределить ключи активов или подмешать метаданные — например, привести имена к вашей схеме. **Отдельная кодовая локация** — выбор больших команд. ~~Начинайте со стандарта; усложняйте, только когда упрётесь.~~
 
+    Рабочий стандарт сегодня — !!@dbt_assets!!, а для типовых случаев ещё проще **Component в YAML**.
+    **Кастомный translator** нужен, когда надо переопределить ключи активов или подмешать метаданные —
+    например, привести имена к вашей схеме. **Отдельная кодовая локация** — выбор больших команд. ~~Начинайте
+    со стандарта; усложняйте, только когда упрётесь.~~
+
+    '
 - kind: content
   id: 031-multi-dbt-neskolko-dbt-proektov
   title: Multi-dbt — несколько dbt-проектов
-  code_caption: 'Два проекта, разные префиксы ключей, один граф'
-  code: |
-    from dagster_dbt import DagsterDbtTranslator, dbt_assets
-
-    class PrefixedTranslator(DagsterDbtTranslator):
-        def __init__(self, prefix: str): self.prefix = prefix
-        def get_asset_key(self, props):                    # избегаем коллизий имён
-            return super().get_asset_key(props).with_prefix(self.prefix)
-
-    @dbt_assets(manifest=core_manifest,
-                dagster_dbt_translator=PrefixedTranslator("core"))
-    def core_dbt(context, dbt: DbtCliResource):
-        yield from dbt.cli(["build"], context=context).stream()
-
-    @dbt_assets(manifest=ml_manifest,
-                dagster_dbt_translator=PrefixedTranslator("ml"))
-    def ml_dbt(context, dbt_ml: DbtCliResource):
-        yield from dbt_ml.cli(["build"], context=context).stream()
+  code_caption: Два проекта, разные префиксы ключей, один граф
+  code: "from dagster_dbt import DagsterDbtTranslator, dbt_assets\n\nclass PrefixedTranslator(DagsterDbtTranslator):\n\
+    \    def __init__(self, prefix: str): self.prefix = prefix\n    def get_asset_key(self, props):  \
+    \                  # избегаем коллизий имён\n        return super().get_asset_key(props).with_prefix(self.prefix)\n\
+    \n@dbt_assets(manifest=core_manifest,\n            dagster_dbt_translator=PrefixedTranslator(\"core\"\
+    ))\ndef core_dbt(context, dbt: DbtCliResource):\n    yield from dbt.cli([\"build\"], context=context).stream()\n\
+    \n@dbt_assets(manifest=ml_manifest,\n            dagster_dbt_translator=PrefixedTranslator(\"ml\"\
+    ))\ndef ml_dbt(context, dbt_ml: DbtCliResource):\n    yield from dbt_ml.cli([\"build\"], context=context).stream()\n"
   bullets:
   - Несколько @dbt_assets с разными manifest — законно
   - Префиксы ключей спасают от коллизий имён моделей
   - Кросс-проектные зависимости связываются по asset key
   - Альтернатива — по кодовой локации на проект
   - dbt Mesh и Dagster решают одну задачу с разных сторон
-  notes: |
-    Крупные компании почти всегда приходят к **нескольким dbt-проектам**: по доменам или по командам. В Dagster это поддерживается прямо: несколько `@dbt_assets` с __разными манифестами__.
+  notes: 'Крупные компании почти всегда приходят к **нескольким dbt-проектам**: по доменам или по командам.
+    В Dagster это поддерживается прямо: несколько `@dbt_assets` с __разными манифестами__.
 
-    Главная практическая ловушка — !!коллизии имён моделей!! между проектами. Лечится **кастомным translator с префиксом ключа**. Дальше самое приятное: Dagster связывает проекты **по ключам активов**, и модель из `ml` может честно зависеть от витрины из `core` — __в одном сквозном графе__. ~~Обратите внимание: dbt Mesh решает похожую задачу средствами самого dbt; выбирать стоит осознанно, а не оба сразу.~~
 
+    Главная практическая ловушка — !!коллизии имён моделей!! между проектами. Лечится **кастомным translator
+    с префиксом ключа**. Дальше самое приятное: Dagster связывает проекты **по ключам активов**, и модель
+    из `ml` может честно зависеть от витрины из `core` — __в одном сквозном графе__. ~~Обратите внимание:
+    dbt Mesh решает похожую задачу средствами самого dbt; выбирать стоит осознанно, а не оба сразу.~~
+
+    '
 - kind: table
   id: 032-airflow-cosmos-protiv-dagster
   title: Airflow + Cosmos против Dagster + dbt
@@ -886,12 +946,20 @@ content:
     - - Зрелость и найм
       - большая база, много людей
       - меньше рынок, современнее модель
-    col_ratios: [3, 4, 4]
-  notes: |
-    **Cosmos** от Astronomer — хорошее решение _внутри парадигмы Airflow_: он парсит тот же `manifest.json` и разворачивает dbt-проект в **TaskGroup**, давая гранулярность до модели.
+    col_ratios:
+    - 3
+    - 4
+    - 4
+  notes: '**Cosmos** от Astronomer — хорошее решение _внутри парадигмы Airflow_: он парсит тот же `manifest.json`
+    и разворачивает dbt-проект в **TaskGroup**, давая гранулярность до модели.
 
-    Но фундаментальная разница остаётся: у Airflow единица — !!задача!!, а не **актив**. Поэтому lineage живёт __в пределах DAG__, dbt-тесты становятся обычными задачами, а бэкфилл привязан к `execution_date`, а не к смыслу данных. Честный аргумент в пользу Airflow — **зрелость и рынок труда**. ~~Если Airflow у вас уже стоит и работает, Cosmos — разумный шаг, не революция.~~
 
+    Но фундаментальная разница остаётся: у Airflow единица — !!задача!!, а не **актив**. Поэтому lineage
+    живёт __в пределах DAG__, dbt-тесты становятся обычными задачами, а бэкфилл привязан к `execution_date`,
+    а не к смыслу данных. Честный аргумент в пользу Airflow — **зрелость и рынок труда**. ~~Если Airflow
+    у вас уже стоит и работает, Cosmos — разумный шаг, не революция.~~
+
+    '
 - kind: content
   id: 033-sqlmesh-alternativa-dbt
   title: SQLMesh — альтернатива dbt
@@ -901,29 +969,27 @@ content:
   - label: SQLGlot — парсер SQL под капотом
     url: https://github.com/tobymao/sqlglot
   code_caption: 'Модель SQLMesh: инкрементальность и типы в самой модели'
-  code: |
-    MODEL (
-      name analytics.stg_transactions,
-      kind INCREMENTAL_BY_TIME_RANGE (time_column ts),
-      cron '@daily',
-      grain transaction_id,
-      audits (not_null(columns := (transaction_id)))
-    );
-
-    SELECT transaction_id, customer_id, amount, ts
-    FROM raw.transactions
-    WHERE ts BETWEEN @start_ds AND @end_ds;   -- границы подставит SQLMesh
+  code: "MODEL (\n  name analytics.stg_transactions,\n  kind INCREMENTAL_BY_TIME_RANGE (time_column ts),\n\
+    \  cron '@daily',\n  grain transaction_id,\n  audits (not_null(columns := (transaction_id)))\n);\n\
+    \nSELECT transaction_id, customer_id, amount, ts\nFROM raw.transactions\nWHERE ts BETWEEN @start_ds\
+    \ AND @end_ds;   -- границы подставит SQLMesh\n"
   bullets:
   - 'Понимает SQL: строит column-level lineage через парсер SQLGlot'
   - 'Virtual data environments: дешёвые изолированные среды'
-  - 'plan/apply показывает, что реально надо пересчитать'
+  - plan/apply показывает, что реально надо пересчитать
   - Инкрементальность и расписание — часть модели
   - Интеграция с Dagster есть, но в основном силами сообщества
-  notes: |
-    **SQLMesh** — самый интересный вызов монополии dbt. Его отличие принципиальное: он __не подставляет строки шаблоном, а разбирает SQL в синтаксическое дерево__ (через SQLGlot). Отсюда !!column-level lineage!! и понимание, какие изменения ломающие, а какие нет.
+  notes: '**SQLMesh** — самый интересный вызов монополии dbt. Его отличие принципиальное: он __не подставляет
+    строки шаблоном, а разбирает SQL в синтаксическое дерево__ (через SQLGlot). Отсюда !!column-level
+    lineage!! и понимание, какие изменения ломающие, а какие нет.
 
-    Вторая сильная идея — **virtual data environments**: среда создаётся как набор ссылок на уже посчитанные таблицы, поэтому «своя копия хранилища для ветки» стоит копейки. `plan/apply` показывает __что именно придётся пересчитать__ до применения. ~~Интеграция с Dagster существует, но по зрелости она заметно уступает dagster-dbt.~~
 
+    Вторая сильная идея — **virtual data environments**: среда создаётся как набор ссылок на уже посчитанные
+    таблицы, поэтому «своя копия хранилища для ветки» стоит копейки. `plan/apply` показывает __что именно
+    придётся пересчитать__ до применения. ~~Интеграция с Dagster существует, но по зрелости она заметно
+    уступает dagster-dbt.~~
+
+    '
 - kind: table
   id: 034-dbt-protiv-sqlmesh
   title: dbt против SQLMesh
@@ -957,21 +1023,30 @@ content:
     - - Интеграция с Dagster
       - официальная, зрелая
       - есть, менее зрелая
-    col_ratios: [3, 4, 4]
-  notes: |
-    Честное сравнение: !!технически SQLMesh во многом сильнее!!. Column-level lineage, дешёвые среды и осмысленный `plan` — это то, чего в dbt действительно не хватает.
+    col_ratios:
+    - 3
+    - 4
+    - 4
+  notes: 'Честное сравнение: !!технически SQLMesh во многом сильнее!!. Column-level lineage, дешёвые среды
+    и осмысленный `plan` — это то, чего в dbt действительно не хватает.
 
-    Но выигрывает не только техника. У **dbt** — __огромная экосистема пакетов, документация, обучение и рынок труда__; нового человека вы наймёте за недели, а не месяцы. Поэтому практический совет: **на новом greenfield-проекте SQLMesh стоит серьёзно рассмотреть**, а миграцию работающего dbt-проекта нужно обосновывать конкретной болью. ~~В нашем курсе мы остаёмся на dbt именно по этой причине.~~
 
-# ── §5 Ingestion, CLI, MCP ────────────────────────────────────────────────────
+    Но выигрывает не только техника. У **dbt** — __огромная экосистема пакетов, документация, обучение
+    и рынок труда__; нового человека вы наймёте за недели, а не месяцы. Поэтому практический совет: **на
+    новом greenfield-проекте SQLMesh стоит серьёзно рассмотреть**, а миграцию работающего dbt-проекта
+    нужно обосновывать конкретной болью. ~~В нашем курсе мы остаёмся на dbt именно по этой причине.~~
+
+    '
 - kind: section
   id: 035-zagruzka-dannyh-cli-i-mcp
-  title: 'Загрузка данных, CLI и MCP'
-  notes: |
-    Короткий, но практичный блок: чем **загружать данные** (dlt и Airbyte) и как с Dagster работать из **терминала** и из **AI-агента**.
+  title: Загрузка данных, CLI и MCP
+  notes: 'Короткий, но практичный блок: чем **загружать данные** (dlt и Airbyte) и как с Dagster работать
+    из **терминала** и из **AI-агента**.
+
 
     Обе интеграции загрузки устроены одинаково: __внешний инструмент превращается в активы Dagster__.
 
+    '
 - kind: content
   id: 036-dlt-zagruzka-kak-kod
   title: dlt — загрузка как код
@@ -979,135 +1054,119 @@ content:
   - label: dlt docs
     url: https://dlthub.com/docs
   code_caption: 'dagster-dlt: пайплайн dlt превращается в активы'
-  code: |
-    import dagster as dg
-    from dagster_dlt import DagsterDltResource, dlt_assets
-    import dlt
-
-    @dlt_assets(
-        dlt_source=sql_database().with_resources("transactions", "customers"),
-        dlt_pipeline=dlt.pipeline(
-            pipeline_name="shop", destination="clickhouse", dataset_name="raw",
-        ),
-        name="shop_ingest",
-        group_name="ingestion",
-    )
-    def shop_assets(context: dg.AssetExecutionContext, dlt_res: DagsterDltResource):
-        yield from dlt_res.run(context=context)
+  code: "import dagster as dg\nfrom dagster_dlt import DagsterDltResource, dlt_assets\nimport dlt\n\n\
+    @dlt_assets(\n    dlt_source=sql_database().with_resources(\"transactions\", \"customers\"),\n   \
+    \ dlt_pipeline=dlt.pipeline(\n        pipeline_name=\"shop\", destination=\"clickhouse\", dataset_name=\"\
+    raw\",\n    ),\n    name=\"shop_ingest\",\n    group_name=\"ingestion\",\n)\ndef shop_assets(context:\
+    \ dg.AssetExecutionContext, dlt_res: DagsterDltResource):\n    yield from dlt_res.run(context=context)\n"
   bullets:
   - 'dlt — Python-библиотека для загрузки: source → destination'
   - Схема выводится автоматически, эволюция схемы поддержана
   - Каждый ресурс dlt становится активом Dagster
   - Живёт в одном процессе с оркестратором — нет лишнего сервиса
   - Есть и готовый Component для dlt
-  notes: |
-    **dlt** (data load tool) — библиотека, а не сервис: вы описываете **источник** и **приёмник**, а dlt сам выводит схему, разбирает вложенный JSON и умеет **эволюцию схемы**.
+  notes: '**dlt** (data load tool) — библиотека, а не сервис: вы описываете **источник** и **приёмник**,
+    а dlt сам выводит схему, разбирает вложенный JSON и умеет **эволюцию схемы**.
 
-    Для Dagster это идеальный сосед: !!нет отдельного сервиса!!, всё исполняется в том же процессе, и __каждый ресурс dlt становится активом__ — с lineage и партициями наравне с dbt-моделями. ~~Для нашего курсового стека связка dlt + dbt + Dagster полностью покрывает ELT.~~
 
+    Для Dagster это идеальный сосед: !!нет отдельного сервиса!!, всё исполняется в том же процессе, и
+    __каждый ресурс dlt становится активом__ — с lineage и партициями наравне с dbt-моделями. ~~Для нашего
+    курсового стека связка dlt + dbt + Dagster полностью покрывает ELT.~~
+
+    '
 - kind: content
   id: 037-airbyte-konnektory-kak-servis
   title: Airbyte — коннекторы как сервис
   code_caption: 'dagster-airbyte: синхронизации как активы'
-  code: |
-    import dagster as dg
-    from dagster_airbyte import AirbyteCloudWorkspace, load_airbyte_asset_specs
-
-    workspace = AirbyteCloudWorkspace(
-        workspace_id=dg.EnvVar("AIRBYTE_WORKSPACE_ID"),
-        client_id=dg.EnvVar("AIRBYTE_CLIENT_ID"),
-        client_secret=dg.EnvVar("AIRBYTE_CLIENT_SECRET"),
-    )
-
-    airbyte_specs = load_airbyte_asset_specs(workspace)
-    defs = dg.Definitions(assets=[*airbyte_specs, dbt_models])
-    # таблицы Airbyte становятся апстримом для dbt-моделей
+  code: "import dagster as dg\nfrom dagster_airbyte import AirbyteCloudWorkspace, load_airbyte_asset_specs\n\
+    \nworkspace = AirbyteCloudWorkspace(\n    workspace_id=dg.EnvVar(\"AIRBYTE_WORKSPACE_ID\"),\n    client_id=dg.EnvVar(\"\
+    AIRBYTE_CLIENT_ID\"),\n    client_secret=dg.EnvVar(\"AIRBYTE_CLIENT_SECRET\"),\n)\n\nairbyte_specs\
+    \ = load_airbyte_asset_specs(workspace)\ndefs = dg.Definitions(assets=[*airbyte_specs, dbt_models])\n\
+    # таблицы Airbyte становятся апстримом для dbt-моделей\n"
   bullets:
-  - 'Сотни готовых коннекторов — не надо писать загрузку'
+  - Сотни готовых коннекторов — не надо писать загрузку
   - Отдельный сервис со своей инфраструктурой и UI
   - Dagster триггерит синхронизации и видит их как активы
   - Таблицы Airbyte становятся апстримом dbt-моделей
-  - 'Есть Cloud и OSS-редакции'
-  notes: |
-    **Airbyte** решает ту же задачу иначе: это **сервис с сотнями готовых коннекторов**. Если нужно забрать данные из экзотической SaaS-системы, шансы найти готовый коннектор здесь заметно выше.
+  - Есть Cloud и OSS-редакции
+  notes: '**Airbyte** решает ту же задачу иначе: это **сервис с сотнями готовых коннекторов**. Если нужно
+    забрать данные из экзотической SaaS-системы, шансы найти готовый коннектор здесь заметно выше.
 
-    Dagster не подменяет Airbyte, а !!запускает синхронизации и представляет их как активы!!. Ценность в том, что __созданные Airbyte таблицы становятся честным апстримом ваших dbt-моделей__ в общем графе. Плата — **отдельный сервис**, который надо разворачивать и обслуживать. ~~Правило выбора: dlt — когда нужен контроль и лёгкость, Airbyte — когда нужны коннекторы «из коробки».~~
 
+    Dagster не подменяет Airbyte, а !!запускает синхронизации и представляет их как активы!!. Ценность
+    в том, что __созданные Airbyte таблицы становятся честным апстримом ваших dbt-моделей__ в общем графе.
+    Плата — **отдельный сервис**, который надо разворачивать и обслуживать. ~~Правило выбора: dlt — когда
+    нужен контроль и лёгкость, Airbyte — когда нужны коннекторы «из коробки».~~
+
+    '
 - kind: content
   id: 038-cli-shpargalka
   title: CLI — шпаргалка
-  code_caption: 'Классический dagster и современный dg'
-  code: |
-    # ── разработка ────────────────────────────────────────────────
-    dg dev                      # UI + daemon (1.11+); аналог dagster dev
-    dg list defs                # что определено в проекте
-    dg check defs               # валидация без запуска
-    dg scaffold project my_prj  # заготовка проекта
-
-    # ── запуск ────────────────────────────────────────────────────
-    dagster asset materialize --select stg_transactions
-    dagster asset materialize --select "group:marts"
-    dagster job execute -j daily_marts
-    dagster asset backfill --select transactions_daily \
-        --partition-range 2026-01-01...2026-06-30
-
-    # ── эксплуатация ──────────────────────────────────────────────
-    dagster instance migrate    # миграция схемы инстанса при апгрейде
-    dagster definitions validate
-    dagster-daemon run          # демон в проде
+  code_caption: Классический dagster и современный dg
+  code: "# ── разработка ────────────────────────────────────────────────\ndg dev                    \
+    \  # UI + daemon (1.11+); аналог dagster dev\ndg list defs                # что определено в проекте\n\
+    dg check defs               # валидация без запуска\ndg scaffold project my_prj  # заготовка проекта\n\
+    \n# ── запуск ────────────────────────────────────────────────────\ndagster asset materialize --select\
+    \ stg_transactions\ndagster asset materialize --select \"group:marts\"\ndagster job execute -j daily_marts\n\
+    dagster asset backfill --select transactions_daily \\\n    --partition-range 2026-01-01...2026-06-30\n\
+    \n# ── эксплуатация ──────────────────────────────────────────────\ndagster instance migrate    #\
+    \ миграция схемы инстанса при апгрейде\ndagster definitions validate\ndagster-daemon run         \
+    \ # демон в проде\n"
   bullets:
   - 'dg — новый CLI: скаффолдинг, валидация, dev-цикл'
-  - 'dagster — классические команды запуска и эксплуатации'
-  - '--select понимает группы, теги и выражения'
+  - dagster — классические команды запуска и эксплуатации
+  - --select понимает группы, теги и выражения
   - instance migrate обязателен при обновлении версии
   - CLI удобен для CI и отладки без UI
-  notes: |
-    Два CLI сосуществуют: !!dg!! — современный, про **разработку** (скаффолдинг, `list`, `check`, `dev`), и **dagster** — классический, про **запуск и эксплуатацию**.
+  notes: 'Два CLI сосуществуют: !!dg!! — современный, про **разработку** (скаффолдинг, `list`, `check`,
+    `dev`), и **dagster** — классический, про **запуск и эксплуатацию**.
 
-    Отдельно отмечу синтаксис **--select**: он понимает не только имена, но и `group:`, `tag:` и выражения — это удобно и в CI, и при разборе инцидента. И запомните !!dagster instance migrate!!: __при обновлении версии Dagster схему инстанса надо мигрировать__, иначе сервис не поднимется. ~~Скриншот UI мы не приводим — посмотрим живьём на практике.~~
 
+    Отдельно отмечу синтаксис **--select**: он понимает не только имена, но и `group:`, `tag:` и выражения
+    — это удобно и в CI, и при разборе инцидента. И запомните !!dagster instance migrate!!: __при обновлении
+    версии Dagster схему инстанса надо мигрировать__, иначе сервис не поднимется. ~~Скриншот UI мы не
+    приводим — посмотрим живьём на практике.~~
+
+    '
 - kind: content
   id: 039-mcp-dagster-i-ai-agenty
   title: MCP — Dagster и AI-агенты
   materials:
   - label: Model Context Protocol
     url: https://modelcontextprotocol.io
-  code_caption: 'Подключение Dagster MCP к агенту'
-  code: |
-    // ~/.claude/mcp.json — официальный dev-time MCP из dg
-    {
-      "mcpServers": {
-        "dagster": { "command": "dg", "args": ["mcp", "serve"] }
-      }
-    }
-
-    // Что это даёт агенту:
-    //   • понимание структуры проекта и определений
-    //   • скаффолдинг компонентов и активов по описанию
-    //   • корректная работа с dg CLI
-
-    // Отдельно существуют community-серверы для эксплуатации:
-    //   list_jobs, list_assets, recent_runs, get_run_info
+  code_caption: Подключение Dagster MCP к агенту
+  code: "// ~/.claude/mcp.json — официальный dev-time MCP из dg\n{\n  \"mcpServers\": {\n    \"dagster\"\
+    : { \"command\": \"dg\", \"args\": [\"mcp\", \"serve\"] }\n  }\n}\n\n// Что это даёт агенту:\n// \
+    \  • понимание структуры проекта и определений\n//   • скаффолдинг компонентов и активов по описанию\n\
+    //   • корректная работа с dg CLI\n\n// Отдельно существуют community-серверы для эксплуатации:\n\
+    //   list_jobs, list_assets, recent_runs, get_run_info\n"
   bullets:
-  - 'MCP — открытый протокол доступа моделей к инструментам'
+  - MCP — открытый протокол доступа моделей к инструментам
   - 'Официальный dg[mcp] — про разработку: помогает писать код Dagster'
   - 'Community-серверы — про эксплуатацию: смотреть запуски и активы'
   - Агент получает структуру проекта, а не догадки
   - 'Направление молодое: проверяйте права доступа'
-  notes: |
-    **MCP** (Model Context Protocol) — открытый протокол, через который модель получает доступ к внешним инструментам. Для Dagster важно различать **два разных класса серверов**.
+  notes: '**MCP** (Model Context Protocol) — открытый протокол, через который модель получает доступ к
+    внешним инструментам. Для Dagster важно различать **два разных класса серверов**.
 
-    !!Официальный dg[mcp] — инструмент времени разработки!!: он помогает агенту __писать корректный код Dagster__, скаффолдить компоненты и понимать структуру проекта. **Community-серверы** решают обратную задачу — **эксплуатацию**: посмотреть запуски, активы, статусы. Направление быстро меняется, поэтому __аккуратнее с правами доступа к проду__. ~~Сверяйтесь с документацией: здесь всё обновляется каждые несколько месяцев.~~
 
-# ── §6 Рынок, новости, будущее ────────────────────────────────────────────────
+    !!Официальный dg[mcp] — инструмент времени разработки!!: он помогает агенту __писать корректный код
+    Dagster__, скаффолдить компоненты и понимать структуру проекта. **Community-серверы** решают обратную
+    задачу — **эксплуатацию**: посмотреть запуски, активы, статусы. Направление быстро меняется, поэтому
+    __аккуратнее с правами доступа к проду__. ~~Сверяйтесь с документацией: здесь всё обновляется каждые
+    несколько месяцев.~~
+
+    '
 - kind: section
   id: 040-rynok-novosti-i-buduschee
   title: Рынок, новости и будущее
-  notes: |
-    Самый свежий блок: буквально на прошлой неделе на рынке оркестраторов произошло **крупное событие**.
+  notes: 'Самый свежий блок: буквально на прошлой неделе на рынке оркестраторов произошло **крупное событие**.
 
-    Разберём его, посмотрим на **конкурентов** и обсудим, как жить с __несколькими оркестраторами__ на большом проекте.
 
+    Разберём его, посмотрим на **конкурентов** и обсудим, как жить с __несколькими оркестраторами__ на
+    большом проекте.
+
+    '
 - kind: content
   id: 041-prefect-priobretaet-dagster-labs
   title: Prefect приобретает Dagster Labs
@@ -1117,17 +1176,23 @@ content:
   - label: 'Dagster: Prefect is acquiring Dagster'
     url: https://dagster.io/blog/prefect-is-acquiring-dagster
   bullets:
-  - '13 июля 2026 — Prefect объявила о покупке Dagster Labs'
+  - 13 июля 2026 — Prefect объявила о покупке Dagster Labs
   - Объединяются два главных преемника Airflow
   - Dagster остаётся под своим именем и OSS-лицензией
   - Цены Dagster+ и Prefect Cloud не меняются
-  - 'Ник Шрок и Пит Хант — стратегические советники Prefect'
+  - Ник Шрок и Пит Хант — стратегические советники Prefect
   - Обе OSS-ветки продолжают получать релизы и патчи
-  notes: |
-    Свежайшая новость: **13 июля 2026** компания **Prefect** объявила о приобретении **Dagster Labs**. Под одной крышей оказались !!два главных преемника Airflow!!.
+  notes: 'Свежайшая новость: **13 июля 2026** компания **Prefect** объявила о приобретении **Dagster Labs**.
+    Под одной крышей оказались !!два главных преемника Airflow!!.
 
-    Что заявлено официально: **Dagster продолжает существовать под своим именем и открытой лицензией**, цены **Dagster+** и **Prefect Cloud** не меняются, обе OSS-ветки получают релизы и патчи безопасности. **Ник Шрок** и **Пит Хант** переходят в роль __стратегических советников__ и остаются в open-source-сообществе. ~~Логика сделки в позиционировании: Dagster — про то, чтобы описывать и валидировать данные, Prefect — про надёжное выполнение сложных workflow.~~
 
+    Что заявлено официально: **Dagster продолжает существовать под своим именем и открытой лицензией**,
+    цены **Dagster+** и **Prefect Cloud** не меняются, обе OSS-ветки получают релизы и патчи безопасности.
+    **Ник Шрок** и **Пит Хант** переходят в роль __стратегических советников__ и остаются в open-source-сообществе.
+    ~~Логика сделки в позиционировании: Dagster — про то, чтобы описывать и валидировать данные, Prefect
+    — про надёжное выполнение сложных workflow.~~
+
+    '
 - kind: content
   id: 042-chto-eto-znachit-na-praktike
   title: Что это значит на практике
@@ -1138,11 +1203,17 @@ content:
   - 'Возможность: усиление обоих за счёт общей команды'
   - 'Что делать: не переписывать пайплайны из-за новости'
   - Следить за релизами и заявлениями о roadmap
-  notes: |
-    Отделим факты от прогнозов. !!Факт!! — сделка объявлена, оба продукта заявлены как продолжающиеся. Всё остальное на этом слайде — __осторожный прогноз, а не обещание__.
+  notes: 'Отделим факты от прогнозов. !!Факт!! — сделка объявлена, оба продукта заявлены как продолжающиеся.
+    Всё остальное на этом слайде — __осторожный прогноз, а не обещание__.
 
-    Разумно ожидать сближения инфраструктуры: общий control plane, взаимные интеграции. Честный риск: **компании редко бесконечно развивают два конкурирующих продукта**, и через несколько лет фокус может сместиться. Практический совет для вас как инженеров: **не принимайте архитектурных решений на основе новости недельной давности** — смотрите на релизы и roadmap. ~~И держите пайплайны переносимыми: бизнес-логика в dbt и Python, а не в специфике оркестратора.~~
 
+    Разумно ожидать сближения инфраструктуры: общий control plane, взаимные интеграции. Честный риск:
+    **компании редко бесконечно развивают два конкурирующих продукта**, и через несколько лет фокус может
+    сместиться. Практический совет для вас как инженеров: **не принимайте архитектурных решений на основе
+    новости недельной давности** — смотрите на релизы и roadmap. ~~И держите пайплайны переносимыми: бизнес-логика
+    в dbt и Python, а не в специфике оркестратора.~~
+
+    '
 - kind: table
   id: 043-konkurenty-obzor
   title: Конкуренты — обзор
@@ -1177,28 +1248,32 @@ content:
       - блокноты и блоки
       - очень низкий порог входа
       - слабее для крупного прода
-    col_ratios: [3, 3, 4, 4]
-  notes: |
-    Быстрый обзор ландшафта. **Airflow** остаётся __стандартом по инерции и по найму__ — это его главный, вполне честный аргумент. **Prefect** берёт гибкостью: ваш обычный Python почти без переписывания.
+    col_ratios:
+    - 3
+    - 3
+    - 4
+    - 4
+  notes: 'Быстрый обзор ландшафта. **Airflow** остаётся __стандартом по инерции и по найму__ — это его
+    главный, вполне честный аргумент. **Prefect** берёт гибкостью: ваш обычный Python почти без переписывания.
 
-    **Kestra** интересен декларативным YAML и языковой независимостью, **Argo Workflows** — это про **контейнеры в Kubernetes**, а не про аналитику, и сравнивать его с Dagster напрямую некорректно. **Mage** хорош для быстрого старта и небольших команд. !!Dagster выигрывает там, где важны данные как объект!!: lineage, партиции, качество. ~~Универсально «лучшего» здесь нет — есть подходящий под задачу и команду.~~
 
+    **Kestra** интересен декларативным YAML и языковой независимостью, **Argo Workflows** — это про **контейнеры
+    в Kubernetes**, а не про аналитику, и сравнивать его с Dagster напрямую некорректно. **Mage** хорош
+    для быстрого старта и небольших команд. !!Dagster выигрывает там, где важны данные как объект!!: lineage,
+    партиции, качество. ~~Универсально «лучшего» здесь нет — есть подходящий под задачу и команду.~~
+
+    '
 - kind: content
   id: 044-neskolko-orkestratorov-na
   title: Несколько оркестраторов на большом проекте
-  code_caption: 'Типовое разделение зон ответственности'
-  code: |
-    ┌──────────────────────────────────────────────────────────┐
-    │  Airflow (legacy)   │  исторические DAG-и, интеграции,    │
-    │                     │  которые никто не будет переписывать│
-    ├──────────────────────────────────────────────────────────┤
-    │  Dagster            │  аналитический контур: ingest→dbt→  │
-    │                     │  витрины→ML-фичи, каталог, lineage  │
-    ├──────────────────────────────────────────────────────────┤
-    │  Argo / Kubeflow    │  тяжёлое обучение моделей на GPU,   │
-    │                     │  распределённые задачи в k8s        │
-    └──────────────────────────────────────────────────────────┘
-              связь: события, сенсоры, внешние активы
+  code_caption: Типовое разделение зон ответственности
+  code: "┌──────────────────────────────────────────────────────────┐\n│  Airflow (legacy)   │  исторические\
+    \ DAG-и, интеграции,    │\n│                     │  которые никто не будет переписывать│\n├──────────────────────────────────────────────────────────┤\n\
+    │  Dagster            │  аналитический контур: ingest→dbt→  │\n│                     │  витрины→ML-фичи,\
+    \ каталог, lineage  │\n├──────────────────────────────────────────────────────────┤\n│  Argo / Kubeflow\
+    \    │  тяжёлое обучение моделей на GPU,   │\n│                     │  распределённые задачи в k8s\
+    \        │\n└──────────────────────────────────────────────────────────┘\n          связь: события,\
+    \ сенсоры, внешние активы\n"
   bullets:
   - Реальность больших компаний — не один оркестратор, а несколько
   - 'Антипаттерн: два оркестратора управляют одними и теми же данными'
@@ -1206,11 +1281,16 @@ content:
   - Dagster умеет наблюдать внешние активы, не запуская их
   - dagster-airlift помогает поэтапной миграции с Airflow
   - Единый слой наблюдаемости важнее единого оркестратора
-  notes: |
-    В больших компаниях !!один оркестратор — это миф!!. Живут одновременно исторический **Airflow**, аналитический **Dagster** и k8s-native **Argo** для обучения моделей.
+  notes: 'В больших компаниях !!один оркестратор — это миф!!. Живут одновременно исторический **Airflow**,
+    аналитический **Dagster** и k8s-native **Argo** для обучения моделей.
 
-    Главный антипаттерн — __два оркестратора управляют одними и теми же таблицами__: рано или поздно они подерутся за один объект. Работающий подход: **явные границы владения** и **односторонние триггеры** (события, сенсоры). Отдельно полезно, что Dagster умеет описывать **внешние активы** — наблюдать за тем, что производит чужая система, не запуская её. ~~Для поэтапного переезда с Airflow есть dagster-airlift.~~
 
+    Главный антипаттерн — __два оркестратора управляют одними и теми же таблицами__: рано или поздно они
+    подерутся за один объект. Работающий подход: **явные границы владения** и **односторонние триггеры**
+    (события, сенсоры). Отдельно полезно, что Dagster умеет описывать **внешние активы** — наблюдать за
+    тем, что производит чужая система, не запуская её. ~~Для поэтапного переезда с Airflow есть dagster-airlift.~~
+
+    '
 - kind: table
   id: 045-kak-svyazat-orkestratory
   title: Как связать оркестраторы между собой
@@ -1235,12 +1315,20 @@ content:
     - - dagster-airlift
       - мост Airflow → Dagster
       - поэтапная миграция
-    col_ratios: [3, 4, 4]
-  notes: |
-    Пять рабочих способов связать разные оркестраторы. Предпочтительны !!слабосвязанные!!: **сенсор по событию** и **связь через факт появления данных** — они переживают перезапуски и не требуют, чтобы обе системы были одновременно живы.
+    col_ratios:
+    - 3
+    - 4
+    - 4
+  notes: 'Пять рабочих способов связать разные оркестраторы. Предпочтительны !!слабосвязанные!!: **сенсор
+    по событию** и **связь через факт появления данных** — они переживают перезапуски и не требуют, чтобы
+    обе системы были одновременно живы.
 
-    **Внешний актив** — недооценённая штука: Dagster показывает чужую таблицу в своём графе __только для наблюдаемости__, не претендуя ею управлять. Так вы получаете **сквозной lineage** без захвата чужой зоны ответственности. ~~Прямые вызовы API работают, но создают жёсткую связность — используйте точечно.~~
 
+    **Внешний актив** — недооценённая штука: Dagster показывает чужую таблицу в своём графе __только для
+    наблюдаемости__, не претендуя ею управлять. Так вы получаете **сквозной lineage** без захвата чужой
+    зоны ответственности. ~~Прямые вызовы API работают, но создают жёсткую связность — используйте точечно.~~
+
+    '
 - kind: content
   id: 046-kuda-vse-dvizhetsya
   title: Куда всё движется
@@ -1251,52 +1339,61 @@ content:
   - AI-агенты как потребители метаданных через MCP
   - 'Консолидация рынка: Prefect + Dagster — первый крупный шаг'
   - Переносимость логики важнее выбора оркестратора
-  notes: |
-    Основной вектор — !!декларативность!!: индустрия уходит от «опиши шаги» к «опиши, каким должно быть состояние, а система сама поймёт, что пересчитать». Dagster здесь оказался ранним и точным.
+  notes: 'Основной вектор — !!декларативность!!: индустрия уходит от «опиши шаги» к «опиши, каким должно
+    быть состояние, а система сама поймёт, что пересчитать». Dagster здесь оказался ранним и точным.
 
-    Второй вектор — **оркестратор становится каталогом и точкой наблюдаемости**, а не просто планировщиком. Третий — __сближение data- и ML/LLM-пайплайнов__ в одном графе. И практический вывод, который я хочу, чтобы вы унесли: **держите бизнес-логику переносимой** — в dbt-моделях и обычном Python, а не размазанной по специфике конкретного оркестратора. ~~Тогда любая консолидация рынка вас не заденет.~~
 
-# ── §7 Домашнее задание ───────────────────────────────────────────────────────
+    Второй вектор — **оркестратор становится каталогом и точкой наблюдаемости**, а не просто планировщиком.
+    Третий — __сближение data- и ML/LLM-пайплайнов__ в одном графе. И практический вывод, который я хочу,
+    чтобы вы унесли: **держите бизнес-логику переносимой** — в dbt-моделях и обычном Python, а не размазанной
+    по специфике конкретного оркестратора. ~~Тогда любая консолидация рынка вас не заденет.~~
+
+    '
 - kind: section
   id: 047-domashnee-zadanie
   title: Домашнее задание
-  notes: |
-    Финальный блок — практика. Задание !!продолжает ваше предыдущее ДЗ по dbt!!.
+  notes: 'Финальный блок — практика. Задание !!продолжает ваше предыдущее ДЗ по dbt!!.
+
 
     Тот же датасет и те же модели, но теперь их надо __поставить под управление Dagster__.
 
+    '
 - kind: content
   id: 048-dz-orkestriruem-dbt-proekt-v
   title: 'ДЗ: оркестрируем dbt-проект в Dagster'
-  code_caption: 'Каркас проекта — от него можно отталкиваться'
-  code: |
-    orchestration/
-      src/olist_orchestration/
-        project.py            # DbtProject → ваш dbt-проект из ДЗ по dbt
-        translator.py         # источникам dbt — ключи ингест-ассетов
-        assets/raw.py         # 8 ассетов: CSV → olist_raw.* в ClickHouse
-        assets/dbt.py         # @dbt_assets, команда `dbt build`
-        resources.py          # ClickHouseResource + DbtCliResource
-        checks.py             # asset checks на сырой слой
-        schedules.py          # ежедневный пересчёт витрин
-        sensors.py            # приход данных + run_status_sensor на падение
-        definitions.py        # Definitions: всё вместе
-    dbt/                      # ваш dbt-проект из прошлого ДЗ — БЕЗ копирования
+  code_caption: Каркас проекта — от него можно отталкиваться
+  code: "orchestration/\n  src/olist_orchestration/\n    project.py            # DbtProject → ваш dbt-проект\
+    \ из ДЗ по dbt\n    translator.py         # источникам dbt — ключи ингест-ассетов\n    assets/raw.py\
+    \         # 8 ассетов: CSV → olist_raw.* в ClickHouse\n    assets/dbt.py         # @dbt_assets, команда\
+    \ `dbt build`\n    resources.py          # ClickHouseResource + DbtCliResource\n    checks.py    \
+    \         # asset checks на сырой слой\n    schedules.py          # ежедневный пересчёт витрин\n \
+    \   sensors.py            # приход данных + run_status_sensor на падение\n    definitions.py     \
+    \   # Definitions: всё вместе\ndbt/                      # ваш dbt-проект из прошлого ДЗ — БЕЗ копирования\n"
   bullets:
   - 'Датасет прежний: Olist Brazilian E-Commerce в ClickHouse'
-  - 'Обернуть dbt через @dbt_assets, команда build — тесты станут asset checks'
+  - Обернуть dbt через @dbt_assets, команда build — тесты станут asset checks
   - 'Настроить ресурсы: ClickHouse и dbt, секреты через EnvVar'
   - 'Главное: ингест-ассеты — РОДИТЕЛИ dbt-графа, а не отдельная куча'
   - 'Связка — кастомный DagsterDbtTranslator: те же ключи у источников'
   - Расписание, asset checks на сырой слой, сенсор на падение
-  - 'Скриншот графа активов и лог успешного запуска — в отчёт'
-  notes: |
-    Постановка: берём !!ваш dbt-проект из предыдущего задания!! — датасет **Olist** в ClickHouse, слои `sources → staging → intermediate → marts` — и ставим его под управление **Dagster**. Каталог `dbt/` при этом __не копируется__: Dagster указывает на тот же самый проект.
+  - Скриншот графа активов и лог успешного запуска — в отчёт
+  notes: 'Постановка: берём !!ваш dbt-проект из предыдущего задания!! — датасет **Olist** в ClickHouse,
+    слои `sources → staging → intermediate → marts` — и ставим его под управление **Dagster**. Каталог
+    `dbt/` при этом __не копируется__: Dagster указывает на тот же самый проект.
 
-    Содержательная часть задания — не «обернуть dbt», это делается одним декоратором. Главное — чтобы **загрузка данных стала частью графа**. По умолчанию источники dbt превращаются в ассеты без родителей, и граф выходит рваным: слева восемь источников из ниоткуда, справа модели. Лечится !!кастомным DagsterDbtTranslator!!, который выдаёт источникам dbt __те же ключи__, что у ваших ингест-ассетов — Dagster видит совпадение и склеивает половины в один граф.
 
-    Ещё одна мелочь с большим эффектом: команда **`dbt build`**, а не `run`. Тогда тесты dbt приезжают в Dagster как **asset checks** — в эталонном решении это 132 проверки, которых не пришлось писать руками. ~~Полное решение и текст задания — в репозитории курса, homework/mlinside-hw-olist.~~
+    Содержательная часть задания — не «обернуть dbt», это делается одним декоратором. Главное — чтобы
+    **загрузка данных стала частью графа**. По умолчанию источники dbt превращаются в ассеты без родителей,
+    и граф выходит рваным: слева восемь источников из ниоткуда, справа модели. Лечится !!кастомным DagsterDbtTranslator!!,
+    который выдаёт источникам dbt __те же ключи__, что у ваших ингест-ассетов — Dagster видит совпадение
+    и склеивает половины в один граф.
 
+
+    Ещё одна мелочь с большим эффектом: команда **`dbt build`**, а не `run`. Тогда тесты dbt приезжают
+    в Dagster как **asset checks** — в эталонном решении это 132 проверки, которых не пришлось писать
+    руками. ~~Полное решение и текст задания — в репозитории курса, homework/mlinside-hw-olist.~~
+
+    '
 - kind: table
   id: 049-dz-kriterii-ocenki
   title: 'ДЗ: критерии оценки'
@@ -1305,27 +1402,48 @@ content:
     - Баллы
     - Что должно быть сделано
     rows:
-    - - '6–7'
-      - 'dbt-проект обёрнут через @dbt_assets; ресурсы ClickHouse и dbt настроены; секреты через EnvVar; поднимается `dagster dev`, проходит ручная материализация; граф активов виден в UI'
-    - - '8–9'
-      - 'всё выше + ингест-ассеты как РЕАЛЬНЫЕ РОДИТЕЛИ dbt-графа через кастомный DagsterDbtTranslator (граф связный, без висячих источников) + расписание + минимум два asset check на сырой слой + run_status_sensor на падение + метаданные материализаций (row_count и прочее)'
+    - - 6–7
+      - dbt-проект обёрнут через @dbt_assets; ресурсы ClickHouse и dbt настроены; секреты через EnvVar;
+        поднимается `dagster dev`, проходит ручная материализация; граф активов виден в UI
+    - - 8–9
+      - всё выше + ингест-ассеты как РЕАЛЬНЫЕ РОДИТЕЛИ dbt-графа через кастомный DagsterDbtTranslator
+        (граф связный, без висячих источников) + расписание + минимум два asset check на сырой слой +
+        run_status_sensor на падение + метаданные материализаций (row_count и прочее)
     - - '10'
-      - 'всё выше + сенсор на приход данных (landing-зона или Kafka-заглушка с задокументированным путём миграции) + `dagster definitions validate` в CI + один нетривиальный элемент: партиции с выполненным бэкфиллом, запуск в Docker (webserver, daemon, Postgres), declarative automation или вторая code location'
-    col_ratios: [2, 9]
-  notes: |
-    Критерии повторяют логику дбт-задания, поэтому ориентироваться просто. **6–7 баллов** — это «__работает и правильно устроено__»: dbt обёрнут ассетами, секреты не в коде.
+      - 'всё выше + сенсор на приход данных (landing-зона или Kafka-заглушка с задокументированным путём
+        миграции) + `dagster definitions validate` в CI + один нетривиальный элемент: партиции с выполненным
+        бэкфиллом, запуск в Docker (webserver, daemon, Postgres), declarative automation или вторая code
+        location'
+    col_ratios:
+    - 2
+    - 9
+  notes: 'Критерии повторяют логику дбт-задания, поэтому ориентироваться просто. **6–7 баллов** — это
+    «__работает и правильно устроено__»: dbt обёрнут ассетами, секреты не в коде.
 
-    **8–9** — главный рубеж, и он не про количество кода, а про !!связность графа!!. Если ингест и модели живут двумя отдельными кучами — задание не выполнено, сколько бы расписаний вы ни навесили. Проверяется это без UI: у каждой `stg_*` в родителях обязан стоять соответствующий ассет сырого слоя.
 
-    **10 баллов** — реакция на события и прод-подобная сборка. Про сенсор на Kafka: урока по ней ещё не было, поэтому достаточно __заглушки с зафиксированным контрактом__ — так, чтобы при появлении реального брокера менялась только реализация ресурса, а тело сенсора оставалось прежним. ~~Оценивается не объём кода, а осмысленность решений — будьте готовы объяснить, почему сделали так.~~
+    **8–9** — главный рубеж, и он не про количество кода, а про !!связность графа!!. Если ингест и модели
+    живут двумя отдельными кучами — задание не выполнено, сколько бы расписаний вы ни навесили. Проверяется
+    это без UI: у каждой `stg_*` в родителях обязан стоять соответствующий ассет сырого слоя.
 
+
+    **10 баллов** — реакция на события и прод-подобная сборка. Про сенсор на Kafka: урока по ней ещё не
+    было, поэтому достаточно __заглушки с зафиксированным контрактом__ — так, чтобы при появлении реального
+    брокера менялась только реализация ресурса, а тело сенсора оставалось прежним. ~~Оценивается не объём
+    кода, а осмысленность решений — будьте готовы объяснить, почему сделали так.~~
+
+    '
 - kind: closing
   id: 050-spasibo-za-vnimanie
   title: Спасибо за внимание!
   subtitle: Вопросы?
-  notes: |
-    Спасибо! Коротко резюмирую главное: !!Dagster описывает данные, а не шаги!! — и из этой одной идеи вырастают **lineage**, **партиции**, **бэкфиллы** и **проверки качества**.
+  notes: 'Спасибо! Коротко резюмирую главное: !!Dagster описывает данные, а не шаги!! — и из этой одной
+    идеи вырастают **lineage**, **партиции**, **бэкфиллы** и **проверки качества**.
 
-    Практический ориентир на будущее: **держите бизнес-логику переносимой**, а оркестратор выбирайте под задачу и команду. Новости рынка — вроде объединения с Prefect — __не повод переписывать работающие пайплайны__. Жду ваши ДЗ, вопросы удобнее в чат курса. ~~Ссылки на документацию есть на слайдах по ходу лекции.~~
 
-    — Сгенерировано: model=claude-opus-4-8 · harness=Claude Code · effort=max · version=v1.0 · 2026-07-20
+    Практический ориентир на будущее: **держите бизнес-логику переносимой**, а оркестратор выбирайте под
+    задачу и команду. Новости рынка — вроде объединения с Prefect — __не повод переписывать работающие
+    пайплайны__. Жду ваши ДЗ, вопросы удобнее в чат курса. ~~Ссылки на документацию есть на слайдах по
+    ходу лекции.~~
+
+
+    — Сгенерировано: model=claude-fable-5 · harness=Claude Code · effort=max · version=v1.1 · 2026-08-13'

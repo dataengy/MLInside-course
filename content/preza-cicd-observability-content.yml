@@ -1,7 +1,3 @@
-# preza-cicd-observability-content.yml — WHAT deck: output naming, source media deck, slides.
-# Visual profile: code-tables (no `image:` keys — визуалы = code-панели + таблицы).
-# Notes use emphasis markup (see settings.notes_emphasis) + blank-line paragraphs.
-
 deck:
   out_name: MLInside_Автоматизация-и-мониторинг-CICD-Prometheus-Grafana
   naming: increment
@@ -9,19 +5,21 @@ deck:
   downloads_dir: ~/Downloads
   source_deck: data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
 content:
-
-# ── Титул + план ──────────────────────────────────────────────────────────────
 - kind: title
   id: 001-avtomatizaciya-i-monitoring
   title: Автоматизация и мониторинг
   subtitle: CI/CD + Prometheus / Grafana
-  notes: |
-    Приветствие. Сегодня две половины одной темы: !!как код автоматически доезжает до прода!! (CI/CD) и !!как мы узнаём, что там происходит!! (observability). Это две стороны одного цикла: без автоматизации мы деплоим руками, без мониторинга — не знаем, что задеплоили.
+  notes: 'Приветствие. Сегодня две половины одной темы: !!как код автоматически доезжает до прода!! (CI/CD)
+    и !!как мы узнаём, что там происходит!! (observability). Это две стороны одного цикла: без автоматизации
+    мы деплоим руками, без мониторинга — не знаем, что задеплоили.
 
-    В первой части — **GitLab CI**, **GitHub Actions**, **self-hosted раннеры на VM** и тренды с AI в пайплайнах. Во второй — **Prometheus**, **Grafana**, **OpenTelemetry**, __алертинг в Telegram и Mattermost__ и специфика **MLOps/LLMOps**. Закончим домашним заданием. ~~Вопросы удобнее задавать по ходу.~~
 
-    — Сгенерировано: model=claude-opus-4-8 · harness=Claude Code · effort=max · version=v1.0 · 2026-07-20
+    В первой части — **GitLab CI**, **GitHub Actions**, **self-hosted раннеры на VM** и тренды с AI в
+    пайплайнах. Во второй — **Prometheus**, **Grafana**, **OpenTelemetry**, __алертинг в Telegram и Mattermost__
+    и специфика **MLOps/LLMOps**. Закончим домашним заданием. ~~Вопросы удобнее задавать по ходу.~~
 
+
+    — Сгенерировано: model=claude-fable-5 · harness=Claude Code · effort=max · version=v1.1 · 2026-08-13'
 - kind: agenda
   id: 002-plan-lekcii
   title: План лекции
@@ -37,47 +35,51 @@ content:
   - Алертинг в Telegram и Mattermost
   - MLOps и LLMOps-мониторинг
   - Домашнее задание
-  notes: |
-    План устроен симметрично: сначала __доставка__, потом __наблюдение__. Первая половина заканчивается сравнительной таблицей платформ и практикой поднятия раннера на своей виртуалке.
+  notes: 'План устроен симметрично: сначала __доставка__, потом __наблюдение__. Первая половина заканчивается
+    сравнительной таблицей платформ и практикой поднятия раннера на своей виртуалке.
 
-    Вторая половина строится снизу вверх: сначала !!три столпа наблюдаемости!!, потом конкретные инструменты, потом алертинг как «последняя миля», и в конце — что меняется, когда мы мониторим не сервис, а **модель** или **LLM**. ~~Держим этот план как ориентир.~~
 
-# ── §1 CI/CD: зачем ───────────────────────────────────────────────────────────
+    Вторая половина строится снизу вверх: сначала !!три столпа наблюдаемости!!, потом конкретные инструменты,
+    потом алертинг как «последняя миля», и в конце — что меняется, когда мы мониторим не сервис, а **модель**
+    или **LLM**. ~~Держим этот план как ориентир.~~
+
+    '
 - kind: section
   id: 003-chast-1-ci-cd
   title: Часть 1 — CI/CD
-  notes: |
-    Первая половина лекции — про автоматизацию.
+  notes: 'Первая половина лекции — про автоматизацию.
 
-    Начнём с вопроса __зачем это нужно именно в data- и ML-проектах__, и чем такой пайплайн отличается от привычного бэкендового.
 
+    Начнём с вопроса __зачем это нужно именно в data- и ML-проектах__, и чем такой пайплайн отличается
+    от привычного бэкендового.
+
+    '
 - kind: content
   id: 004-zachem-ci-cd-v-data-i-ml
   title: Зачем CI/CD в data- и ML-проектах
   code_caption: 'Типовой контур: от коммита до прода'
-  code: |
-    ┌────────┐  push   ┌───────────┐  ┌──────────┐  ┌──────────┐
-    │ разраб │ ──────► │    CI     │→ │  тесты   │→ │    CD    │
-    │  ветка │   MR    │ lint,     │  │ dbt test,│  │ deploy   │
-    └────────┘         │ build     │  │ unit,    │  │ dev→prod │
-                       └───────────┘  │ contract │  └────┬─────┘
-                                      └──────────┘       │
-                                                         ▼
-                                            ┌────────────────────┐
-                                            │ Dagster / dbt / БД  │
-                                            │  + мониторинг       │
-                                            └────────────────────┘
+  code: "┌────────┐  push   ┌───────────┐  ┌──────────┐  ┌──────────┐\n│ разраб │ ──────► │    CI    \
+    \ │→ │  тесты   │→ │    CD    │\n│  ветка │   MR    │ lint,     │  │ dbt test,│  │ deploy   │\n└────────┘\
+    \         │ build     │  │ unit,    │  │ dev→prod │\n                   └───────────┘  │ contract\
+    \ │  └────┬─────┘\n                                  └──────────┘       │\n                      \
+    \                               ▼\n                                        ┌────────────────────┐\n\
+    \                                        │ Dagster / dbt / БД  │\n                               \
+    \         │  + мониторинг       │\n                                        └────────────────────┘\n"
   bullets:
   - Каждое изменение проверяется одинаково, а не «как повезёт»
   - Линт и тесты ловят ошибку до продакшена
   - Деплой воспроизводим и не зависит от ноутбука инженера
   - История «что и когда выкатили» появляется бесплатно
   - Ревью становится осмысленным — CI уже отсеял механику
-  notes: |
-    CI/CD решает одну простую проблему: !!ручные шаги не воспроизводимы!!. Пока деплой живёт в голове или в личном скрипте одного человека, любой отпуск — это риск, а любая ошибка — сюрприз.
+  notes: 'CI/CD решает одну простую проблему: !!ручные шаги не воспроизводимы!!. Пока деплой живёт в голове
+    или в личном скрипте одного человека, любой отпуск — это риск, а любая ошибка — сюрприз.
 
-    В data-проектах цена ручного деплоя выше: сломанная **dbt-модель** портит не один запрос, а __все витрины ниже по графу__. Поэтому автоматический прогон `dbt build` на изменённых моделях в CI — не роскошь, а базовая гигиена. ~~На схеме — контур, который мы будем собирать по кусочкам всю лекцию.~~
 
+    В data-проектах цена ручного деплоя выше: сломанная **dbt-модель** портит не один запрос, а __все
+    витрины ниже по графу__. Поэтому автоматический прогон `dbt build` на изменённых моделях в CI — не
+    роскошь, а базовая гигиена. ~~На схеме — контур, который мы будем собирать по кусочкам всю лекцию.~~
+
+    '
 - kind: table
   id: 005-chem-data-ml-pajplajn
   title: Чем data/ML-пайплайн отличается от бэкендового
@@ -108,261 +110,228 @@ content:
     - - Главный риск
       - падение сервиса
       - молча испорченные данные
-    col_ratios: [3, 4, 5]
-  notes: |
-    Ключевое отличие в строке про откат: !!откат кода не откатывает данные!!. Если модель отработала и перезаписала витрину неверными значениями, вернуть предыдущий коммит недостаточно — нужен пересчёт, а иногда и восстановление из бэкапа.
+    col_ratios:
+    - 3
+    - 4
+    - 5
+  notes: 'Ключевое отличие в строке про откат: !!откат кода не откатывает данные!!. Если модель отработала
+    и перезаписала витрину неверными значениями, вернуть предыдущий коммит недостаточно — нужен пересчёт,
+    а иногда и восстановление из бэкапа.
 
-    Второе отличие — **тесты на данные**. Обычный юнит-тест проверяет функцию, а `dbt test` проверяет __результат на реальных данных__: уникальность ключа, отсутствие null, ссылочную целостность. И третье, самое коварное: главный риск здесь — не падение, а **тихая порча данных**, которую никто не заметит неделю. ~~Именно поэтому вторая половина лекции про мониторинг так важна.~~
 
-# ── §2 GitLab CI ──────────────────────────────────────────────────────────────
+    Второе отличие — **тесты на данные**. Обычный юнит-тест проверяет функцию, а `dbt test` проверяет
+    __результат на реальных данных__: уникальность ключа, отсутствие null, ссылочную целостность. И третье,
+    самое коварное: главный риск здесь — не падение, а **тихая порча данных**, которую никто не заметит
+    неделю. ~~Именно поэтому вторая половина лекции про мониторинг так важна.~~
+
+    '
 - kind: section
   id: 006-gitlab-ci
   title: GitLab CI
-  notes: |
-    Первая платформа — **GitLab CI**. Выбрана не случайно: в российских компаниях self-hosted GitLab остаётся самым распространённым вариантом.
+  notes: 'Первая платформа — **GitLab CI**. Выбрана не случайно: в российских компаниях self-hosted GitLab
+    остаётся самым распространённым вариантом.
 
-    Разберём __анатомию `.gitlab-ci.yml`__, механику артефактов и кэша, окружения и защиту от параллельных деплоев.
 
+    Разберём __анатомию `.gitlab-ci.yml`__, механику артефактов и кэша, окружения и защиту от параллельных
+    деплоев.
+
+    '
 - kind: content
   id: 007-gitlab-ci-yml-anatomiya
-  title: '.gitlab-ci.yml — анатомия'
+  title: .gitlab-ci.yml — анатомия
   materials:
   - label: GitLab CI/CD — справочник .gitlab-ci.yml
     url: https://docs.gitlab.com/ee/ci/yaml/
-  - label: 'glab — GitLab CLI'
+  - label: glab — GitLab CLI
     url: https://gitlab.com/gitlab-org/cli
-  code_caption: 'Минимальный, но рабочий пайплайн для dbt-проекта'
-  code: |
-    stages: [lint, test, deploy]
-
-    default:
-      image: python:3.12-slim
-      before_script:
-        - pip install -q uv && uv pip install --system -r requirements.txt
-
-    variables:
-      DBT_PROFILES_DIR: ./ci
-
-    lint:
-      stage: lint
-      script:
-        - sqlfluff lint models/
-        - dbt parse
-
-    dbt-test:
-      stage: test
-      script:
-        - dbt build --target ci --select state:modified+
-      needs: [lint]
-
-    deploy-prod:
-      stage: deploy
-      script: [./scripts/deploy.sh]
-      when: manual
+  code_caption: Минимальный, но рабочий пайплайн для dbt-проекта
+  code: "stages: [lint, test, deploy]\n\ndefault:\n  image: python:3.12-slim\n  before_script:\n    -\
+    \ pip install -q uv && uv pip install --system -r requirements.txt\n\nvariables:\n  DBT_PROFILES_DIR:\
+    \ ./ci\n\nlint:\n  stage: lint\n  script:\n    - sqlfluff lint models/\n    - dbt parse\n\ndbt-test:\n\
+    \  stage: test\n  script:\n    - dbt build --target ci --select state:modified+\n  needs: [lint]\n\
+    \ndeploy-prod:\n  stage: deploy\n  script: [./scripts/deploy.sh]\n  when: manual\n"
   bullets:
-  - 'stages — последовательные этапы; jobs внутри идут параллельно'
-  - 'default задаёт общий образ и before_script для всех джоб'
-  - 'needs строит DAG и позволяет обгонять стадии'
-  - 'variables — переменные пайплайна, секреты через CI/CD Variables'
-  - 'when manual — деплой по кнопке, а не автоматом'
-  notes: |
-    Файл `.gitlab-ci.yml` лежит в корне репозитория и целиком описывает пайплайн. Базовая единица — **job**; джобы группируются в **stages**, стадии выполняются по порядку, а джобы внутри стадии — параллельно.
+  - stages — последовательные этапы; jobs внутри идут параллельно
+  - default задаёт общий образ и before_script для всех джоб
+  - needs строит DAG и позволяет обгонять стадии
+  - variables — переменные пайплайна, секреты через CI/CD Variables
+  - when manual — деплой по кнопке, а не автоматом
+  notes: 'Файл `.gitlab-ci.yml` лежит в корне репозитория и целиком описывает пайплайн. Базовая единица
+    — **job**; джобы группируются в **stages**, стадии выполняются по порядку, а джобы внутри стадии —
+    параллельно.
 
-    Два приёма, которые стоит забрать сразу. Первый — !!`needs`!!: он превращает линейные стадии в настоящий DAG, и быстрая джоба не ждёт медленную соседку. Второй — `--select state:modified+` в dbt: пересобираются __только изменённые модели и всё, что от них зависит__, а не весь проект. ~~На большом проекте это разница между тремя минутами и часом.~~
 
+    Два приёма, которые стоит забрать сразу. Первый — !!`needs`!!: он превращает линейные стадии в настоящий
+    DAG, и быстрая джоба не ждёт медленную соседку. Второй — `--select state:modified+` в dbt: пересобираются
+    __только изменённые модели и всё, что от них зависит__, а не весь проект. ~~На большом проекте это
+    разница между тремя минутами и часом.~~
+
+    '
 - kind: content
   id: 008-artefakty-kesh-rules
-  title: 'Артефакты, кэш, rules, environments, resource_group'
-  code_caption: 'Пять механизмов, которые делают пайплайн взрослым'
-  code: |
-    dbt-docs:
-      stage: test
-      script: [dbt docs generate]
-      artifacts:                       # результат работы джобы
-        paths: [target/]
-        expire_in: 1 week
-        reports:
-          junit: target/report.xml
-      cache:                           # переиспользуемое между прогонами
-        key:
-          files: [requirements.txt]
-        paths: [.venv/, ~/.cache/uv]
-
-    deploy-prod:
-      stage: deploy
-      rules:                           # когда джоба вообще существует
-        - if: '$CI_COMMIT_BRANCH == "main"'
-          when: manual
-        - when: never
-      environment:                     # запись в реестр окружений
-        name: production
-        url: https://dagster.example.ru
-      resource_group: production       # запрет параллельных деплоев
+  title: Артефакты, кэш, rules, environments, resource_group
+  code_caption: Пять механизмов, которые делают пайплайн взрослым
+  code: "dbt-docs:\n  stage: test\n  script: [dbt docs generate]\n  artifacts:                       #\
+    \ результат работы джобы\n    paths: [target/]\n    expire_in: 1 week\n    reports:\n      junit:\
+    \ target/report.xml\n  cache:                           # переиспользуемое между прогонами\n    key:\n\
+    \      files: [requirements.txt]\n    paths: [.venv/, ~/.cache/uv]\n\ndeploy-prod:\n  stage: deploy\n\
+    \  rules:                           # когда джоба вообще существует\n    - if: '$CI_COMMIT_BRANCH\
+    \ == \"main\"'\n      when: manual\n    - when: never\n  environment:                     # запись\
+    \ в реестр окружений\n    name: production\n    url: https://dagster.example.ru\n  resource_group:\
+    \ production       # запрет параллельных деплоев\n"
   bullets:
   - 'artifacts — результат наружу: отчёты, target/, скомпилированный SQL'
   - 'cache — ускорение: зависимости, которые не меняются'
   - 'rules — условия запуска: ветка, теги, изменённые файлы'
-  - 'environment — где сейчас какая версия, ссылка и история'
-  - 'resource_group — сериализация деплоев в одно окружение'
-  notes: |
-    Разница между `artifacts` и `cache` — вопрос на собеседовании. **Артефакты** — это __результат, который нужен людям или следующим джобам__ и гарантированно передаётся. **Кэш** — оптимизация: он может не приехать, и пайплайн обязан от этого не сломаться.
+  - environment — где сейчас какая версия, ссылка и история
+  - resource_group — сериализация деплоев в одно окружение
+  notes: 'Разница между `artifacts` и `cache` — вопрос на собеседовании. **Артефакты** — это __результат,
+    который нужен людям или следующим джобам__ и гарантированно передаётся. **Кэш** — оптимизация: он
+    может не приехать, и пайплайн обязан от этого не сломаться.
 
-    Отдельно отмечу !!`resource_group`!!: он гарантирует, что два деплоя в одно окружение не пойдут одновременно. Без него два смёрдженных подряд MR запускают два `deploy.sh` параллельно — и вы получаете гонку прямо на проде. **`environment`** же даёт страницу с историей выкаток и кнопкой отката. ~~Эти две строчки экономят один инцидент в квартал.~~
 
+    Отдельно отмечу !!`resource_group`!!: он гарантирует, что два деплоя в одно окружение не пойдут одновременно.
+    Без него два смёрдженных подряд MR запускают два `deploy.sh` параллельно — и вы получаете гонку прямо
+    на проде. **`environment`** же даёт страницу с историей выкаток и кнопкой отката. ~~Эти две строчки
+    экономят один инцидент в квартал.~~
+
+    '
 - kind: content
   id: 009-cli-glab
   title: 'CLI: glab'
-  code_caption: 'Работа с пайплайнами не выходя из терминала'
-  code: |
-    glab auth login --hostname gitlab.example.ru
+  code_caption: Работа с пайплайнами не выходя из терминала
+  code: 'glab auth login --hostname gitlab.example.ru
+
 
     glab ci status                 # статус пайплайна текущей ветки
+
     glab ci view                   # интерактивный граф джоб
+
     glab ci trace dbt-test         # живой лог конкретной джобы
+
     glab ci run --branch main      # запустить пайплайн вручную
+
     glab ci retry dbt-test         # перезапустить упавшую джобу
+
     glab ci lint                   # проверить синтаксис .gitlab-ci.yml
 
+
     glab mr create --fill --yes    # MR из текущей ветки
+
     glab mr merge --when-pipeline-succeeds
+
+    '
   bullets:
   - '`glab ci lint` — проверить YAML до пуша, а не после'
   - '`glab ci trace` — лог джобы прямо в терминале'
   - '`glab ci view` — граф пайплайна без браузера'
-  - 'Создание MR и merge по успеху пайплайна одной командой'
+  - Создание MR и merge по успеху пайплайна одной командой
   - Удобно для скриптов и для агентов, которые чинят CI
-  notes: |
-    `glab` — официальный CLI GitLab. Ценность не в экономии кликов, а в том, что !!весь цикл становится скриптуемым!!: запустить, дождаться, прочитать лог, перезапустить.
+  notes: '`glab` — официальный CLI GitLab. Ценность не в экономии кликов, а в том, что !!весь цикл становится
+    скриптуемым!!: запустить, дождаться, прочитать лог, перезапустить.
 
-    Самая недооценённая команда — **`glab ci lint`**: она проверяет `.gitlab-ci.yml` __до пуша__. Классическая боль новичка — пять коммитов подряд «fix ci», потому что синтаксис проверяется только на сервере. ~~Ещё один плюс: этими же командами пользуются AI-агенты, когда чинят упавший пайплайн — об этом будет отдельный слайд.~~
 
-# ── §3 GitHub Actions ─────────────────────────────────────────────────────────
+    Самая недооценённая команда — **`glab ci lint`**: она проверяет `.gitlab-ci.yml` __до пуша__. Классическая
+    боль новичка — пять коммитов подряд «fix ci», потому что синтаксис проверяется только на сервере.
+    ~~Ещё один плюс: этими же командами пользуются AI-агенты, когда чинят упавший пайплайн — об этом будет
+    отдельный слайд.~~
+
+    '
 - kind: section
   id: 010-github-actions
   title: GitHub Actions
-  notes: |
-    Вторая платформа — **GitHub Actions**. Для open source и для команд на GitHub это фактический стандарт.
+  notes: 'Вторая платформа — **GitHub Actions**. Для open source и для команд на GitHub это фактический
+    стандарт.
 
-    Посмотрим на __модель workflow-ов__, матричные сборки, переиспользуемые workflow-ы и современный способ работы с облачными доступами — **OIDC**.
 
+    Посмотрим на __модель workflow-ов__, матричные сборки, переиспользуемые workflow-ы и современный способ
+    работы с облачными доступами — **OIDC**.
+
+    '
 - kind: content
   id: 011-workflow-jobs-i-steps
   title: 'Workflow: jobs и steps'
   materials:
   - label: GitHub Actions — документация
     url: https://docs.github.com/en/actions
-  - label: 'gh — GitHub CLI'
+  - label: gh — GitHub CLI
     url: https://cli.github.com/manual/
-  code_caption: '.github/workflows/ci.yml'
-  code: |
-    name: CI
-    on:
-      pull_request:
-      push:
-        branches: [main]
-
-    jobs:
-      dbt:
-        runs-on: ubuntu-latest
-        steps:
-          - uses: actions/checkout@v4
-          - uses: astral-sh/setup-uv@v5
-          - name: Install deps
-            run: uv pip install --system -r requirements.txt
-          - name: Lint
-            run: sqlfluff lint models/
-          - name: Build changed models
-            run: dbt build --select state:modified+
-            env:
-              CH_PASSWORD: ${{ secrets.CH_PASSWORD }}
+  code_caption: .github/workflows/ci.yml
+  code: "name: CI\non:\n  pull_request:\n  push:\n    branches: [main]\n\njobs:\n  dbt:\n    runs-on:\
+    \ ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: astral-sh/setup-uv@v5\n\
+    \      - name: Install deps\n        run: uv pip install --system -r requirements.txt\n      - name:\
+    \ Lint\n        run: sqlfluff lint models/\n      - name: Build changed models\n        run: dbt build\
+    \ --select state:modified+\n        env:\n          CH_PASSWORD: ${{ secrets.CH_PASSWORD }}\n"
   bullets:
   - Файлы лежат в .github/workflows, их может быть много
   - 'on задаёт события: push, pull_request, schedule, вручную'
-  - 'job выполняется на раннере, step — команда или готовый action'
-  - 'uses подключает action из Marketplace, run — обычный shell'
-  - 'Секреты приходят через secrets, а не через переменные репозитория'
-  notes: |
-    Модель отличается от GitLab: здесь нет глобальных стадий, есть **workflow-файлы**, внутри — **jobs**, внутри — **steps**. Порядок джоб задаётся через `needs`, а не через общий список стадий.
+  - job выполняется на раннере, step — команда или готовый action
+  - uses подключает action из Marketplace, run — обычный shell
+  - Секреты приходят через secrets, а не через переменные репозитория
+  notes: 'Модель отличается от GitLab: здесь нет глобальных стадий, есть **workflow-файлы**, внутри —
+    **jobs**, внутри — **steps**. Порядок джоб задаётся через `needs`, а не через общий список стадий.
 
-    Главная особенность экосистемы — !!Marketplace готовых actions!!: `checkout`, установка языков, кэширование, публикация — почти всё уже написано. Обратная сторона того же — __каждый сторонний action это чужой код с доступом к вашему репозиторию__, и его версию стоит пинить. ~~К безопасности вернёмся на слайде про раннеры.~~
 
+    Главная особенность экосистемы — !!Marketplace готовых actions!!: `checkout`, установка языков, кэширование,
+    публикация — почти всё уже написано. Обратная сторона того же — __каждый сторонний action это чужой
+    код с доступом к вашему репозиторию__, и его версию стоит пинить. ~~К безопасности вернёмся на слайде
+    про раннеры.~~
+
+    '
 - kind: content
   id: 012-matrix-i-reusable-workflows
   title: Matrix и reusable workflows
-  code_caption: 'Не копировать, а параметризовать'
-  code: |
-    jobs:
-      test:
-        strategy:
-          fail-fast: false
-          matrix:
-            python: ["3.11", "3.12"]
-            target: [ci, staging]
-        runs-on: ubuntu-latest
-        steps:
-          - run: dbt build --target ${{ matrix.target }}
-
-    # переиспользуемый workflow: .github/workflows/deploy.yml
-    on:
-      workflow_call:
-        inputs:
-          environment: { required: true, type: string }
-        secrets:
-          token: { required: true }
-
-    # вызов из другого репозитория или workflow
-    jobs:
-      deploy:
-        uses: org/ci-templates/.github/workflows/deploy.yml@v1
-        with: { environment: production }
-        secrets: inherit
+  code_caption: Не копировать, а параметризовать
+  code: "jobs:\n  test:\n    strategy:\n      fail-fast: false\n      matrix:\n        python: [\"3.11\"\
+    , \"3.12\"]\n        target: [ci, staging]\n    runs-on: ubuntu-latest\n    steps:\n      - run: dbt\
+    \ build --target ${{ matrix.target }}\n\n# переиспользуемый workflow: .github/workflows/deploy.yml\n\
+    on:\n  workflow_call:\n    inputs:\n      environment: { required: true, type: string }\n    secrets:\n\
+    \      token: { required: true }\n\n# вызов из другого репозитория или workflow\njobs:\n  deploy:\n\
+    \    uses: org/ci-templates/.github/workflows/deploy.yml@v1\n    with: { environment: production }\n\
+    \    secrets: inherit\n"
   bullets:
   - matrix разворачивает одну джобу в набор комбинаций
-  - 'fail-fast false — досмотреть все варианты, а не только первый упавший'
-  - 'workflow_call превращает workflow в переиспользуемую функцию'
+  - fail-fast false — досмотреть все варианты, а не только первый упавший
+  - workflow_call превращает workflow в переиспользуемую функцию
   - Общие пайплайны живут в отдельном репозитории с версиями
-  - 'В GitLab аналог — include, extends и якоря YAML'
-  notes: |
-    **Matrix** — способ проверить одно и то же на нескольких версиях или окружениях без копипасты. Ставьте `fail-fast: false`, если хотите увидеть __все__ падения сразу, а не первое.
+  - В GitLab аналог — include, extends и якоря YAML
+  notes: '**Matrix** — способ проверить одно и то же на нескольких версиях или окружениях без копипасты.
+    Ставьте `fail-fast: false`, если хотите увидеть __все__ падения сразу, а не первое.
 
-    **Reusable workflows** решают ту же проблему, что `include` в GitLab: !!общий пайплайн описывается один раз и версионируется!!. Практический совет — держать такие шаблоны в отдельном репозитории и подключать по тегу, а не по ветке. ~~Иначе правка шаблона молча меняет поведение CI во всех проектах сразу.~~
 
+    **Reusable workflows** решают ту же проблему, что `include` в GitLab: !!общий пайплайн описывается
+    один раз и версионируется!!. Практический совет — держать такие шаблоны в отдельном репозитории и
+    подключать по тегу, а не по ветке. ~~Иначе правка шаблона молча меняет поведение CI во всех проектах
+    сразу.~~
+
+    '
 - kind: content
   id: 013-sekrety-i-oidc-dostupy-bez
   title: 'Секреты и OIDC: доступы без долгоживущих ключей'
-  code_caption: 'Обмен токена пайплайна на короткоживущий доступ'
-  code: |
-    permissions:
-      id-token: write        # разрешить выпуск OIDC-токена
-      contents: read
-
-    jobs:
-      deploy:
-        runs-on: ubuntu-latest
-        steps:
-          - uses: aws-actions/configure-aws-credentials@v4
-            with:
-              role-to-assume: arn:aws:iam::123456789012:role/ci-deploy
-              aws-region: eu-central-1
-          # долгоживущих AWS-ключей в secrets нет вообще
-
-    # gh CLI — тот же цикл из терминала
-    # gh auth login
-    # gh run list --workflow ci.yml
-    # gh run watch          # ждать текущий прогон
-    # gh run view --log-failed
-    # gh workflow run deploy.yml -f environment=production
+  code_caption: Обмен токена пайплайна на короткоживущий доступ
+  code: "permissions:\n  id-token: write        # разрешить выпуск OIDC-токена\n  contents: read\n\njobs:\n\
+    \  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: aws-actions/configure-aws-credentials@v4\n\
+    \        with:\n          role-to-assume: arn:aws:iam::123456789012:role/ci-deploy\n          aws-region:\
+    \ eu-central-1\n      # долгоживущих AWS-ключей в secrets нет вообще\n\n# gh CLI — тот же цикл из\
+    \ терминала\n# gh auth login\n# gh run list --workflow ci.yml\n# gh run watch          # ждать текущий\
+    \ прогон\n# gh run view --log-failed\n# gh workflow run deploy.yml -f environment=production\n"
   bullets:
   - 'OIDC: CI получает короткоживущий токен вместо статичного ключа'
   - Нечего красть и нечего ротировать — ключа просто нет
   - Доверие настраивается на стороне облака, а не в репозитории
-  - 'Аналогичный механизм есть и в GitLab CI (ID tokens)'
+  - Аналогичный механизм есть и в GitLab CI (ID tokens)
   - '`gh run watch` и `gh run view --log-failed` — разбор падений из терминала'
-  notes: |
-    Классическая схема — положить долгоживущий ключ в secrets — работает, но это !!вечный секрет с широкими правами!!, который надо ротировать и который утекает вместе с логом или скомпрометированным сторонним action.
+  notes: 'Классическая схема — положить долгоживущий ключ в secrets — работает, но это !!вечный секрет
+    с широкими правами!!, который надо ротировать и который утекает вместе с логом или скомпрометированным
+    сторонним action.
 
-    **OIDC** переворачивает модель: пайплайн предъявляет облаку подписанный токен о том, __какой репозиторий и какая ветка__ его запустили, и получает временный доступ на несколько минут. Похожий механизм есть и в GitLab. ~~Ниже в том же блоке — команды `gh` для разбора упавших прогонов; `gh run view --log-failed` показывает только упавшие шаги.~~
 
+    **OIDC** переворачивает модель: пайплайн предъявляет облаку подписанный токен о том, __какой репозиторий
+    и какая ветка__ его запустили, и получает временный доступ на несколько минут. Похожий механизм есть
+    и в GitLab. ~~Ниже в том же блоке — команды `gh` для разбора упавших прогонов; `gh run view --log-failed`
+    показывает только упавшие шаги.~~
+
+    '
 - kind: table
   id: 014-gitlab-ci-protiv-github-actions
   title: GitLab CI против GitHub Actions
@@ -376,8 +345,8 @@ content:
       - один .gitlab-ci.yml, stages и jobs
       - много workflow-файлов, jobs и steps
     - - Переиспользование
-      - 'include, extends, YAML-якоря'
-      - 'reusable workflows, composite actions'
+      - include, extends, YAML-якоря
+      - reusable workflows, composite actions
     - - Готовые блоки
       - шаблоны и компоненты CI/CD
       - большой Marketplace actions
@@ -385,10 +354,10 @@ content:
       - GitLab Runner, executors на выбор
       - раннеры GitHub или self-hosted
     - - Секреты
-      - 'CI/CD Variables, masked/protected'
-      - 'secrets и environments репозитория'
+      - CI/CD Variables, masked/protected
+      - secrets и environments репозитория
     - - Доступ в облако
-      - 'ID tokens (OIDC)'
+      - ID tokens (OIDC)
       - 'OIDC через id-token: write'
     - - Self-hosted
       - зрелый сценарий, часто основной
@@ -399,107 +368,126 @@ content:
     - - Экосистема
       - единая платформа с репо, реестром, CD
       - GitHub плюс огромное сообщество
-    col_ratios: [3, 5, 5]
-  notes: |
-    Честный вывод: !!платформы функционально сопоставимы!!, и выбор почти всегда определяется тем, где уже лежит код, а не техническими достоинствами.
+    col_ratios:
+    - 3
+    - 5
+    - 5
+  notes: 'Честный вывод: !!платформы функционально сопоставимы!!, и выбор почти всегда определяется тем,
+    где уже лежит код, а не техническими достоинствами.
 
-    Различия, которые реально ощущаются на практике: у GitLab — __более цельная платформа__ (репозиторий, реестр образов, окружения, CD в одном месте) и очень зрелый self-hosted-сценарий; у GitHub — __несравнимо больший Marketplace__ и удобство для open source. Тарифы на минуты у обоих меняются, поэтому конкретных цифр не называю: **смотрите актуальный прайс перед планированием бюджета**. ~~Если у вас self-hosted GitLab — вопрос выбора обычно не стоит вовсе.~~
 
-# ── §4 Self-hosted раннеры ────────────────────────────────────────────────────
+    Различия, которые реально ощущаются на практике: у GitLab — __более цельная платформа__ (репозиторий,
+    реестр образов, окружения, CD в одном месте) и очень зрелый self-hosted-сценарий; у GitHub — __несравнимо
+    больший Marketplace__ и удобство для open source. Тарифы на минуты у обоих меняются, поэтому конкретных
+    цифр не называю: **смотрите актуальный прайс перед планированием бюджета**. ~~Если у вас self-hosted
+    GitLab — вопрос выбора обычно не стоит вовсе.~~
+
+    '
+- kind: content
+  id: 051-sborka-docker-obraza-v-ci
+  title: Сборка и публикация Docker-образа в CI
+  materials:
+  - label: GitLab Container Registry
+    url: https://docs.gitlab.com/ee/user/packages/container_registry/
+  code_caption: .gitlab-ci.yml — тесты, затем сборка Docker-образа
+  code: "stages: [test, build]\n\ntest:\n  script:\n    - pytest -q                      # тестирование\
+    \ кода — до сборки\n\nbuild-image:\n  stage: build\n  script:\n    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA\
+    \ .\n    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA\n"
+  bullets:
+  - 'Автоматизация сборки: написание пайплайнов GitLab CI или GitHub Actions'
+  - 'Конвейер: тестирование кода → сборка Docker-образов → push в registry'
+  - Тег образа = SHA коммита — воспроизводимость и мгновенный откат
+  - Кэш слоёв и .dockerignore решают время сборки
+  - В GitHub Actions тот же паттерн — docker/build-push-action
+  notes: 'Связываем первую часть лекции с Docker-темой курса. Типовой пайплайн: !!сначала тестирование
+    кода, затем сборка Docker-образа!! — упавшие тесты не дают собрать и опубликовать образ.
+
+
+    Тегируйте образ **SHA коммита**, а не latest: это даёт __воспроизводимость и откат в один шаг__ —
+    деплой прошлой версии равен смене тега. В GitLab образ уезжает во встроенный **Container Registry**;
+    в GitHub Actions тот же конвейер собирается из **docker/build-push-action**. ~~Multi-stage build и
+    кэш слоёв — из лекции про Docker — здесь окупаются на каждом прогоне.~~
+
+    '
 - kind: section
   id: 015-self-hosted-rannery-na-vm
   title: Self-hosted раннеры на VM
-  notes: |
-    Практический блок: у нас есть виртуалка, надо чтобы на ней выполнялись джобы.
+  notes: 'Практический блок: у нас есть виртуалка, надо чтобы на ней выполнялись джобы.
 
-    Причины ставить свой раннер: __доступ во внутреннюю сеть__ (ClickHouse, Dagster), контроль ресурсов, отсутствие лимита минут и требования по данным.
 
+    Причины ставить свой раннер: __доступ во внутреннюю сеть__ (ClickHouse, Dagster), контроль ресурсов,
+    отсутствие лимита минут и требования по данным.
+
+    '
 - kind: content
   id: 016-gitlab-runner-ustanovka-i
   title: 'GitLab Runner: установка и регистрация'
   materials:
   - label: GitLab Runner — документация
     url: https://docs.gitlab.com/runner/
-  code_caption: 'Debian/Ubuntu VM — от нуля до рабочего раннера'
-  code: |
-    # 1. установка пакета
-    curl -L https://packages.gitlab.com/install/repositories/runner/\
-    gitlab-runner/script.deb.sh | sudo bash
-    sudo apt-get install -y gitlab-runner
-
-    # 2. регистрация (token берётся в UI проекта/группы)
-    sudo gitlab-runner register \
-      --non-interactive \
-      --url https://gitlab.example.ru/ \
-      --token "$RUNNER_TOKEN" \
-      --executor docker \
-      --docker-image python:3.12-slim \
-      --tag-list "dbt,linux,docker" \
-      --docker-privileged=false
-
-    sudo gitlab-runner status        # systemd-сервис уже поднят
-    sudo gitlab-runner list          # что зарегистрировано
+  code_caption: Debian/Ubuntu VM — от нуля до рабочего раннера
+  code: "# 1. установка пакета\ncurl -L https://packages.gitlab.com/install/repositories/runner/\\\ngitlab-runner/script.deb.sh\
+    \ | sudo bash\nsudo apt-get install -y gitlab-runner\n\n# 2. регистрация (token берётся в UI проекта/группы)\n\
+    sudo gitlab-runner register \\\n  --non-interactive \\\n  --url https://gitlab.example.ru/ \\\n  --token\
+    \ \"$RUNNER_TOKEN\" \\\n  --executor docker \\\n  --docker-image python:3.12-slim \\\n  --tag-list\
+    \ \"dbt,linux,docker\" \\\n  --docker-privileged=false\n\nsudo gitlab-runner status        # systemd-сервис\
+    \ уже поднят\nsudo gitlab-runner list          # что зарегистрировано\n"
   bullets:
   - Раннер — отдельный агент, он сам ходит за задачами
   - 'executor docker: каждая джоба в чистом контейнере'
   - 'executor shell: быстро, но окружение накапливает мусор'
-  - 'tags связывают джобу с нужным раннером'
+  - tags связывают джобу с нужным раннером
   - concurrent в config.toml ограничивает параллельные джобы
-  notes: |
-    Раннер !!сам инициирует соединение с GitLab!!, поэтому входящие порты на виртуалке открывать не нужно — это важный аргумент для безопасников.
+  notes: 'Раннер !!сам инициирует соединение с GitLab!!, поэтому входящие порты на виртуалке открывать
+    не нужно — это важный аргумент для безопасников.
 
-    Про executor: **docker** даёт чистое окружение на каждую джобу и предсказуемость — это разумный выбор по умолчанию. **shell** быстрее, но состояние накапливается, и рано или поздно джоба падает «только на этом раннере». __Теги__ — обязательная гигиена: без них джоба уедет на случайный раннер без доступа к вашей БД. ~~`--docker-privileged` без крайней необходимости не включаем, почему — на следующем слайде.~~
 
+    Про executor: **docker** даёт чистое окружение на каждую джобу и предсказуемость — это разумный выбор
+    по умолчанию. **shell** быстрее, но состояние накапливается, и рано или поздно джоба падает «только
+    на этом раннере». __Теги__ — обязательная гигиена: без них джоба уедет на случайный раннер без доступа
+    к вашей БД. ~~`--docker-privileged` без крайней необходимости не включаем, почему — на следующем слайде.~~
+
+    '
 - kind: content
   id: 017-github-actions-runner-na-vm
-  title: 'GitHub Actions runner на VM'
+  title: GitHub Actions runner на VM
   materials:
   - label: Self-hosted runners — GitHub Docs
     url: https://docs.github.com/en/actions/hosting-your-own-runners
-  code_caption: 'config.sh, run.sh и systemd-юнит'
-  code: |
-    # 1. распаковать пакет раннера в отдельного пользователя
-    sudo useradd -m runner && sudo -iu runner
-    mkdir actions-runner && cd actions-runner
-    # скачать актуальный архив со страницы Settings → Actions → Runners
-    tar xzf ./actions-runner-linux-x64.tar.gz
-
-    # 2. привязать к репозиторию или организации
-    ./config.sh --url https://github.com/org/repo \
-                --token "$REG_TOKEN" \
-                --labels self-hosted,linux,dbt \
-                --unattended
-
-    # 3. как сервис (скрипт сам создаёт systemd-юнит)
-    sudo ./svc.sh install runner
-    sudo ./svc.sh start
-    sudo systemctl status actions.runner.*
+  code_caption: config.sh, run.sh и systemd-юнит
+  code: "# 1. распаковать пакет раннера в отдельного пользователя\nsudo useradd -m runner && sudo -iu\
+    \ runner\nmkdir actions-runner && cd actions-runner\n# скачать актуальный архив со страницы Settings\
+    \ → Actions → Runners\ntar xzf ./actions-runner-linux-x64.tar.gz\n\n# 2. привязать к репозиторию или\
+    \ организации\n./config.sh --url https://github.com/org/repo \\\n            --token \"$REG_TOKEN\"\
+    \ \\\n            --labels self-hosted,linux,dbt \\\n            --unattended\n\n# 3. как сервис (скрипт\
+    \ сам создаёт systemd-юнит)\nsudo ./svc.sh install runner\nsudo ./svc.sh start\nsudo systemctl status\
+    \ actions.runner.*\n"
   bullets:
-  - 'config.sh регистрирует, run.sh запускает в фореграунде'
-  - 'svc.sh install/start оформляет раннер как systemd-сервис'
+  - config.sh регистрирует, run.sh запускает в фореграунде
+  - svc.sh install/start оформляет раннер как systemd-сервис
   - 'labels — аналог tags: по ним джоба выбирает раннер'
-  - 'runs-on self-hosted направляет джобу на вашу VM'
+  - runs-on self-hosted направляет джобу на вашу VM
   - Отдельный системный пользователь, а не root
-  notes: |
-    Схема та же, что у GitLab: **регистрация → сервис → метки**. Разница в терминах — здесь `labels` вместо `tags` — и в том, что раннер привязывается к репозиторию, организации или enterprise.
+  notes: 'Схема та же, что у GitLab: **регистрация → сервис → метки**. Разница в терминах — здесь `labels`
+    вместо `tags` — и в том, что раннер привязывается к репозиторию, организации или enterprise.
 
-    Практика, которую стоит соблюдать сразу: !!раннер не запускается от root!! и живёт в собственном системном пользователе с минимальными правами. `run.sh` в фореграунде хорош только для проверки — в проде это **systemd**, чтобы раннер поднимался после перезагрузки. ~~Версии архива не называю: берите актуальную ссылку прямо со страницы настроек раннеров.~~
 
+    Практика, которую стоит соблюдать сразу: !!раннер не запускается от root!! и живёт в собственном системном
+    пользователе с минимальными правами. `run.sh` в фореграунде хорош только для проверки — в проде это
+    **systemd**, чтобы раннер поднимался после перезагрузки. ~~Версии архива не называю: берите актуальную
+    ссылку прямо со страницы настроек раннеров.~~
+
+    '
 - kind: content
   id: 018-bezopasnost-sobstvennyh-rannerov
   title: Безопасность собственных раннеров
-  code_caption: 'Что именно защищаем'
-  code: |
-    ┌─────────────────────────────────────────────────────────┐
-    │  VM с раннером                                          │
-    │   ├─ отдельный пользователь, без sudo                   │
-    │   ├─ джоба → одноразовый контейнер (ephemeral)          │
-    │   ├─ нет доступа к прод-секретам из джоб форков         │
-    │   └─ сетевой доступ только к нужным хостам              │
-    └─────────────────────────────────────────────────────────┘
-             ▲                                   ▲
-        исходящее соединение               НЕ открываем
-        к GitLab / GitHub                  входящие порты
+  code_caption: Что именно защищаем
+  code: "┌─────────────────────────────────────────────────────────┐\n│  VM с раннером               \
+    \                           │\n│   ├─ отдельный пользователь, без sudo                   │\n│   ├─\
+    \ джоба → одноразовый контейнер (ephemeral)          │\n│   ├─ нет доступа к прод-секретам из джоб\
+    \ форков         │\n│   └─ сетевой доступ только к нужным хостам              │\n└─────────────────────────────────────────────────────────┘\n\
+    \         ▲                                   ▲\n    исходящее соединение               НЕ открываем\n\
+    \    к GitLab / GitHub                  входящие порты\n"
   bullets:
   - Публичный репозиторий плюс self-hosted раннер — опасная связка
   - Pull request из форка не должен видеть прод-секреты
@@ -508,11 +496,18 @@ content:
   - Секреты — только через переменные, protected и masked
   - Сторонние actions пинить по коммиту, а не по плавающему тегу
   - Отдельные раннеры и теги для прод-деплоя
-  notes: |
-    Главная угроза формулируется одной фразой: !!исполнение произвольного кода на вашей машине!!. Джоба CI — это по определению запуск чужого кода, и на публичном репозитории «чужой» может быть кто угодно.
+  notes: 'Главная угроза формулируется одной фразой: !!исполнение произвольного кода на вашей машине!!.
+    Джоба CI — это по определению запуск чужого кода, и на публичном репозитории «чужой» может быть кто
+    угодно.
 
-    Три правила, которые закрывают большую часть рисков. Первое — **эфемерность**: раннер или контейнер живёт одну джобу, чтобы утечка не переехала в следующую. Второе — __прод-секреты только на выделенных раннерах и защищённых ветках__. Третье — осторожность с `--privileged` и `docker.sock`: и то и другое фактически означает **root на хосте**. ~~И пиньте сторонние actions по SHA — плавающий тег меняется без вашего ведома.~~
 
+    Три правила, которые закрывают большую часть рисков. Первое — **эфемерность**: раннер или контейнер
+    живёт одну джобу, чтобы утечка не переехала в следующую. Второе — __прод-секреты только на выделенных
+    раннерах и защищённых ветках__. Третье — осторожность с `--privileged` и `docker.sock`: и то и другое
+    фактически означает **root на хосте**. ~~И пиньте сторонние actions по SHA — плавающий тег меняется
+    без вашего ведома.~~
+
+    '
 - kind: content
   id: 019-trend-ai-vnutri-ci-cd
   title: 'Тренд: AI внутри CI/CD'
@@ -523,11 +518,18 @@ content:
   - 'Self-healing CI: агент чинит и перезапускает пайплайн'
   - 'Agentic-пайплайны: агент как отдельный шаг сборки'
   - Агенты ходят в CI теми же CLI — glab и gh
-  notes: |
-    Что уже реально работает: **AI-ревью** как первый проход (стиль, очевидные баги, забытые тесты), **объяснение упавшего лога** и **генерация тестов-заготовок**. Это экономит время ревьюера и снимает рутину, но __не заменяет человеческое ревью__.
+  notes: 'Что уже реально работает: **AI-ревью** как первый проход (стиль, очевидные баги, забытые тесты),
+    **объяснение упавшего лога** и **генерация тестов-заготовок**. Это экономит время ревьюера и снимает
+    рутину, но __не заменяет человеческое ревью__.
 
-    Более амбициозная история — **self-healing CI** и **agentic-пайплайны**, где агент сам правит конфиг и перезапускает прогон. Важно понимать механику: агент не имеет магии, он вызывает те же `glab ci trace` и `gh run view --log-failed`, что и вы. !!Поэтому качество вашего CLI-инструментария прямо определяет, насколько полезен агент!!. ~~Конкретные продукты в этой нише меняются быстро — я называю классы решений, а не бренды.~~
 
+    Более амбициозная история — **self-healing CI** и **agentic-пайплайны**, где агент сам правит конфиг
+    и перезапускает прогон. Важно понимать механику: агент не имеет магии, он вызывает те же `glab ci
+    trace` и `gh run view --log-failed`, что и вы. !!Поэтому качество вашего CLI-инструментария прямо
+    определяет, насколько полезен агент!!. ~~Конкретные продукты в этой нише меняются быстро — я называю
+    классы решений, а не бренды.~~
+
+    '
 - kind: table
   id: 020-ai-v-ci-cd-vyigrysh-i-risk
   title: 'AI в CI/CD: выигрыш и риск'
@@ -555,185 +557,220 @@ content:
     - - Любой сценарий
       - —
       - секреты и данные, попавшие в промпт
-    col_ratios: [3, 4, 5]
-  notes: |
-    Правая колонка важнее левой. Сквозной риск — последняя строка: !!секреты и персональные данные, случайно попавшие в промпт!!, уезжают наружу и уже не отзываются. Логи CI полны токенов и строк из БД — это надо учитывать до, а не после.
+    col_ratios:
+    - 3
+    - 4
+    - 5
+  notes: 'Правая колонка важнее левой. Сквозной риск — последняя строка: !!секреты и персональные данные,
+    случайно попавшие в промпт!!, уезжают наружу и уже не отзываются. Логи CI полны токенов и строк из
+    БД — это надо учитывать до, а не после.
 
-    Второй по значимости — **недетерминизм**: пайплайн, который иногда чинит себя по-разному, перестаёт быть воспроизводимым, а воспроизводимость — вся ценность CI. Разумная граница: __AI предлагает, человек мёржит__; автономный автофикс — только на некритичных ветках. ~~И следите за стоимостью: агент в каждом прогоне PR — это заметная строка в счёте.~~
 
-# ── §5 Observability: основы ──────────────────────────────────────────────────
+    Второй по значимости — **недетерминизм**: пайплайн, который иногда чинит себя по-разному, перестаёт
+    быть воспроизводимым, а воспроизводимость — вся ценность CI. Разумная граница: __AI предлагает, человек
+    мёржит__; автономный автофикс — только на некритичных ветках. ~~И следите за стоимостью: агент в каждом
+    прогоне PR — это заметная строка в счёте.~~
+
+    '
 - kind: section
   id: 021-chast-2-observability
   title: Часть 2 — Observability
-  notes: |
-    Вторая половина лекции. Мы научились доставлять изменения — теперь надо !!видеть, что происходит после доставки!!.
+  notes: 'Вторая половина лекции. Мы научились доставлять изменения — теперь надо !!видеть, что происходит
+    после доставки!!.
 
-    Начнём с понятийной рамки: __три столпа наблюдаемости__ и язык договорённостей о надёжности — SLI, SLO и error budget.
 
+    Начнём с понятийной рамки: __три столпа наблюдаемости__ и язык договорённостей о надёжности — SLI,
+    SLO и error budget.
+
+    '
 - kind: content
   id: 022-tri-stolpa-nablyudaemosti
   title: Три столпа наблюдаемости
-  code_caption: 'Метрики, логи, трейсы — и что добавилось рядом'
-  code: |
-    ┌──────────────┬──────────────────┬────────────────────────┐
-    │  МЕТРИКИ     │  ЛОГИ            │  ТРЕЙСЫ                │
-    ├──────────────┼──────────────────┼────────────────────────┤
-    │ числа во     │ события с        │ путь одного запроса    │
-    │ времени      │ контекстом       │ через сервисы          │
-    │ дёшево       │ дорого хранить   │ дорого, обычно семплят │
-    │ «что не так» │ «что случилось»  │ «где именно тормозит»  │
-    └──────────────┴──────────────────┴────────────────────────┘
-                      + профили (CPU/RAM внутри процесса)
-                      + события деплоев как контекст
+  code_caption: Метрики, логи, трейсы — и что добавилось рядом
+  code: "┌──────────────┬──────────────────┬────────────────────────┐\n│  МЕТРИКИ     │  ЛОГИ        \
+    \    │  ТРЕЙСЫ                │\n├──────────────┼──────────────────┼────────────────────────┤\n│ числа\
+    \ во     │ события с        │ путь одного запроса    │\n│ времени      │ контекстом       │ через\
+    \ сервисы          │\n│ дёшево       │ дорого хранить   │ дорого, обычно семплят │\n│ «что не так»\
+    \ │ «что случилось»  │ «где именно тормозит»  │\n└──────────────┴──────────────────┴────────────────────────┘\n\
+    \                  + профили (CPU/RAM внутри процесса)\n                  + события деплоев как контекст\n"
   bullets:
-  - 'Метрики отвечают на «что-то не так» и дёшевы в хранении'
-  - 'Логи объясняют «что именно произошло», но дороги'
-  - 'Трейсы показывают путь запроса и где потеряно время'
+  - Метрики отвечают на «что-то не так» и дёшевы в хранении
+  - Логи объясняют «что именно произошло», но дороги
+  - Трейсы показывают путь запроса и где потеряно время
   - Профили добавляют разрез внутри процесса
   - Связка сигналов важнее полноты каждого по отдельности
-  notes: |
-    Три столпа отвечают на три разных вопроса, и подменять один другим не получается. **Метрики** дешёвые и агрегированные — по ним строят алерты. **Логи** дают детали, но платить за них приходится объёмом. **Трейсы** показывают, __в каком именно сервисе теряется время__.
+  notes: 'Три столпа отвечают на три разных вопроса, и подменять один другим не получается. **Метрики**
+    дешёвые и агрегированные — по ним строят алерты. **Логи** дают детали, но платить за них приходится
+    объёмом. **Трейсы** показывают, __в каком именно сервисе теряется время__.
 
-    Практически важнее не полнота каждого сигнала, а !!возможность перейти между ними!!: из всплеска на графике — в логи этого интервала — в конкретный трейс. Если такой связки нет, вы владеете тремя разными системами, а не наблюдаемостью. ~~Профили и события деплоев — четвёртый и пятый сигналы, которые в современных стеках уже норма.~~
 
+    Практически важнее не полнота каждого сигнала, а !!возможность перейти между ними!!: из всплеска на
+    графике — в логи этого интервала — в конкретный трейс. Если такой связки нет, вы владеете тремя разными
+    системами, а не наблюдаемостью. ~~Профили и события деплоев — четвёртый и пятый сигналы, которые в
+    современных стеках уже норма.~~
+
+    '
 - kind: content
   id: 023-sli-slo-i-error-budget
   title: SLI, SLO и error budget
-  code_caption: 'От «работает?» к измеримой договорённости'
-  code: |
-    SLI  = что измеряем
-           доля успешных запусков пайплайна за сутки
-           доля витрин, обновлённых до 08:00
-
-    SLO  = целевое значение
-           99% запусков успешны за 30 дней
-           95% витрин свежие к 08:00
-
-    Error budget = 100% − SLO
-           1% от 30 дней ≈ 7 часов допустимой деградации
-           бюджет исчерпан → останавливаем фичи, чиним надёжность
+  code_caption: От «работает?» к измеримой договорённости
+  code: "SLI  = что измеряем\n       доля успешных запусков пайплайна за сутки\n       доля витрин, обновлённых\
+    \ до 08:00\n\nSLO  = целевое значение\n       99% запусков успешны за 30 дней\n       95% витрин свежие\
+    \ к 08:00\n\nError budget = 100% − SLO\n       1% от 30 дней ≈ 7 часов допустимой деградации\n   \
+    \    бюджет исчерпан → останавливаем фичи, чиним надёжность\n"
   bullets:
-  - 'SLI — измеримый показатель, а не ощущение'
-  - 'SLO — цель, согласованная с потребителем данных'
-  - 'Error budget превращает надёжность в бюджет решений'
+  - SLI — измеримый показатель, а не ощущение
+  - SLO — цель, согласованная с потребителем данных
+  - Error budget превращает надёжность в бюджет решений
   - '100% — не цель: он бесконечно дорог'
   - Для данных SLI обычно про свежесть, полноту и корректность
-  notes: |
-    **SLI** — это метрика, **SLO** — цель по ней, **error budget** — разрешённый остаток. Смысл конструкции в том, что она !!переводит спор о надёжности в цифры!!: не «всё плохо / всё нормально», а «бюджет на месяц израсходован на 80%».
+  notes: '**SLI** — это метрика, **SLO** — цель по ней, **error budget** — разрешённый остаток. Смысл
+    конструкции в том, что она !!переводит спор о надёжности в цифры!!: не «всё плохо / всё нормально»,
+    а «бюджет на месяц израсходован на 80%».
 
-    Для дата-платформы правильные SLI — не про CPU, а про __свежесть, полноту и корректность витрин__: «витрина обновлена к 08:00», «расхождение с источником меньше 0.1%». И отдельно подчеркну: **100% недостижимы и не нужны** — стремление к ним останавливает разработку. ~~Error budget как раз и есть механизм, который честно говорит, когда пора переключиться с фич на надёжность.~~
 
-# ── §6 Prometheus ─────────────────────────────────────────────────────────────
+    Для дата-платформы правильные SLI — не про CPU, а про __свежесть, полноту и корректность витрин__:
+    «витрина обновлена к 08:00», «расхождение с источником меньше 0.1%». И отдельно подчеркну: **100%
+    недостижимы и не нужны** — стремление к ним останавливает разработку. ~~Error budget как раз и есть
+    механизм, который честно говорит, когда пора переключиться с фич на надёжность.~~
+
+    '
 - kind: content
   id: 024-prometheus-pull-model-i
   title: 'Prometheus: pull-модель и экспортеры'
   materials:
   - label: Prometheus — документация
     url: https://prometheus.io/docs/introduction/overview/
-  code_caption: 'Кто у кого что забирает'
-  code: |
-      ┌─────────────┐   scrape (HTTP GET /metrics, раз в N сек)
-      │ PROMETHEUS  │ ──────────────┬──────────────┬────────────┐
-      │  TSDB       │               ▼              ▼            ▼
-      │  правила    │        ┌────────────┐ ┌───────────┐ ┌──────────┐
-      └──────┬──────┘        │ node_      │ │ приложение│ │ clickhouse│
-             │               │ exporter   │ │ /metrics  │ │ _exporter │
-             │ alerts        └────────────┘ └───────────┘ └──────────┘
-             ▼
-      ┌──────────────┐          короткоживущие задачи →
-      │ Alertmanager │          Pushgateway → Prometheus
-      └──────────────┘
+  code_caption: Кто у кого что забирает
+  code: "┌─────────────┐   scrape (HTTP GET /metrics, раз в N сек)\n│ PROMETHEUS  │ ──────────────┬──────────────┬────────────┐\n\
+    │  TSDB       │               ▼              ▼            ▼\n│  правила    │        ┌────────────┐\
+    \ ┌───────────┐ ┌──────────┐\n└──────┬──────┘        │ node_      │ │ приложение│ │ clickhouse│\n\
+    \       │               │ exporter   │ │ /metrics  │ │ _exporter │\n       │ alerts        └────────────┘\
+    \ └───────────┘ └──────────┘\n       ▼\n┌──────────────┐          короткоживущие задачи →\n│ Alertmanager\
+    \ │          Pushgateway → Prometheus\n└──────────────┘\n"
   bullets:
   - Prometheus сам ходит за метриками по HTTP — это pull
-  - 'Экспортер отдаёт /metrics в текстовом формате'
+  - Экспортер отдаёт /metrics в текстовом формате
   - Метрика = имя + набор меток + значение во времени
   - 'Типы: counter, gauge, histogram, summary'
-  - 'Pushgateway — только для коротких job, не для сервисов'
+  - Pushgateway — только для коротких job, не для сервисов
   - Служба обнаружения целей заменяет ручные списки хостов
-  notes: |
-    Ключевая архитектурная особенность — !!pull!!: Prometheus сам опрашивает цели. Плюс в том, что сам факт недоступности цели становится сигналом (`up == 0`), и не нужен отдельный heartbeat.
+  notes: 'Ключевая архитектурная особенность — !!pull!!: Prometheus сам опрашивает цели. Плюс в том, что
+    сам факт недоступности цели становится сигналом (`up == 0`), и не нужен отдельный heartbeat.
 
-    Модель данных — **имя метрики плюс метки**. Метки дают гибкость, но здесь же зарыта главная опасность: __каждая уникальная комбинация меток — отдельный временной ряд__. Положите в метку user_id или trace_id — и получите взрыв кардинальности, который кладёт хранилище. Про **Pushgateway** запомните: это костыль для коротких задач, а не общий способ слать метрики. ~~Для наших пайплайнов он как раз уместен: dbt-прогон живёт минуту и умирает.~~
 
+    Модель данных — **имя метрики плюс метки**. Метки дают гибкость, но здесь же зарыта главная опасность:
+    __каждая уникальная комбинация меток — отдельный временной ряд__. Положите в метку user_id или trace_id
+    — и получите взрыв кардинальности, который кладёт хранилище. Про **Pushgateway** запомните: это костыль
+    для коротких задач, а не общий способ слать метрики. ~~Для наших пайплайнов он как раз уместен: dbt-прогон
+    живёт минуту и умирает.~~
+
+    '
+- kind: content
+  id: 052-fastapi-instrumentaciya-prometheus
+  title: 'Мониторинг FastAPI: RPS, latency, ошибки 5xx'
+  materials:
+  - label: prometheus-fastapi-instrumentator
+    url: https://github.com/trallnag/prometheus-fastapi-instrumentator
+  code_caption: main.py — /metrics одной строкой + три главных запроса
+  code: '# pip install prometheus-fastapi-instrumentator
+
+    from fastapi import FastAPI
+
+    from prometheus_fastapi_instrumentator import Instrumentator
+
+
+    app = FastAPI()
+
+    Instrumentator().instrument(app).expose(app)   # GET /metrics
+
+
+    # PromQL для трёх главных вопросов к сервису:
+
+    # RPS:      rate(http_requests_total[5m])
+
+    # latency:  histogram_quantile(0.95,
+
+    #             rate(http_request_duration_seconds_bucket[5m]))
+
+    # 5xx:      sum(rate(http_requests_total{status=~"5.."}[5m]))
+
+    #             / sum(rate(http_requests_total))
+
+    '
+  bullets:
+  - 'Мониторинг сервиса: сбор технических метрик FastAPI с помощью Prometheus'
+  - RPS — rate(http_requests_total) за окно времени
+  - Latency — перцентили из histogram_quantile
+  - Ошибки 5xx — доля status=~"5.." от всех ответов
+  - Инструментатор вешает /metrics без ручной разметки кода
+  notes: 'Наш ML-сервис из лекции про FastAPI подключается к Prometheus !!одной строкой!! — **Instrumentator**
+    оборачивает приложение и отдаёт `/metrics` со стандартными HTTP-метриками.
+
+
+    Три технических вопроса к любому сервису: **RPS** (сколько запросов), **latency** (какие перцентили,
+    смотрим p95/p99, не среднее) и **доля ошибок 5xx**. Это база для SLO из прошлого слайда: __сначала
+    метрики, потом целевые уровни на них__. ~~Бизнес-метрики модели — распределение предсказаний, дрейф
+    — добавим в MLOps-блоке дальше.~~
+
+    '
 - kind: content
   id: 025-promql-yazyk-zaprosov
   title: 'PromQL: язык запросов'
   materials:
   - label: PromQL — основы
     url: https://prometheus.io/docs/prometheus/latest/querying/basics/
-  code_caption: 'Пять запросов, покрывающих 80% практики'
-  code: |
-    # 1. текущее значение и фильтр по меткам
-    up{job="dagster"}
-
-    # 2. скорость роста счётчика за 5 минут
-    rate(http_requests_total{status=~"5.."}[5m])
-
-    # 3. доля ошибок = ошибки / все
-    sum(rate(http_requests_total{status=~"5.."}[5m]))
-      / sum(rate(http_requests_total[5m]))
-
-    # 4. 95-й перцентиль по гистограмме
-    histogram_quantile(0.95,
-      sum by (le) (rate(job_duration_seconds_bucket[10m])))
-
-    # 5. свежесть данных: сколько секунд назад успешный прогон
-    time() - max(dbt_run_last_success_timestamp_seconds)
+  code_caption: Пять запросов, покрывающих 80% практики
+  code: "# 1. текущее значение и фильтр по меткам\nup{job=\"dagster\"}\n\n# 2. скорость роста счётчика\
+    \ за 5 минут\nrate(http_requests_total{status=~\"5..\"}[5m])\n\n# 3. доля ошибок = ошибки / все\n\
+    sum(rate(http_requests_total{status=~\"5..\"}[5m]))\n  / sum(rate(http_requests_total[5m]))\n\n# 4.\
+    \ 95-й перцентиль по гистограмме\nhistogram_quantile(0.95,\n  sum by (le) (rate(job_duration_seconds_bucket[10m])))\n\
+    \n# 5. свежесть данных: сколько секунд назад успешный прогон\ntime() - max(dbt_run_last_success_timestamp_seconds)\n"
   bullets:
-  - 'rate() применяют к counter, а не к gauge'
-  - 'Окно [5m] должно быть больше интервала scrape'
-  - 'sum by / without — агрегация с сохранением нужных меток'
-  - 'histogram_quantile считает перцентили из бакетов'
-  - 'time() минус метка времени — базовый SLI свежести данных'
-  notes: |
-    **PromQL** — не SQL: здесь всё крутится вокруг __временных рядов и окон__. Две ошибки новичка: применить `rate()` к gauge (бессмысленно) и взять окно короче интервала опроса (получите пустоту).
+  - rate() применяют к counter, а не к gauge
+  - Окно [5m] должно быть больше интервала scrape
+  - sum by / without — агрегация с сохранением нужных меток
+  - histogram_quantile считает перцентили из бакетов
+  - time() минус метка времени — базовый SLI свежести данных
+  notes: '**PromQL** — не SQL: здесь всё крутится вокруг __временных рядов и окон__. Две ошибки новичка:
+    применить `rate()` к gauge (бессмысленно) и взять окно короче интервала опроса (получите пустоту).
 
-    Последний запрос — !!прямо ваш SLI свежести!!: если пайплайн после успешного прогона выставляет метку времени, то `time() - max(...)` показывает возраст данных, и на него вешается алерт «витрина не обновлялась дольше N часов». __Это самый полезный алерт в дата-платформе__ — он ловит именно тихую поломку. ~~Перцентили считайте из histogram, а не из average: среднее прячет хвосты.~~
 
+    Последний запрос — !!прямо ваш SLI свежести!!: если пайплайн после успешного прогона выставляет метку
+    времени, то `time() - max(...)` показывает возраст данных, и на него вешается алерт «витрина не обновлялась
+    дольше N часов». __Это самый полезный алерт в дата-платформе__ — он ловит именно тихую поломку. ~~Перцентили
+    считайте из histogram, а не из average: среднее прячет хвосты.~~
+
+    '
 - kind: content
   id: 026-konfiguraciya-scrape-recording
   title: 'Конфигурация: scrape, recording и alerting rules'
-  code_caption: 'prometheus.yml и файл правил'
-  code: |
-    # prometheus.yml
-    global:
-      scrape_interval: 15s
-      evaluation_interval: 15s
-    rule_files:
-      - /etc/prometheus/rules/*.yml
-    alerting:
-      alertmanagers:
-        - static_configs:
-            - targets: ["alertmanager:9093"]
-    scrape_configs:
-      - job_name: dagster
-        static_configs:
-          - targets: ["dagster:3000"]
-
-    # rules/data.yml
-    groups:
-      - name: data-platform
-        rules:
-          - record: job:pipeline_failures:rate5m         # recording rule
-            expr: sum(rate(pipeline_runs_failed_total[5m]))
-          - alert: MartStale                              # alerting rule
-            expr: time() - max(dbt_run_last_success_timestamp_seconds) > 6*3600
-            for: 15m
-            labels: { severity: critical }
-            annotations:
-              summary: "Витрина не обновлялась больше 6 часов"
-              runbook: "https://wiki.example.ru/runbooks/mart-stale"
+  code_caption: prometheus.yml и файл правил
+  code: "# prometheus.yml\nglobal:\n  scrape_interval: 15s\n  evaluation_interval: 15s\nrule_files:\n\
+    \  - /etc/prometheus/rules/*.yml\nalerting:\n  alertmanagers:\n    - static_configs:\n        - targets:\
+    \ [\"alertmanager:9093\"]\nscrape_configs:\n  - job_name: dagster\n    static_configs:\n      - targets:\
+    \ [\"dagster:3000\"]\n\n# rules/data.yml\ngroups:\n  - name: data-platform\n    rules:\n      - record:\
+    \ job:pipeline_failures:rate5m         # recording rule\n        expr: sum(rate(pipeline_runs_failed_total[5m]))\n\
+    \      - alert: MartStale                              # alerting rule\n        expr: time() - max(dbt_run_last_success_timestamp_seconds)\
+    \ > 6*3600\n        for: 15m\n        labels: { severity: critical }\n        annotations:\n     \
+    \     summary: \"Витрина не обновлялась больше 6 часов\"\n          runbook: \"https://wiki.example.ru/runbooks/mart-stale\"\
+    \n"
   bullets:
-  - 'recording rule — предпосчитанный ряд для тяжёлых выражений'
-  - 'alerting rule — условие плюс for, чтобы отсечь всплески'
+  - recording rule — предпосчитанный ряд для тяжёлых выражений
+  - alerting rule — условие плюс for, чтобы отсечь всплески
   - '`for` — сколько условие должно держаться до срабатывания'
-  - 'labels задают severity и маршрутизацию'
-  - 'annotations — текст для человека и ссылка на runbook'
-  notes: |
-    Два вида правил решают разные задачи. **Recording rules** предпосчитывают тяжёлые выражения, чтобы дашборд не считал их заново каждые 10 секунд. **Alerting rules** описывают, когда бить тревогу.
+  - labels задают severity и маршрутизацию
+  - annotations — текст для человека и ссылка на runbook
+  notes: 'Два вида правил решают разные задачи. **Recording rules** предпосчитывают тяжёлые выражения,
+    чтобы дашборд не считал их заново каждые 10 секунд. **Alerting rules** описывают, когда бить тревогу.
 
-    Обратите внимание на !!`for: 15m`!!: без него любой одиночный всплеск порождает алерт, и через неделю на алерты перестают смотреть. И ещё — **ограничения самого Prometheus**: он рассчитан на __оперативное окно, локальное хранилище и один инстанс__; долгое хранение и настоящий HA-режим делают надстройками вроде Thanos, Mimir или альтернативными TSDB. ~~Об этом ровно через два слайда.~~
 
+    Обратите внимание на !!`for: 15m`!!: без него любой одиночный всплеск порождает алерт, и через неделю
+    на алерты перестают смотреть. И ещё — **ограничения самого Prometheus**: он рассчитан на __оперативное
+    окно, локальное хранилище и один инстанс__; долгое хранение и настоящий HA-режим делают надстройками
+    вроде Thanos, Mimir или альтернативными TSDB. ~~Об этом ровно через два слайда.~~
+
+    '
 - kind: content
   id: 027-grafana-dashbordy-peremennye
   title: 'Grafana: дашборды, переменные, алерты как код'
@@ -741,36 +778,28 @@ content:
   - label: Grafana — документация
     url: https://grafana.com/docs/grafana/latest/
   code_caption: 'Provisioning: дашборды и источники из репозитория'
-  code: |
-    # provisioning/datasources/prom.yml
-    apiVersion: 1
-    datasources:
-      - name: Prometheus
-        type: prometheus
-        access: proxy
-        url: http://prometheus:9090
-        isDefault: true
-
-    # provisioning/dashboards/all.yml
-    apiVersion: 1
-    providers:
-      - name: platform
-        folder: DataPlatform
-        type: file
-        options:
-          path: /etc/grafana/dashboards      # JSON-модели из git
+  code: "# provisioning/datasources/prom.yml\napiVersion: 1\ndatasources:\n  - name: Prometheus\n    type:\
+    \ prometheus\n    access: proxy\n    url: http://prometheus:9090\n    isDefault: true\n\n# provisioning/dashboards/all.yml\n\
+    apiVersion: 1\nproviders:\n  - name: platform\n    folder: DataPlatform\n    type: file\n    options:\n\
+    \      path: /etc/grafana/dashboards      # JSON-модели из git\n"
   bullets:
   - 'Один UI поверх разных источников: метрики, логи, трейсы'
   - 'Переменные дашборда: окружение, джоба, таблица'
   - 'Unified alerting: правила и маршруты в самой Grafana'
-  - 'Provisioning — дашборды и источники из файлов, а не кликами'
-  - 'Дашборд в git — это ревью, история и одинаковый прод'
-  - Хороший дашборд отвечает на вопрос, а не показывает всё
-  notes: |
-    Grafana — это **слой представления**: она не хранит данные, а ходит в источники. Отсюда её сила — один экран поверх Prometheus, логов и трейсов с переходами между ними.
+  - Provisioning — дашборды и источники из файлов, а не кликами
+  - Дашборд в git — это ревью, история и одинаковый прод
+  - 'Визуализация и алерты: создание дашбордов в Grafana, настройка алертов в Telegram/Slack при аномалиях'
+  notes: 'Grafana — это **слой представления**: она не хранит данные, а ходит в источники. Отсюда её сила
+    — один экран поверх Prometheus, логов и трейсов с переходами между ними.
 
-    Главная организационная мысль слайда: !!дашборды и алерты надо держать в репозитории!!. Накликанный руками дашборд — это знание в одной голове, которое исчезает вместе с человеком и не переживает переезд. **Provisioning** делает их обычным кодом с ревью и историей. __И дисциплина содержания__: дашборд должен отвечать на конкретный вопрос — «здоровы ли пайплайны?» — а не показывать все метрики сразу. ~~Панель, на которую никто не смотрит, стоит удалить.~~
 
+    Главная организационная мысль слайда: !!дашборды и алерты надо держать в репозитории!!. Накликанный
+    руками дашборд — это знание в одной голове, которое исчезает вместе с человеком и не переживает переезд.
+    **Provisioning** делает их обычным кодом с ревью и историей. __И дисциплина содержания__: дашборд
+    должен отвечать на конкретный вопрос — «здоровы ли пайплайны?» — а не показывать все метрики сразу.
+    ~~Панель, на которую никто не смотрит, стоит удалить.~~
+
+    '
 - kind: table
   id: 028-stek-hraneniya-legacy-i
   title: 'Стек хранения: legacy и современные варианты'
@@ -805,12 +834,23 @@ content:
       - метрики
       - плотность хранения, совместимость с PromQL
       - отличия в деталях от эталонного Prometheus
-    col_ratios: [3, 2, 5, 5]
-  notes: |
-    Главная линия разлома в логах — !!что именно индексируется!!. **ELK** индексирует содержимое: поиск богатый, но и цена в железе и обслуживании соответствующая. **Loki** и **VictoriaLogs** идут от обратного — индексируют метки и хранят сжатые потоки, поэтому дешевле, но за произвольный полнотекстовый поиск придётся платить временем сканирования.
+    col_ratios:
+    - 3
+    - 2
+    - 5
+    - 5
+  notes: 'Главная линия разлома в логах — !!что именно индексируется!!. **ELK** индексирует содержимое:
+    поиск богатый, но и цена в железе и обслуживании соответствующая. **Loki** и **VictoriaLogs** идут
+    от обратного — индексируют метки и хранят сжатые потоки, поэтому дешевле, но за произвольный полнотекстовый
+    поиск придётся платить временем сканирования.
 
-    В метриках выбор проще: __берём Prometheus, а когда упираемся в горизонт хранения или отказоустойчивость — добавляем надстройку или меняем TSDB__. Критерии сравнения всегда одни и те же: **стоимость хранения, кардинальность, масштаб и стоимость эксплуатации**. ~~Конкретные цифры производительности сильно зависят от профиля данных — не верьте чужим бенчмаркам, меряйте на своих.~~
 
+    В метриках выбор проще: __берём Prometheus, а когда упираемся в горизонт хранения или отказоустойчивость
+    — добавляем надстройку или меняем TSDB__. Критерии сравнения всегда одни и те же: **стоимость хранения,
+    кардинальность, масштаб и стоимость эксплуатации**. ~~Конкретные цифры производительности сильно зависят
+    от профиля данных — не верьте чужим бенчмаркам, меряйте на своих.~~
+
+    '
 - kind: content
   id: 029-opentelemetry-i-trejsing
   title: OpenTelemetry и трейсинг
@@ -818,75 +858,57 @@ content:
   - label: OpenTelemetry — документация
     url: https://opentelemetry.io/docs/
   code_caption: 'OTLP: одна инструментация — любой бэкенд'
-  code: |
-    приложение (OTel SDK)
-        │  OTLP (gRPC/HTTP)
-        ▼
-    ┌───────────────────────────┐
-    │  OpenTelemetry Collector  │  receivers → processors → exporters
-    └───┬────────────┬──────────┘
-        │            │            │
-        ▼            ▼            ▼
-     метрики       логи        трейсы
-    Prometheus /  Loki /     Jaeger / Tempo
-    VictoriaMetrics  ELK
+  code: "приложение (OTel SDK)\n    │  OTLP (gRPC/HTTP)\n    ▼\n┌───────────────────────────┐\n│  OpenTelemetry\
+    \ Collector  │  receivers → processors → exporters\n└───┬────────────┬──────────┘\n    │         \
+    \   │            │\n    ▼            ▼            ▼\n метрики       логи        трейсы\nPrometheus\
+    \ /  Loki /     Jaeger / Tempo\nVictoriaMetrics  ELK\n"
   bullets:
-  - 'OTel — вендор-независимый стандарт для метрик, логов и трейсов'
+  - OTel — вендор-независимый стандарт для метрик, логов и трейсов
   - 'Collector: приём, обработка, маршрутизация, экспорт'
   - Смена бэкенда — правка конфига, а не переписывание кода
-  - 'trace_id связывает лог, метрику и трейс в один инцидент'
-  - 'Jaeger и Tempo — типичные хранилища трейсов'
+  - trace_id связывает лог, метрику и трейс в один инцидент
+  - Jaeger и Tempo — типичные хранилища трейсов
   - Трейсы обычно семплируют — хранить все дорого
-  notes: |
-    **OpenTelemetry** — попытка индустрии договориться об одном стандарте инструментации. Ценность в одной фразе: !!вы инструментируете код один раз, а бэкенд меняете конфигом коллектора!!.
+  notes: '**OpenTelemetry** — попытка индустрии договориться об одном стандарте инструментации. Ценность
+    в одной фразе: !!вы инструментируете код один раз, а бэкенд меняете конфигом коллектора!!.
 
-    **Collector** — это ETL для телеметрии: принял по OTLP, обогатил, отфильтровал, разослал по разным хранилищам. Отдельно подчеркну **`trace_id`**: если он протаскивается в логи и метрики, __расследование инцидента превращается из археологии в навигацию__. ~~Трейсы почти всегда семплируют — писать 100% трафика обычно и дорого, и не нужно.~~
 
-# ── §7 Алертинг ───────────────────────────────────────────────────────────────
+    **Collector** — это ETL для телеметрии: принял по OTLP, обогатил, отфильтровал, разослал по разным
+    хранилищам. Отдельно подчеркну **`trace_id`**: если он протаскивается в логи и метрики, __расследование
+    инцидента превращается из археологии в навигацию__. ~~Трейсы почти всегда семплируют — писать 100%
+    трафика обычно и дорого, и не нужно.~~
+
+    '
 - kind: content
   id: 030-alertmanager-marshruty
   title: 'Alertmanager: маршруты, Telegram и Mattermost'
   materials:
   - label: Alertmanager — конфигурация
     url: https://prometheus.io/docs/alerting/latest/configuration/
-  code_caption: 'alertmanager.yml + два способа доставки'
-  code: |
-    route:
-      group_by: [alertname, severity]
-      group_wait: 30s
-      group_interval: 5m
-      repeat_interval: 4h
-      receiver: tg-team
-      routes:
-        - matchers: [severity="critical"]
-          receiver: mm-oncall
-
-    receivers:
-      - name: tg-team
-        telegram_configs:
-          - bot_token_file: /etc/alertmanager/tg_token
-            chat_id: -1001234567890
-            parse_mode: HTML
-      - name: mm-oncall
-        webhook_configs:
-          - url: https://mm.example.ru/hooks/xxxxxxxxxxxx
-
-    inhibit_rules:
-      - source_matchers: [severity="critical"]
-        target_matchers: [severity="warning"]
-        equal: [alertname]
+  code_caption: alertmanager.yml + два способа доставки
+  code: "route:\n  group_by: [alertname, severity]\n  group_wait: 30s\n  group_interval: 5m\n  repeat_interval:\
+    \ 4h\n  receiver: tg-team\n  routes:\n    - matchers: [severity=\"critical\"]\n      receiver: mm-oncall\n\
+    \nreceivers:\n  - name: tg-team\n    telegram_configs:\n      - bot_token_file: /etc/alertmanager/tg_token\n\
+    \        chat_id: -1001234567890\n        parse_mode: HTML\n  - name: mm-oncall\n    webhook_configs:\n\
+    \      - url: https://mm.example.ru/hooks/xxxxxxxxxxxx\n\ninhibit_rules:\n  - source_matchers: [severity=\"\
+    critical\"]\n    target_matchers: [severity=\"warning\"]\n    equal: [alertname]\n"
   bullets:
-  - 'group_by склеивает однотипные алерты в одно сообщение'
-  - 'repeat_interval — как часто напоминать о неустранённом'
-  - 'routes маршрутизируют по severity и меткам'
-  - 'inhibit_rules гасят производные алерты при крупной аварии'
-  - 'Telegram — через бот-токен и chat_id'
-  - 'Mattermost — через incoming webhook, формат JSON'
-  notes: |
-    Alertmanager отвечает не за «когда сработало» (это правила Prometheus), а за !!что с этим делать!!: сгруппировать, подавить дубли, направить нужным людям, замолчать на время работ.
+  - group_by склеивает однотипные алерты в одно сообщение
+  - repeat_interval — как часто напоминать о неустранённом
+  - routes маршрутизируют по severity и меткам
+  - inhibit_rules гасят производные алерты при крупной аварии
+  - Telegram — через бот-токен и chat_id
+  - Mattermost — через incoming webhook, формат JSON
+  notes: 'Alertmanager отвечает не за «когда сработало» (это правила Prometheus), а за !!что с этим делать!!:
+    сгруппировать, подавить дубли, направить нужным людям, замолчать на время работ.
 
-    Две детали, ради которых слайд и существует. **`group_by` и `inhibit_rules`** — это и есть борьба с лавиной: при падении узла вы получаете одно сообщение, а не сорок. И __секреты__: `bot_token_file` вместо токена в конфиге, а URL вебхука Mattermost — это сам по себе секрет, его нельзя коммитить. ~~Дальше — те же вызовы вручную, чтобы проверить доставку до настройки Alertmanager.~~
 
+    Две детали, ради которых слайд и существует. **`group_by` и `inhibit_rules`** — это и есть борьба
+    с лавиной: при падении узла вы получаете одно сообщение, а не сорок. И __секреты__: `bot_token_file`
+    вместо токена в конфиге, а URL вебхука Mattermost — это сам по себе секрет, его нельзя коммитить.
+    ~~Дальше — те же вызовы вручную, чтобы проверить доставку до настройки Alertmanager.~~
+
+    '
 - kind: content
   id: 031-proverka-dostavki-curl-v
   title: 'Проверка доставки: curl в Telegram и Mattermost'
@@ -895,34 +917,30 @@ content:
     url: https://core.telegram.org/bots/api
   - label: Mattermost — incoming webhooks
     url: https://developers.mattermost.com/integrate/webhooks/incoming/
-  code_caption: 'Быстрая проверка канала до настройки маршрутов'
-  code: |
-    # Telegram Bot API: бот создаётся через @BotFather,
-    # chat_id для группы — отрицательный
-    curl -sS -X POST \
-      "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
-      -d "chat_id=${TG_CHAT_ID}" \
-      -d "parse_mode=HTML" \
-      --data-urlencode "text=<b>ALERT</b> MartStale%0Aвитрина не обновлялась 6ч"
-
-    # Mattermost incoming webhook: URL создаётся в Integrations
-    curl -sS -X POST "${MM_WEBHOOK_URL}" \
-      -H 'Content-Type: application/json' \
-      -d '{
-            "username": "prometheus",
-            "text": "#### :rotating_light: MartStale\n витрина не обновлялась 6ч\n [runbook](https://wiki.example.ru/runbooks/mart-stale)"
-          }'
+  code_caption: Быстрая проверка канала до настройки маршрутов
+  code: "# Telegram Bot API: бот создаётся через @BotFather,\n# chat_id для группы — отрицательный\ncurl\
+    \ -sS -X POST \\\n  \"https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage\" \\\n  -d \"chat_id=${TG_CHAT_ID}\"\
+    \ \\\n  -d \"parse_mode=HTML\" \\\n  --data-urlencode \"text=<b>ALERT</b> MartStale%0Aвитрина не обновлялась\
+    \ 6ч\"\n\n# Mattermost incoming webhook: URL создаётся в Integrations\ncurl -sS -X POST \"${MM_WEBHOOK_URL}\"\
+    \ \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n        \"username\": \"prometheus\",\n \
+    \       \"text\": \"#### :rotating_light: MartStale\\n витрина не обновлялась 6ч\\n [runbook](https://wiki.example.ru/runbooks/mart-stale)\"\
+    \n      }'\n"
   bullets:
   - Бот Telegram создаётся у BotFather, бота надо добавить в группу
-  - 'chat_id групп отрицательный — частая причина «не приходит»'
+  - chat_id групп отрицательный — частая причина «не приходит»
   - Mattermost webhook принимает JSON и поддерживает Markdown
   - Токен и URL вебхука — секреты, только из переменных окружения
   - Сначала проверяем канал руками, потом подключаем Alertmanager
-  notes: |
-    Порядок отладки всегда такой: !!сначала убедиться, что канал вообще работает!!, и только потом разбираться с правилами и маршрутами. Иначе вы час ищете ошибку в PromQL, а бот просто не добавлен в группу.
+  notes: 'Порядок отладки всегда такой: !!сначала убедиться, что канал вообще работает!!, и только потом
+    разбираться с правилами и маршрутами. Иначе вы час ищете ошибку в PromQL, а бот просто не добавлен
+    в группу.
 
-    Типовые грабли Telegram — __забыть добавить бота в чат__ и не заметить, что `chat_id` группы отрицательный. У Mattermost всё проще: **incoming webhook** — это URL, принимающий JSON с Markdown. Ссылку на **runbook** кладите прямо в сообщение. ~~И повторюсь: и токен, и URL вебхука — секреты, в git им места нет.~~
 
+    Типовые грабли Telegram — __забыть добавить бота в чат__ и не заметить, что `chat_id` группы отрицательный.
+    У Mattermost всё проще: **incoming webhook** — это URL, принимающий JSON с Markdown. Ссылку на **runbook**
+    кладите прямо в сообщение. ~~И повторюсь: и токен, и URL вебхука — секреты, в git им места нет.~~
+
+    '
 - kind: content
   id: 032-kakim-dolzhen-byt-horoshij-alert
   title: Каким должен быть хороший алерт
@@ -930,15 +948,21 @@ content:
   - 'Actionable: получатель знает, что делать прямо сейчас'
   - 'Симптом, а не причина: «витрина устарела», а не «CPU 90%»'
   - 'Severity осмысленная: critical будит, warning ждёт утра'
-  - 'Ссылка на runbook прямо в сообщении'
-  - 'Дедупликация и группировка вместо потока дублей'
-  - 'Порог плюс `for`, чтобы отсечь мгновенные всплески'
-  - 'Алерт, на который никто не реагирует, надо удалить'
-  notes: |
-    Первый критерий — !!actionable!!. Если на алерт нельзя ничего сделать, он не алерт, а уведомление, и место ему в дашборде. Второй — **симптом вместо причины**: «витрины не обновились» важно всегда, а «CPU 90%» само по себе может быть нормой.
+  - Ссылка на runbook прямо в сообщении
+  - Дедупликация и группировка вместо потока дублей
+  - Порог плюс `for`, чтобы отсечь мгновенные всплески
+  - Алерт, на который никто не реагирует, надо удалить
+  notes: 'Первый критерий — !!actionable!!. Если на алерт нельзя ничего сделать, он не алерт, а уведомление,
+    и место ему в дашборде. Второй — **симптом вместо причины**: «витрины не обновились» важно всегда,
+    а «CPU 90%» само по себе может быть нормой.
 
-    Про **alert fatigue** скажу прямо: __это не проблема людей, а проблема конфигурации__. Когда в канал падает сорок сообщений в день, мозг перестаёт их видеть — и настоящую аварию пропускают. Лечится ревизией: раз в квартал смотрим, на какие алерты никто ни разу не отреагировал, и **удаляем их без сожаления**. ~~Меньше алертов, на которые реагируют, лучше чем много, которые игнорируют.~~
 
+    Про **alert fatigue** скажу прямо: __это не проблема людей, а проблема конфигурации__. Когда в канал
+    падает сорок сообщений в день, мозг перестаёт их видеть — и настоящую аварию пропускают. Лечится ревизией:
+    раз в квартал смотрим, на какие алерты никто ни разу не отреагировал, и **удаляем их без сожаления**.
+    ~~Меньше алертов, на которые реагируют, лучше чем много, которые игнорируют.~~
+
+    '
 - kind: content
   id: 033-ai-v-observability-i-aiops
   title: AI в observability и AIOps
@@ -950,70 +974,77 @@ content:
   - Автоматический постмортем-черновик по таймлайну
   - 'MCP: агент сам запрашивает метрики и логи'
   - 'Риски: галлюцинации, стоимость, чувствительные данные в промпте'
-  notes: |
-    Самое зрелое применение — !!детекция аномалий и корреляция!!. Статические пороги плохо работают на сезонных данных: ночью нормальная нагрузка отличается от дневной, и один порог для обоих режимов либо шумит, либо молчит.
+  notes: 'Самое зрелое применение — !!детекция аномалий и корреляция!!. Статические пороги плохо работают
+    на сезонных данных: ночью нормальная нагрузка отличается от дневной, и один порог для обоих режимов
+    либо шумит, либо молчит.
 
-    Более новая история — **LLM для разбора инцидентов**: собрать таймлайн, суммаризовать логи, предложить гипотезы, набросать постмортем. Через **MCP** агент может сам сходить за метриками и логами вместо человека. Ограничение при этом жёсткое: __модель формулирует уверенно и ошибочную причину тоже__, поэтому это помощник для дежурного, а не замена ему. ~~И помните про данные: логи, отправленные в чужую модель, — это те же логи, но уже наружу.~~
 
-# ── §8 MLOps / LLMOps ─────────────────────────────────────────────────────────
+    Более новая история — **LLM для разбора инцидентов**: собрать таймлайн, суммаризовать логи, предложить
+    гипотезы, набросать постмортем. Через **MCP** агент может сам сходить за метриками и логами вместо
+    человека. Ограничение при этом жёсткое: __модель формулирует уверенно и ошибочную причину тоже__,
+    поэтому это помощник для дежурного, а не замена ему. ~~И помните про данные: логи, отправленные в
+    чужую модель, — это те же логи, но уже наружу.~~
+
+    '
 - kind: content
   id: 034-mlops-drejf-i-kachestvo
   title: 'MLOps: дрейф и качество предсказаний'
-  code_caption: 'Что мониторим у модели в проде'
-  code: |
-    ┌──────────────┐   ┌───────────┐   ┌──────────────┐
-    │ входные      │ → │  модель   │ → │ предсказания │
-    │ признаки     │   │           │   │              │
-    └──────┬───────┘   └─────┬─────┘   └──────┬───────┘
-           │                 │                │
-       data drift        latency,          качество
-       распределение     ошибки,           (когда придёт
-       признаков уехало  доля отказов      разметка)
-           │                                  │
-           └──────── concept drift ───────────┘
-              связь «признаки → цель» изменилась
+  code_caption: Что мониторим у модели в проде
+  code: "┌──────────────┐   ┌───────────┐   ┌──────────────┐\n│ входные      │ → │  модель   │ → │ предсказания\
+    \ │\n│ признаки     │   │           │   │              │\n└──────┬───────┘   └─────┬─────┘   └──────┬───────┘\n\
+    \       │                 │                │\n   data drift        latency,          качество\n  \
+    \ распределение     ошибки,           (когда придёт\n   признаков уехало  доля отказов      разметка)\n\
+    \       │                                  │\n       └──────── concept drift ───────────┘\n      \
+    \    связь «признаки → цель» изменилась\n"
   bullets:
-  - 'Data drift — сместилось распределение входных признаков'
-  - 'Concept drift — изменилась связь признаков и целевой переменной'
+  - 'Мониторинг ML — сбор бизнес-метрик: распределение предсказаний, деградация качества модели, Data
+    Drift'
+  - Data drift — сместилось распределение входных признаков
+  - Concept drift — изменилась связь признаков и целевой переменной
   - Качество считается с задержкой — разметка приходит позже
   - 'Прокси-метрики: доля отказов, уверенность, доля дефолтов'
-  - 'Feature store даёт одинаковые признаки в обучении и инференсе'
-  - 'Train/serving skew — классическая причина «в проде хуже»'
-  notes: |
-    Технически модель может быть идеально здорова — отвечает быстро, ошибок нет — и при этом !!предсказывать всё хуже и хуже!!. Поэтому к обычным метрикам сервиса добавляются метрики про данные и качество.
+  - Feature store даёт одинаковые признаки в обучении и инференсе
+  - Train/serving skew — классическая причина «в проде хуже»
+  notes: 'Технически модель может быть идеально здорова — отвечает быстро, ошибок нет — и при этом !!предсказывать
+    всё хуже и хуже!!. Поэтому к обычным метрикам сервиса добавляются метрики про данные и качество.
 
-    **Data drift** — уехало распределение входов; **concept drift** — изменилась сама связь между признаками и целью, что для фрод-детекции норма жизни: мошенники меняют тактику. Главная практическая сложность — __настоящее качество известно с задержкой__, поэтому в реальном времени смотрят на прокси. **Feature store** нужен ровно затем, чтобы признаки в обучении и в проде считались одним кодом. ~~Train/serving skew — самая частая причина «на тесте было 0.95, в проде развалилось».~~
 
+    **Data drift** — уехало распределение входов; **concept drift** — изменилась сама связь между признаками
+    и целью, что для фрод-детекции норма жизни: мошенники меняют тактику. Главная практическая сложность
+    — __настоящее качество известно с задержкой__, поэтому в реальном времени смотрят на прокси. **Feature
+    store** нужен ровно затем, чтобы признаки в обучении и в проде считались одним кодом. ~~Train/serving
+    skew — самая частая причина «на тесте было 0.95, в проде развалилось».~~
+
+    '
 - kind: content
   id: 035-llmops-chto-monitorim-u-llm
   title: 'LLMOps: что мониторим у LLM-приложений'
-  code_caption: 'Трейс одного вызова как единица наблюдения'
-  code: |
-    trace: user_request
-      ├─ retrieve(docs)      120 ms   top_k=5
-      ├─ prompt build         2 ms    tokens_in=3120
-      ├─ llm.call           1840 ms   tokens_out=410, cost=$0.012
-      ├─ guardrail check      40 ms   pii=false, toxicity=ok
-      └─ response                     eval_score=0.82
-
-    метрики: latency p95 · tokens_in/out · cost per request
-             доля ошибок и таймаутов · доля срабатываний guardrail
-             оценки evals по регрессионному набору
+  code_caption: Трейс одного вызова как единица наблюдения
+  code: "trace: user_request\n  ├─ retrieve(docs)      120 ms   top_k=5\n  ├─ prompt build         2 ms\
+    \    tokens_in=3120\n  ├─ llm.call           1840 ms   tokens_out=410, cost=$0.012\n  ├─ guardrail\
+    \ check      40 ms   pii=false, toxicity=ok\n  └─ response                     eval_score=0.82\n\n\
+    метрики: latency p95 · tokens_in/out · cost per request\n         доля ошибок и таймаутов · доля срабатываний\
+    \ guardrail\n         оценки evals по регрессионному набору\n"
   bullets:
   - Трассировка промптов — базовая единица наблюдаемости
-  - 'Стоимость и токены — метрика первого класса, а не бухгалтерия'
+  - Стоимость и токены — метрика первого класса, а не бухгалтерия
   - 'Latency p95 важнее среднего: хвосты видит пользователь'
-  - 'Evals — регрессионные тесты качества на фиксированном наборе'
+  - Evals — регрессионные тесты качества на фиксированном наборе
   - 'Guardrails: PII, токсичность, выход за рамки домена'
-  - 'Обратная связь пользователей — дешёвый источник разметки'
-  notes: |
-    Для LLM-приложения единица наблюдения — !!полный трейс вызова!!: что достали из базы знаний, какой промпт собрали, сколько токенов ушло, что ответила модель, сколько это стоило.
+  - Обратная связь пользователей — дешёвый источник разметки
+  notes: 'Для LLM-приложения единица наблюдения — !!полный трейс вызова!!: что достали из базы знаний,
+    какой промпт собрали, сколько токенов ушло, что ответила модель, сколько это стоило.
 
-    Два принципиально новых сигнала по сравнению с обычным сервисом. Первый — **стоимость**: в LLM-приложении цена запроса переменная, и безобидная правка промпта может умножить счёт. Второй — **evals**: __регрессионные тесты качества__ на фиксированном наборе примеров, которые гоняются в CI при каждом изменении промпта или модели. ~~Смена версии модели у провайдера — это тоже изменение, которое ваши evals должны поймать.~~
 
+    Два принципиально новых сигнала по сравнению с обычным сервисом. Первый — **стоимость**: в LLM-приложении
+    цена запроса переменная, и безобидная правка промпта может умножить счёт. Второй — **evals**: __регрессионные
+    тесты качества__ на фиксированном наборе примеров, которые гоняются в CI при каждом изменении промпта
+    или модели. ~~Смена версии модели у провайдера — это тоже изменение, которое ваши evals должны поймать.~~
+
+    '
 - kind: table
   id: 036-instrumenty-monitoringa-ml-i-llm
-  title: 'Инструменты мониторинга ML и LLM'
+  title: Инструменты мониторинга ML и LLM
   materials:
   - label: Evidently — документация
     url: https://docs.evidentlyai.com/
@@ -1042,63 +1073,61 @@ content:
     - - Prometheus + Grafana
       - инфраструктурные метрики и алерты
       - всегда, как общий слой поверх остального
-    col_ratios: [3, 5, 4]
-  notes: |
-    Инструменты не конкурируют, а закрывают разные слои. **MLflow** — про __жизненный цикл модели__: эксперименты, версии, реестр. **Evidently** — про данные и дрейф. **Langfuse** и **Arize Phoenix** — про наблюдаемость LLM-приложений: трейсы, стоимость, оценки.
+    col_ratios:
+    - 3
+    - 5
+    - 4
+  notes: 'Инструменты не конкурируют, а закрывают разные слои. **MLflow** — про __жизненный цикл модели__:
+    эксперименты, версии, реестр. **Evidently** — про данные и дрейф. **Langfuse** и **Arize Phoenix**
+    — про наблюдаемость LLM-приложений: трейсы, стоимость, оценки.
 
-    Практический вывод: !!Prometheus и Grafana остаются общим слоем!! — в них стекаются алерты и инфраструктурные метрики из всех остальных систем. Типовая связка на проекте — специализированный инструмент для качества плюс Prometheus для «жив/не жив» и дежурства. ~~Ниша LLM-инструментов очень быстро меняется, поэтому смотрите на назначение, а не на конкретные имена — они устареют раньше вашего проекта.~~
 
-# ── §9 Домашнее задание ───────────────────────────────────────────────────────
+    Практический вывод: !!Prometheus и Grafana остаются общим слоем!! — в них стекаются алерты и инфраструктурные
+    метрики из всех остальных систем. Типовая связка на проекте — специализированный инструмент для качества
+    плюс Prometheus для «жив/не жив» и дежурства. ~~Ниша LLM-инструментов очень быстро меняется, поэтому
+    смотрите на назначение, а не на конкретные имена — они устареют раньше вашего проекта.~~
+
+    '
 - kind: section
   id: 037-domashnee-zadanie
   title: Домашнее задание
-  notes: |
-    Финальный блок — практика. Задание !!продолжает ваши предыдущие ДЗ по dbt и Dagster!!.
+  notes: 'Финальный блок — практика. Задание !!продолжает ваши предыдущие ДЗ по dbt и Dagster!!.
 
-    Тот же датасет `transactions_db.transactions` в **ClickHouse**, но теперь вокруг пайплайна надо __построить контур автоматизации и наблюдения__.
 
+    Тот же датасет `transactions_db.transactions` в **ClickHouse**, но теперь вокруг пайплайна надо __построить
+    контур автоматизации и наблюдения__.
+
+    '
 - kind: content
   id: 038-dz-minimalnyj-stek-monitoringa
   title: 'ДЗ: минимальный стек мониторинга + CI'
-  code_caption: 'docker-compose.yml и правило алерта — каркас'
-  code: |
-    services:
-      prometheus:
-        image: prom/prometheus
-        volumes:
-          - ./prometheus.yml:/etc/prometheus/prometheus.yml
-          - ./rules:/etc/prometheus/rules
-        ports: ["9090:9090"]
-      alertmanager:
-        image: prom/alertmanager
-        volumes: ["./alertmanager.yml:/etc/alertmanager/alertmanager.yml"]
-        ports: ["9093:9093"]
-      grafana:
-        image: grafana/grafana
-        volumes: ["./provisioning:/etc/grafana/provisioning"]
-        ports: ["3000:3000"]
-      pushgateway:
-        image: prom/pushgateway      # метрики короткого dbt-прогона
-        ports: ["9091:9091"]
-
-    # rules/dbt.yml
-    - alert: DbtMartStale
-      expr: time() - max(dbt_run_last_success_timestamp_seconds) > 3600
-      for: 10m
-      labels: { severity: critical }
-      annotations: { summary: "Витрина transactions не обновлялась > 1ч" }
+  code_caption: docker-compose.yml и правило алерта — каркас
+  code: "services:\n  prometheus:\n    image: prom/prometheus\n    volumes:\n      - ./prometheus.yml:/etc/prometheus/prometheus.yml\n\
+    \      - ./rules:/etc/prometheus/rules\n    ports: [\"9090:9090\"]\n  alertmanager:\n    image: prom/alertmanager\n\
+    \    volumes: [\"./alertmanager.yml:/etc/alertmanager/alertmanager.yml\"]\n    ports: [\"9093:9093\"\
+    ]\n  grafana:\n    image: grafana/grafana\n    volumes: [\"./provisioning:/etc/grafana/provisioning\"\
+    ]\n    ports: [\"3000:3000\"]\n  pushgateway:\n    image: prom/pushgateway      # метрики короткого\
+    \ dbt-прогона\n    ports: [\"9091:9091\"]\n\n# rules/dbt.yml\n- alert: DbtMartStale\n  expr: time()\
+    \ - max(dbt_run_last_success_timestamp_seconds) > 3600\n  for: 10m\n  labels: { severity: critical\
+    \ }\n  annotations: { summary: \"Витрина transactions не обновлялась > 1ч\" }\n"
   bullets:
-  - 'Поднять Prometheus, Alertmanager, Grafana (можно Pushgateway)'
+  - Поднять Prometheus, Alertmanager, Grafana (можно Pushgateway)
   - 'Отдавать метрики пайплайна: успех, длительность, число строк'
   - 'Дашборд Grafana: свежесть, длительность, доля падений'
-  - 'Алерт про устаревшую витрину с доставкой в Telegram'
+  - Алерт про устаревшую витрину с доставкой в Telegram
   - 'CI-пайплайн: sqlfluff lint, dbt parse, dbt build на изменённых'
   - 'В отчёт: скриншот дашборда, скриншот алерта, ссылка на прогон CI'
-  notes: |
-    Постановка: берём пайплайн из предыдущих заданий и !!обвешиваем его автоматизацией и мониторингом!!. Технически всё поднимается одним `docker-compose up`, поэтому основная работа — не в инфраструктуре, а в том, __какие метрики вы решите отдавать__.
+  notes: 'Постановка: берём пайплайн из предыдущих заданий и !!обвешиваем его автоматизацией и мониторингом!!.
+    Технически всё поднимается одним `docker-compose up`, поэтому основная работа — не в инфраструктуре,
+    а в том, __какие метрики вы решите отдавать__.
 
-    Минимальный набор метрик: **отметка времени успешного прогона**, **длительность** и **число обработанных строк**. Первой хватает на самый ценный алерт — про устаревшую витрину. Параллельно собираем **CI**: линт SQL, `dbt parse` и сборка изменённых моделей. ~~Платформа CI на ваш выбор — GitLab CI или GitHub Actions, это не влияет на оценку.~~
 
+    Минимальный набор метрик: **отметка времени успешного прогона**, **длительность** и **число обработанных
+    строк**. Первой хватает на самый ценный алерт — про устаревшую витрину. Параллельно собираем **CI**:
+    линт SQL, `dbt parse` и сборка изменённых моделей. ~~Платформа CI на ваш выбор — GitLab CI или GitHub
+    Actions, это не влияет на оценку.~~
+
+    '
 - kind: table
   id: 039-dz-kriterii-ocenki
   title: 'ДЗ: критерии оценки'
@@ -1107,25 +1136,45 @@ content:
     - Баллы
     - Что должно быть сделано
     rows:
-    - - '6–7'
-      - 'Prometheus и Grafana подняты в docker-compose; пайплайн отдаёт минимум одну метрику (метка времени успешного прогона); есть дашборд хотя бы с двумя панелями; CI-джоба с линтом и dbt parse проходит зелёной'
-    - - '8–9'
-      - 'всё выше + правило алерта на устаревшую витрину с `for` + Alertmanager с доставкой в Telegram (скриншот сообщения) + метрики длительности и числа строк + CI прогоняет dbt build на изменённых моделях с артефактом отчёта'
+    - - 6–7
+      - Prometheus и Grafana подняты в docker-compose; пайплайн отдаёт минимум одну метрику (метка времени
+        успешного прогона); есть дашборд хотя бы с двумя панелями; CI-джоба с линтом и dbt parse проходит
+        зелёной
+    - - 8–9
+      - всё выше + правило алерта на устаревшую витрину с `for` + Alertmanager с доставкой в Telegram
+        (скриншот сообщения) + метрики длительности и числа строк + CI прогоняет dbt build на изменённых
+        моделях с артефактом отчёта
     - - '10'
-      - 'всё выше + дашборды и datasource через provisioning из репозитория + второй канал доставки или маршрутизация по severity + осмысленный SLO по свежести с обоснованием порога + один нетривиальный элемент на выбор: self-hosted раннер, экспортер ClickHouse, трассировка через OpenTelemetry или мониторинг дрейфа данных'
-    col_ratios: [2, 9]
-  notes: |
-    Логика та же, что в предыдущих заданиях. **6–7 баллов** — «__поднято и работает__»: стек живой, метрика есть, CI зелёный. Это база, и она достижима за вечер.
+      - 'всё выше + дашборды и datasource через provisioning из репозитория + второй канал доставки или
+        маршрутизация по severity + осмысленный SLO по свежести с обоснованием порога + один нетривиальный
+        элемент на выбор: self-hosted раннер, экспортер ClickHouse, трассировка через OpenTelemetry или
+        мониторинг дрейфа данных'
+    col_ratios:
+    - 2
+    - 9
+  notes: 'Логика та же, что в предыдущих заданиях. **6–7 баллов** — «__поднято и работает__»: стек живой,
+    метрика есть, CI зелёный. Это база, и она достижима за вечер.
 
-    **8–9** — появляется то, ради чего мониторинг и делают: !!алерт, который реально доходит до человека!!. **10 баллов** — это __воспроизводимость и осмысленность__: конфигурация из репозитория, обоснованный SLO и один самостоятельно освоенный элемент. ~~Оценивается не количество панелей, а способность объяснить, почему выбран именно такой порог и почему на этот алерт стоит реагировать ночью.~~
 
+    **8–9** — появляется то, ради чего мониторинг и делают: !!алерт, который реально доходит до человека!!.
+    **10 баллов** — это __воспроизводимость и осмысленность__: конфигурация из репозитория, обоснованный
+    SLO и один самостоятельно освоенный элемент. ~~Оценивается не количество панелей, а способность объяснить,
+    почему выбран именно такой порог и почему на этот алерт стоит реагировать ночью.~~
+
+    '
 - kind: closing
   id: 040-spasibo-za-vnimanie
   title: Спасибо за внимание!
   subtitle: Вопросы?
-  notes: |
-    Спасибо! Резюмирую двумя мыслями. Первая: !!CI/CD и мониторинг — это один цикл, а не две задачи!!. Автоматическая доставка без наблюдения означает, что вы быстро выкатываете то, о состоянии чего ничего не знаете.
+  notes: 'Спасибо! Резюмирую двумя мыслями. Первая: !!CI/CD и мониторинг — это один цикл, а не две задачи!!.
+    Автоматическая доставка без наблюдения означает, что вы быстро выкатываете то, о состоянии чего ничего
+    не знаете.
 
-    Вторая, практическая: **начинайте с малого**. Один CI-джоб с линтом и тестами, одна метрика свежести, один алерт, который доходит до людей и на который реагируют — это уже больше пользы, чем неделя настройки идеального стека. __Всё остальное наращивается поверх__. Жду ваши ДЗ, вопросы удобнее в чат курса. ~~Ссылки на документацию есть на слайдах по ходу лекции.~~
 
-    — Сгенерировано: model=claude-opus-4-8 · harness=Claude Code · effort=max · version=v1.0 · 2026-07-20
+    Вторая, практическая: **начинайте с малого**. Один CI-джоб с линтом и тестами, одна метрика свежести,
+    один алерт, который доходит до людей и на который реагируют — это уже больше пользы, чем неделя настройки
+    идеального стека. __Всё остальное наращивается поверх__. Жду ваши ДЗ, вопросы удобнее в чат курса.
+    ~~Ссылки на документацию есть на слайдах по ходу лекции.~~
+
+
+    — Сгенерировано: model=claude-fable-5 · harness=Claude Code · effort=max · version=v1.1 · 2026-08-13'

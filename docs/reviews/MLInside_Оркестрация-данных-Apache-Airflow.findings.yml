@@ -2,8 +2,8 @@ deck: MLInside_Оркестрация-данных-Apache-Airflow
 content: content/preza-apache-airflow-content.yml
 lecture:
   n: null
-  topic: 'Оркестрация данных: Apache Airflow'
-  owner: null
+  topic: Оркестрация данных (Apache Airflow)
+  owner: Влад Бояджи
   status: draft
 stats:
   slides: 40
@@ -11,8 +11,20 @@ stats:
   tables: 6
   code_slides: 24
   materials_slides: 13
-  accents_total: 0
-  accents_hit: 0
-  accents_partial: 0
+  accents_total: 4
+  accents_hit: 3
+  accents_partial: 1
   accents_missing: 0
-findings: []
+findings:
+- severity: warn
+  kind: accent_partial
+  accent: 'Передача данных: Ограничения XCom, правильная передача метаданных вместо тяжелых датафреймов.'
+  slides:
+  - 1
+  - 13
+  - 24
+  - 28
+  - 2
+  message: 'Акцент «Передача данных: Ограничения XCom, правильная передача метаданных вместо тяжелых датафреймов.»
+    покрыт частично (лучший слайд 70%); недостаёт: перед, данны, огран, xcom, прави, перед, метад, вмест,
+    тяжел, датаф'

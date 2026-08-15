@@ -2,17 +2,17 @@ deck: MLInside_Введение-в-dbt
 content: content/preza-dbt-v3-content.yml
 lecture:
   n: null
-  topic: Введение в dbt
-  owner: null
+  topic: Трансформация данных и витрины (dbt)
+  owner: Николай Крупий
   status: draft
 stats:
-  slides: 48
+  slides: 52
   notes_coverage: 1.0
-  tables: 7
-  code_slides: 13
-  materials_slides: 25
-  accents_total: 0
-  accents_hit: 0
+  tables: 8
+  code_slides: 14
+  materials_slides: 26
+  accents_total: 4
+  accents_hit: 4
   accents_partial: 0
   accents_missing: 0
 findings:
