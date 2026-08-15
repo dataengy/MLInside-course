@@ -1,5 +1,37 @@
 # CLAUDE-curr-status — MLInside-course
 
+## Session 2026-08-13..16 — акцентная ось ЖИВА: тезисы листа → accents → 12/12 hit
+
+**Блокер акцентной оси (2026-07-27) РАЗРЕШЁН.** Полная лента поднята и прогнана:
+`settings/gsheet.yml` (полная карта колонок, «тезисы»→accents) → `just presentations-plan`
+(4 updated / 4 added-голых / 3 stale, dbt-topic переименован под «название» листа) →
+`just preza-review-all`: **dbt, Dagster, CI/CD+Obs — 12/12 акцентов hit, 0 err/0 warn**;
+`hit_ratio: 0.75` подгонки не потребовал. Закрыта
+[.ai/tasks/.done/0006](../.ai/tasks/.done/0006-review-accents-axis.md). Spec ленты:
+[docs/schedule-gsheet-lane.md](../docs/schedule-gsheet-lane.md).
+
+**Оговорка по транспорту**: ADC-консент в браузере так и не был добит (3 дня, 4 попытки) —
+первый дамп `settings/schedule.yml` получен через claude.ai Drive-коннектор в формате
+`fetch_raw` (данные листа сверены дважды, 13.08 и 16.08 — идентичны); `plan`-шаг и всё
+дальше — штатный код. Фоновый `adc-login` ещё слушает :8085; после консента пересинк —
+`just gsheet-dump && just presentations-plan` (идемпотентно).
+
+**Деки под 12 акцентов** (точечные правки, без реструктуризации): dbt 51→**52** слайда
+(новый `052-sloi-dbt-proekta`; без штампа — рукописная), Dagster 50→**51** (новый
+`051-ml-pajplajn-kak-cepochka-assetov`; штамп v1.1 model=claude-fable-5), CI/CD 40→**42**
+(новые `051-sborka-docker-obraza-v-ci`, `052-fastapi-instrumentaciya-prometheus`; штамп
+v1.1). `slides_max` 50→55. Сборка: dbt v3.14 / Dagster v1.3 / CICD v1.3 (pptx+html,
+хардлинки в ~/Downloads). Тесты: 21 passed (счётчик dbt 52; +тест нумерованного сплита).
+
+**Новая обвязка**: хук `scripts/hooks/preza-accents-status.sh` (SessionStart), суб-агент
+`.claude/agents/preza-accents-keeper.md` (scope: project; зеркало в `~/.ai/agents/`
+отложено — канонический репо грязный и не на main), память
+`schedule_gsheet_accents_lane`, `~/.ai/projects/MLInside-course/README.md`, скилл
+`preza-review` дополнен и заново захардлинкен (каталог=глобал=репо).
+
+**Наш Airflow-дек: 3/4 акцентов** (partial по XCom-тезису) — лекция Влада, вне скоупа
+этой сессии; чужой импортный Airflow-дек по-прежнему error (заглушки; открытый вопрос 0005).
+
 ## Session 2026-08-11 — workstation bootstrap: всё закоммичено и ЗАПУШЕНО
 
 **Push-блокер РАЗРЕШЁН.** Причиной «Repository not found» была потеря collaborator-доступа

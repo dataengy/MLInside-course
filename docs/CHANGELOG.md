@@ -2,6 +2,37 @@
 
 Canonical project changelog (finalize-issue passes migrate shipped work here).
 
+## 2026-08-16 — Accent axis live: GSheet тезисы → accents → 12/12 hit ([#3](https://github.com/dataengy/MLInside-course/issues/3), [#4](https://github.com/dataengy/MLInside-course/issues/4))
+
+- **Рубрика приехала с листа**: `settings/gsheet.yml` (полная карта колонок — loader замещает
+  дефолт целиком; «тезисы»→accents; «старая запись» сознательно не мапится в `n`),
+  `mapper.split_accents` научился резать нумерованные абзацы (`accents_split_numbering`,
+  регэксп `_NUMBERED_ITEM`, юнит-тест), topic dbt-записи переименован в точное «название»
+  листа — upsert матчится без дублей. Итог `just presentations-plan`: 4 updated / 4 added
+  (чужие лекции, `content: null`) / 3 stale (Prefect, внешний Airflow, OGIP).
+  Транспорт первого дампа — claude.ai Drive-коннектор (ADC-консент не добит; после
+  `adc-login` пересинк = `just gsheet-dump && just presentations-plan`); формат дампа —
+  штатный `fetch_raw`, остальная лента — штатный код. Spec:
+  [`docs/schedule-gsheet-lane.md`](schedule-gsheet-lane.md).
+- **Целевые правки трёх дек под 12 акцентов** (все — hit, 0 error/0 warn;
+  [`docs/reviews/`](reviews/)): dbt 51→**52** слайда (новый `052-sloi-dbt-proekta`
+  sources→staging→marts; Analytics-Engineering-буллет на 004; качество данных на 028;
+  инкрементальность-в-ClickHouse на 018 — дека рукописная, без штампа); Dagster 50→**51**
+  (новый `051-ml-pajplajn-kak-cepochka-assetov` Загрузка→Препроцессинг→Обучение→Валидация;
+  SDA-vs-Airflow на 009; фабрики ресурсов на 016; lineage в notes 012; штамп v1.1);
+  CI/CD+Obs 40→**42** (новые `051-sborka-docker-obraza-v-ci` и
+  `052-fastapi-instrumentaciya-prometheus` RPS/latency/5xx; бизнес-метрики на 034;
+  Telegram/Slack на 027; штамп v1.1). `slides_max` 50→55. Пересборка: dbt v3.14,
+  Dagster v1.3, CICD v1.3.
+- **Закрыта [.ai/tasks/0006](../.ai/tasks/.done/0006-review-accents-axis.md)** — акцентная
+  ось прогнана на живых данных; `hit_ratio: 0.75` подгонки не потребовал (лексика акцентов
+  повторена в деках буквально). Наш Airflow-дек — 3/4 (лекция Влада, вне скоупа).
+- **Обвязка**: SessionStart-хук `scripts/hooks/preza-accents-status.sh` (лента не
+  настроена / sheet-matched дека без акцентов); проектный суб-агент
+  `.claude/agents/preza-accents-keeper.md`; память + `~/.ai/projects/MLInside-course/`;
+  скилл `preza-review` дополнен разделом про синк-ленту и заново захардлинкен
+  (каталог=глобал=репо, один инод).
+
 ## 2026-08-11 — Secrets sync + workstation bootstrap; Olist homework wired in
 
 - **Secrets sync, two lanes** (`scripts/secrets-sync.sh`, `just secrets-*`, runbook

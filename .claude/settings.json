@@ -8,6 +8,12 @@
             "command": "bash scripts/hooks/repo-sync-status.sh",
             "timeout": 10,
             "statusMessage": "Checking repo sync state"
+          },
+          {
+            "type": "command",
+            "command": "bash scripts/hooks/preza-accents-status.sh",
+            "timeout": 10,
+            "statusMessage": "Checking preza accents lane"
           }
         ]
       }
