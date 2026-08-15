@@ -7,74 +7,153 @@
 #
 # `accents:` is the rubric `/preza-review` scores each deck against.
 # Supersedes settings/config.yml → deck_generation.decks once the reviewer is proven.
-#
-# SEEDED BY HAND (2026-07-27) — the five existing decks, so the reviewer is usable before the
-# first sheet sync. `accents: []` everywhere: the rubric comes from the sheet. After
-# `just gsheet-dump && just presentations-plan` these entries are matched to their numbered
-# sheet rows by topic and gain n/date/owner/status/accents without duplicating.
 # ──────────────────────────────────────────────────────────────────────────────
 source:
   gsheet: https://docs.google.com/spreadsheets/d/1cxYGtU36nbmO5DhjtNkm_HMESiNPwoWdd6QY8yb2JaU/edit
-  tab: null
-  fetched_at: null
+  tab: sheet1 (drive-connector fetch)
+  fetched_at: '2026-08-16'
   raw: settings/schedule.yml
 presentations:
-- topic: Введение в dbt
+- topic: Разработка ML-сервисов и контейнеризация (FastAPI & Docker)
+  owner: Влад Бояджи
+  accents:
+  - 'Проектирование API: Создание легковесных REST API на FastAPI и валидация входящих тензоров/данных
+    через Pydantic.'
+  - 'Анатомия Docker: Разница между виртуальными машинами и контейнерами. Архитектура Docker (Daemon,
+    Client, Images, Containers).'
+  - 'Сборка эффективных ML-образов: Написание оптимальных Dockerfile. Использование Multi-stage builds
+    для уменьшения веса образа (отдельно сборка зависимостей, отдельно рантайм).'
+  - 'Оптимизация под тяжелый ML: Кэширование слоев Docker (pip install), выбор правильных базовых образов
+    (Slim vs Alpine, нюансы компиляции C++ библиотек вроде LightGBM/XGBoost).'
+  - 'Управление окружением: Работа со сложными зависимостями (CUDA, PyTorch, TensorFlow) внутри контейнера.'
+  - 'Docker Compose в ML: Оркестрация локального окружения. Одновременный запуск сервиса с моделью, локальной
+    БД и хранилища весов (MinIO/S3).'
+  - 'Постоянное хранение данных: Работа с Docker Volumes и Bind Mounts для сохранения логов предсказаний
+    и локальных артефактов.'
+  content: null
+  out_name: null
+- topic: Асинхронный стриминг данных (Apache Kafka в ML)
+  owner: Влад Бояджи
+  accents:
+  - 'Концепция событийной архитектуры: Зачем нужен стриминг в ML, отличия от пакетной (batch) обработки.'
+  - 'Анатомия Kafka: Темы (Topics), партиции, продюсеры (Producers) и консьюмеры (Consumers).'
+  - 'Стриминг признаков: Отправка логов поведения пользователей в реальном времени для расчета динамических
+    фичей.'
+  - 'Отказоустойчивость: Обработка ошибок при потере соединения и гарантии доставки сообщений.'
+  content: null
+  out_name: null
+- topic: Хранилища данных и MPP-системы (ClickHouse)
+  owner: Влад Бояджи
+  accents:
+  - 'Эволюция хранения: Различия, архитектурные сдвиги и юзкейсы для концепций Data Lake (сырые данные),
+    Data Warehouse (структурированные DWH) и Lakehouse (Delta Lake / Iceberg).'
+  - 'Парадигмы обработки:  Смена подходов ETL (классический) на ELT (современный подход, где тяжелые трансформации
+    переносятся внутрь мощных БД).'
+  - 'Архитектура MPP (Massively Parallel Processing): Принципы распределенного выполнения запросов, разделение
+    данных по узлам (Sharding) и репликация. Почему MPP незаменимы для Big Data.'
+  - 'Моделирование данных: Проектирование классических схем «Звезда» (Star Schema) и «Снежинка» (Snowflake
+    Schema). Их плюсы, минусы и применимость в аналитических хранилищах.'
+  - 'Колоночный подход: Внутреннее устройство ClickHouse. Почему колоночные БД работают в сотни раз быстрее
+    построчных (PostgreSQL) на аналитических выборках и подготовке фичей.'
+  - 'Оптимизация производительности: Индексы в ClickHouse, выбор правильного ключа сортировки (ORDER BY),
+    движки семейства MergeTree, материализованные представления (Materialized Views).'
+  - 'Примеры использования в MLOps:'
+  - ClickHouse как сверхбыстрое хранилище истории предсказаний и логов для мониторинга.
+  - Использование MPP-систем для расчета "тяжелых" батч-фичей на миллиардах строк.
+  - Сквозная аналитика качества моделей (стыковка предсказаний с реальными бизнес-метриками/таргетами
+    спустя время).
+  content: null
+  out_name: null
+- topic: Трансформация данных и витрины (dbt)
+  owner: Николай Крупий
   status: draft
-  accents: []
-  visuals: reuse-source      # this deck reuses ppt/media from the 2025 source deck
-  generated: false           # hand-authored (predates create-preza-about-de-tool) — it carries
-                             # no `— Сгенерировано:` stamp and must never be given a fake one
+  accents:
+  - 'Подход Analytics Engineering: Перенос логики трансформации данных из Python-скрипов на уровень SQL.'
+  - 'Структурирование dbt-проекта: Источники (sources), промежуточные модели (staging) и финальные витрины
+    признаков (marts).'
+  - 'Качество данных: Автоматическое тестирование ограничений (уникальность, null, связи) и генерация
+    документации.'
+  - 'Инкрементальные модели: Оптимизация расчетов через обновление только новых данных в ClickHouse.'
   content: content/preza-dbt-v3-content.yml
   out_name: MLInside_Введение-в-dbt
-  slides: 51
-  homework:                  # ДЗ этой лекции — submodule homework/mlinside-hw-olist
+  slides: 52
+  visuals: reuse-source
+  generated: false
+  homework:
     repo: https://github.com/hnkovr/mlinside-hw-olist
     spec: homework/mlinside-hw-olist/docs/HW1-dbt.md
-    slides: [048-domashnee-zadanie, 049-dz-vitriny-na-datasete-olist, 050-dz-kriterii-ocenki]
-- topic: 'Современная оркестрация ML-пайплайнов: Dagster'
+    slides:
+    - 048-domashnee-zadanie
+    - 049-dz-vitriny-na-datasete-olist
+    - 050-dz-kriterii-ocenki
+- topic: Оркестрация данных (Apache Airflow)
+  owner: Влад Бояджи
   status: draft
-  accents: []
+  accents:
+  - 'Управление процессами: Архитектура Airflow (Scheduler, Worker, Webserver), понятие DAG и операторов.'
+  - 'Расписание и ETL: Регулярный запуск dbt-моделей, сбор сырых данных и подготовка батч-прогнозов.'
+  - 'Передача данных: Ограничения XCom, правильная передача метаданных вместо тяжелых датафреймов.'
+  - 'Обработка сбоев: Настройка политик повторных попыток (retries) и алертов при падении задач.'
+  content: content/preza-apache-airflow-content.yml
+  out_name: MLInside_Оркестрация-данных-Apache-Airflow
+  slides: 40
+- topic: Современная оркестрация ML-пайплайнов (Dagster)
+  owner: Николай Крупий
+  status: draft
+  accents:
+  - 'Data-Driven подход: Отличие от Airflow, концепция программно-определяемых ассетов (Software-Defined
+    Assets).'
+  - 'ML-пайплайн: Описание шагов «Загрузка -> Препроцессинг -> Обучение -> Валидация» как цепочки зависимых
+    ресурсов.'
+  - 'Изоляция кода: Использование фабрик ресурсов, локальное тестирование пайплайнов без развертывания
+    инфраструктуры.'
+  - 'Версионирование данных: Отслеживание происхождения (lineage) датасетов и версий моделей.'
   content: content/preza-dagster-content.yml
   out_name: MLInside_Современная-оркестрация-ML-пайплайнов-Dagster
-  slides: 50
-  homework:                  # ДЗ этой лекции — надстройка над ДЗ по dbt
+  slides: 51
+  homework:
     repo: https://github.com/hnkovr/mlinside-hw-olist
     spec: homework/mlinside-hw-olist/docs/HW2-dagster.md
-    slides: [047-domashnee-zadanie, 048-dz-orkestriruem-dbt-proekt-v, 049-dz-kriterii-ocenki]
+    slides:
+    - 047-domashnee-zadanie
+    - 048-dz-orkestriruem-dbt-proekt-v
+    - 049-dz-kriterii-ocenki
+- topic: Трекинг экспериментов и реестр моделей (MLflow / ClearML)
+  owner: Влад Бояджи
+  accents:
+  - 'Логирование артефактов: Автоматическое и ручное трекание гиперпараметров, метрик, графиков и кода
+    обучения.'
+  - 'Воспроизводимость: Сохранение окружения (зависимостей) вместе с обученной моделью.'
+  - 'Реестр моделей (Model Registry): Версионирование моделей, смена стадий (Staging, Production, Archive).'
+  - 'Удаленный сервер: Настройка общего хранилища экспериментов для командной работы DS.'
+  content: null
+  out_name: null
+- topic: Автоматизация и мониторинг (CI/CD + Prometheus/Grafana)
+  owner: Николай Крупий/Влад
+  status: draft
+  accents:
+  - 'Автоматизация сборки: Написание пайплайнов GitLab CI или GitHub Actions для тестирования кода и сборки
+    Docker-образов.'
+  - 'Мониторинг сервиса: Сбор технических метрик FastAPI (RPS, latency, ошибки 5xx) с помощью Prometheus.'
+  - 'Мониторинг ML: Сбор бизнес-метрик (распределение предсказаний, деградация качества модели, Data Drift).'
+  - 'Визуализация: Создание дашбордов в Grafana и настройка алертов в Telegram/Slack при аномалиях.'
+  content: content/preza-cicd-observability-content.yml
+  out_name: MLInside_Автоматизация-и-мониторинг-CICD-Prometheus-Grafana
+  slides: 42
 - topic: 'Современная оркестрация ML-пайплайнов: Prefect'
   status: draft
   accents: []
   content: content/preza-prefect-content.yml
   out_name: MLInside_Современная-оркестрация-ML-пайплайнов-Prefect
   slides: 30
-- topic: 'Автоматизация и мониторинг: CI/CD, Prometheus, Grafana'
-  status: draft
-  accents: []
-  content: content/preza-cicd-observability-content.yml
-  out_name: MLInside_Автоматизация-и-мониторинг-CICD-Prometheus-Grafana
-  slides: 40
-- topic: 'Оркестрация данных: Apache Airflow'
-  status: draft
-  accents: []
-  content: content/preza-apache-airflow-content.yml
-  out_name: MLInside_Оркестрация-данных-Apache-Airflow
-  slides: 40
-# Imported 2026-07-28 from data/decks/5_Оркестрация_данных_Apache_Airflow.pptx — a FOREIGN deck
-# on the same lecture as the entry above. Kept as a separate topic so the upsert never merges the
-# two; whether it supersedes, complements or loses to our generated deck is an open decision.
 - topic: 'Оркестрация данных: Apache Airflow (внешний дек, лекция 5)'
   status: draft
   accents: []
-  generated: false           # imported from pptx — no generation stamp exists or should be faked
-  visuals: image-pipeline    # 25 embedded pictures; `code-tables` would flag every one as an error
   content: content/imported/5_Оркестрация_данных_Apache_Airflow.yml
   out_name: 5_Оркестрация_данных_Apache_Airflow
   slides: 43
-# Added 2026-07-30 — OGIP showcase deck: a PORTFOLIO artifact (project walkthrough for a
-# senior data-engineering reviewer), NOT a lecture from the schedule sheet. Kept in the plan so
-# the deck is visible to /preza-review and the build/validate recipes; a sheet sync will never
-# match this topic, so the entry survives untouched.
+  generated: false
+  visuals: image-pipeline
 - topic: 'OGIP — Open Games Intelligence Platform: один spec, три engine-сетапа (showcase)'
   status: draft
   accents: []

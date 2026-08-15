@@ -16,6 +16,10 @@ SHEET_FIELDS = {"n", "date", "topic", "owner", "status", "accents", "notes"}
 
 _PUNCT = re.compile(r"[^\w\s]", re.UNICODE)
 _WS = re.compile(r"\s+")
+#: "… SQL. 2. Структурирование …" — a numbered item boundary inside one paragraph-cell.
+#: Requires start/whitespace before the number and a capital right after, so decimals
+#: ("0.75") and abbreviations never match.
+_NUMBERED_ITEM = re.compile(r"(?:^|(?<=\s))\d{1,2}[.)]\s+(?=[А-ЯЁA-Z])")
 
 
 def normalize(text: Any) -> str:
@@ -81,11 +85,17 @@ def find_header_row(rows: list[list[Any]], columns: dict[str, list[str]], limit:
     return best
 
 
-def split_accents(value: Any, seps: list[str]) -> list[str]:
+def split_accents(value: Any, seps: list[str], split_numbering: bool = False) -> list[str]:
     """Split one cell into individual accents.
+
+    With ``split_numbering`` a single-paragraph numbered cell ("1. … 2. …") is split on the
+    item boundaries too — idempotent whether or not real newlines already exist, and the
+    leading "N." of each item is dropped with the boundary.
 
     >>> split_accents("модели; тесты\\n- docs", ["\\n", ";"])
     ['модели', 'тесты', 'docs']
+    >>> split_accents("1. Подход A: перенос на SQL. 2. Слои проекта.", ["\\n"], True)
+    ['Подход A: перенос на SQL.', 'Слои проекта.']
     >>> split_accents("", ["\\n"])
     []
     """
@@ -94,6 +104,8 @@ def split_accents(value: Any, seps: list[str]) -> list[str]:
     text = str(value)
     for sep in seps or []:
         text = text.replace(sep, "\n")
+    if split_numbering:
+        text = _NUMBERED_ITEM.sub("\n", text)
     out = []
     for part in text.split("\n"):
         part = part.strip().lstrip("-–—•*").strip()
@@ -131,6 +143,7 @@ def rows_to_presentations(rows: list[list[Any]], mapping: dict) -> list[dict]:
     log.info(f"header row {hidx + 1}; columns resolved: {cols}")
 
     seps = mapping.get("accents_split") or ["\n"]
+    split_numbering = bool(mapping.get("accents_split_numbering"))
     out: list[dict] = []
     for row in rows[hidx + 1 :]:
         topic = _cell(row, cols.get("topic"))
@@ -146,7 +159,7 @@ def rows_to_presentations(rows: list[list[Any]], mapping: dict) -> list[dict]:
             if val not in ("", None):
                 rec[field] = val
         rec["topic"] = topic
-        accents = split_accents(_cell(row, cols.get("accents")), seps)
+        accents = split_accents(_cell(row, cols.get("accents")), seps, split_numbering)
         if accents:
             rec["accents"] = accents
         notes = _cell(row, cols.get("notes"))

@@ -44,6 +44,33 @@ def test_rows_to_presentations_parses_and_skips_blanks():
     assert "owner" not in recs[2] and recs[2]["topic"] == "Прочее"
 
 
+def test_numbered_paragraph_cell_splits_into_accents():
+    """The live sheet's тезисы cell is one paragraph: '1. … 2. … 3. …' with no newlines."""
+    rows = [
+        ["старая запись", "название", "тезисы", "лектор"],
+        ["https://my.mts-link.ru/x", "Трансформация данных и витрины (dbt)",
+         "1. Подход Analytics Engineering: перенос логики на SQL. "
+         "2. Структурирование dbt-проекта: sources, staging и marts. "
+         "3. Качество данных: тестирование (уникальность, null, связи). "
+         "4. Инкрементальные модели: обновление только новых данных в ClickHouse.",
+         "Николай Крупий"],
+    ]
+    mapping = cfg.DEFAULT_MAPPING | {
+        "header_row": 1,
+        "columns": cfg.DEFAULT_MAPPING["columns"] | {"accents": ["тезисы", "акценты"]},
+        "accents_split_numbering": True,
+    }
+    recs = mapper.rows_to_presentations(rows, mapping)
+    assert len(recs) == 1
+    assert recs[0]["owner"] == "Николай Крупий"
+    assert "n" not in recs[0], "free-text 'старая запись' must not be coerced into n"
+    accents = recs[0]["accents"]
+    assert len(accents) == 4
+    assert accents[0].startswith("Подход Analytics Engineering")
+    assert accents[3].startswith("Инкрементальные модели")
+    assert not any(a[0].isdigit() for a in accents), "numbering is stripped with the boundary"
+
+
 def test_header_row_autodetected_when_unset():
     recs = mapper.rows_to_presentations(SHEET_ROWS, cfg.DEFAULT_MAPPING | {"header_row": None})
     assert [r["n"] for r in recs] == [9, 10, 11]
