@@ -30,24 +30,28 @@ build-all:
     cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --all \
       --settings {{_settings}} --content {{_content}}
 
-# Build, open the latest deck locally, then send it to Telegram.
+# Build the dbt deck (all formats), open locally, then publish it (TG + GDrive + sheet).
 publish:
     cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --all --open \
       --settings {{_settings}} --content {{_content}}
-    just send
+    just publish-new --deck {{_content}}
 
-# Send the newest built deck (auto-versioned) to the MLInside Telegram topic (118)
-send:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    f=$(ls -t ~/Downloads/MLInside_Введение-в-dbt_v*.pptx | head -1)
-    ver=$(basename "$f" .pptx | sed 's/.*_v/v/')
-    bash ~/.ai/scripts/telegram/tg-send-file.sh \
-      --file "$f" \
-      --caption "📎 Введение в dbt — $ver · MLInside" \
-      --chat -1002281796095 --thread 118
+# Publish every built version newer than the cursor: Telegram + GDrive (stable URL) +
+# schedule-sheet columns. Idempotent; spec: docs/deck-publish-pipeline.md
+publish-new *ARGS:
+    cd {{_dir}} && PYTHONPATH=src python3 -m publisher run {{ARGS}}
 
-build-send: build send
+# Same, print intent only (no network, no writes)
+publish-new-dry:
+    just publish-new --dry
+
+# Cursor vs newest built version, per deck
+publish-status:
+    cd {{_dir}} && PYTHONPATH=src python3 -m publisher status
+
+# One-time: search-or-create the course Drive folder, prints id for settings/publish.yml
+publish-init-drive *ARGS:
+    cd {{_dir}} && PYTHONPATH=src python3 -m publisher init-drive {{ARGS}}
 
 # Build the Dagster lecture deck (PPTX + HTML).
 dagster-build:

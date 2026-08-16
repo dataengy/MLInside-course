@@ -1,0 +1,125 @@
+"""publisher.settings — settings/publish.yml + facts reused from the schedule reader.
+
+``settings/publish.yml`` owns only what is NEW to publishing (Drive folder, sheet column
+headers, Telegram routing, auth scopes/token path). Spreadsheet id, header row and the tab
+override are NOT restated here — they come from ``schedule.settings.load()`` (a pure, cheap,
+offline call), so the fact lives in one place (``settings/gsheet.yml`` / ``config.yml``).
+"""
+
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+
+import yaml
+
+from schedule import settings as sched_settings
+from schedule.gsheet import REPO_ROOT
+
+PUBLISH_YML = REPO_ROOT / "settings" / "publish.yml"
+
+WRITE_SCOPES = [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/spreadsheets",
+]
+
+
+@dataclass
+class DriveSettings:
+    folder_id: str | None = None  # required before the first real run (publish-init-drive)
+    folder_name: str = "MLInside 2026 — decks"
+    parent_folder_id: str = "root"
+    share: str = "anyone_reader"  # anyone_reader | none
+
+
+@dataclass
+class SheetSettings:
+    # Header text per written field; dict order = append order for missing columns.
+    columns: dict[str, str] = field(
+        default_factory=lambda: {"url": "pptx (GDrive)", "version": "версия", "slides": "слайдов"}
+    )
+    link_style: str = "url"  # url | hyperlink
+
+
+@dataclass
+class TelegramSettings:
+    slug: str = "mlinside_course"
+    kind: str = "milestone"
+    max_upload_mb: int = 49  # pre-flight guard under tg-send-file.sh's hard 50MB cap
+    chat: str | None = None  # None → deck-publish.yml default (MLInside topic 118)
+    thread: str | None = None
+
+
+@dataclass
+class PublishConfig:
+    drive: DriveSettings
+    sheet: SheetSettings
+    telegram: TelegramSettings
+    scopes: list[str]
+    token_cache: Path
+    state_file: Path
+    out_dir: Path  # data/generated — where built versions live
+    plan_path: Path  # content/presentations.yml
+    spreadsheet_id: str
+    header_row: int
+    sheet_tab_override: str | None
+    # The reader's candidate-header map (settings/gsheet.yml) — the write lane locates the
+    # topic column with the exact same rules (mapper.resolve_columns), one identity model.
+    columns_map: dict[str, list[str]] = field(default_factory=dict)
+
+
+def _get(raw: dict, key: str) -> dict:
+    v = raw.get(key)
+    return v if isinstance(v, dict) else {}
+
+
+def load(path: str | Path = PUBLISH_YML) -> PublishConfig:
+    """Merged publish config; every key optional except what the sheet lane derives."""
+    p = Path(path)
+    raw = yaml.safe_load(p.read_text(encoding="utf-8")) if p.is_file() else {}
+    raw = raw or {}
+
+    d, s, t, a = _get(raw, "drive"), _get(raw, "sheet"), _get(raw, "telegram"), _get(raw, "auth")
+
+    drive = DriveSettings(
+        folder_id=d.get("folder_id"),
+        folder_name=d.get("folder_name") or DriveSettings.folder_name,
+        parent_folder_id=d.get("parent_folder_id") or "root",
+        share=d.get("share") or "anyone_reader",
+    )
+    sheet = SheetSettings(
+        columns={str(k): str(v) for k, v in (s.get("columns") or {}).items()}
+        or SheetSettings().columns,
+        link_style=s.get("link_style") or "url",
+    )
+    telegram = TelegramSettings(
+        slug=t.get("slug") or "mlinside_course",
+        kind=t.get("kind") or "milestone",
+        max_upload_mb=int(t.get("max_upload_mb") or 49),
+        chat=t.get("chat"),
+        thread=str(t["thread"]) if t.get("thread") is not None else None,
+    )
+
+    token_env = a.get("token_cache_env") or "GOOGLE_OAUTH_TOKEN_CACHE"
+    token_cache = Path(
+        os.environ.get(token_env)
+        or a.get("token_cache_default")
+        or "~/.config/gcloud/application_default_credentials.json"
+    ).expanduser()
+
+    sched = sched_settings.load()
+    return PublishConfig(
+        drive=drive,
+        sheet=sheet,
+        telegram=telegram,
+        scopes=list(a.get("scopes") or WRITE_SCOPES),
+        token_cache=token_cache,
+        state_file=REPO_ROOT / (raw.get("state_file") or "data/.state/deck-publish-state.json"),
+        out_dir=REPO_ROOT / "data" / "generated",
+        plan_path=sched_settings.out_path(sched, "plan"),
+        spreadsheet_id=sched["spreadsheet"]["id"],
+        header_row=int(sched["mapping"].get("header_row") or 1),
+        sheet_tab_override=sched["mapping"].get("tab"),
+        columns_map=dict(sched["mapping"].get("columns") or {}),
+    )
