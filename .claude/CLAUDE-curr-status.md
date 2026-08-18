@@ -1,5 +1,21 @@
 # CLAUDE-curr-status — MLInside-course
 
+## Session 2026-08-16..18 — публикационная лента: TG + GDrive (вечный URL) + колонки листа
+
+**Код-комплит, закоммичено** (`dcad8e6` → [#6](https://github.com/dataengy/MLInside-course/issues/6)):
+`src/publisher/` + `just publish-new{,-dry}`/`publish-status`/`publish-init-drive` +
+SessionStart-хук `deck-publish-status.sh` + 43 теста (suite 251 зелёный). Порядок легов
+drive→tg→sheet, изоляция, ретрай только не-ok, курсор + git-tracked `published:`-блок.
+Spec: [docs/deck-publish-pipeline.md](../docs/deck-publish-pipeline.md).
+Попутно **починен корневой баг ADC-ленты** (`just` без именованных args → gcloud получал
+`--account="account=X"`; [hnkovr/.ai#8](https://github.com/hnkovr/.ai/issues/8), ~/.ai
+`de2c45b`), write-скоупы drive+spreadsheets в дефолтах `reset-google-account-creds`;
+мёртвый AGD-gen OAuth-токен (invalid_grant) удалён из ~/.secrets.
+
+**Ждёт ТОЛЬКО браузерного ADC-консента** (логин слушает :8085, вотчер на ADC-файл
+взведён): смок → `publish-init-drive` (folder_id в settings/publish.yml) → dry →
+первая публикация OGIP → все деки → пин имени таба. Чек-лист — в спеке.
+
 ## Session 2026-08-13..16 — акцентная ось ЖИВА: тезисы листа → accents → 12/12 hit
 
 **Блокер акцентной оси (2026-07-27) РАЗРЕШЁН.** Полная лента поднята и прогнана:

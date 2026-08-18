@@ -2,6 +2,32 @@
 
 Canonical project changelog (finalize-issue passes migrate shipped work here).
 
+## 2026-08-18 — Deck publish pipeline: TG + GDrive (вечный URL) + колонки листа ([#6](https://github.com/dataengy/MLInside-course/issues/6))
+
+- **`src/publisher/`** (`just publish-new{,-dry}`, `publish-status`, `publish-init-drive`):
+  detect по `data/generated/*_v{maj}.{min}.pptx` → **drive** (`files().update` того же
+  fileId — URL на предмет вечный; adopt-by-name при потере курсора; шаринг anyone_reader
+  идемпотентно) → **tg** (`tg-project-inform` + `preza_gen.publish`→топик 118, гард 49MB)
+  → **sheet** (живой резолв таба; колонки «pptx (GDrive)»/«версия»/«слайдов» дозаводятся
+  идемпотентно; строка по `mapper.normalize`; один `batchUpdate`). Леги изолированы,
+  ретрай только не-ok (TG не шлётся дважды); курсор `data/.state/deck-publish-state.json`
+  + git-tracked `published:`-блок в `presentations.yml` (сид свежего клона — без
+  повторных отправок). Триггер только явный: билдер мятит новую minor каждым билдом.
+  Захардкоженный dbt-only `just send`/`build-send` удалён, `publish` перенаправлен.
+  SessionStart-хук `deck-publish-status.sh` нагает про неопубликованное. 43 теста
+  (моки, без сети), suite 251 зелёный. Spec:
+  [`docs/deck-publish-pipeline.md`](deck-publish-pipeline.md).
+- **Транспорт**: user-ADC hnkovr@gmail.com c write-скоупами drive+spreadsheets (токен-кэш =
+  ADC-файл). OAuth-токен AGD-gen мёртв (`invalid_grant`, Testing-status 7-day expiry);
+  SA отпал (нет storage-квоты на Drive у личного аккаунта). **Починен корневой баг
+  ADC-ленты**: `just` не имеет именованных args — `adc-login account=X` кормил gcloud
+  `--account="account=X"`, каждый консент ломался
+  ([hnkovr/.ai#8](https://github.com/hnkovr/.ai/issues/8), fix запушен в ~/.ai
+  `de2c45b`); write-скоупы закреплены в дефолтах `reset-google-account-creds`.
+- **Отложено до консента** (браузерный ADC-логин не добит): живой прогон — smoke,
+  `publish-init-drive` (реальный folder_id), первая публикация OGIP → все деки, пин
+  имени таба. Чек-лист — в спеке.
+
 ## 2026-08-16 — Accent axis live: GSheet тезисы → accents → 12/12 hit ([#3](https://github.com/dataengy/MLInside-course/issues/3), [#4](https://github.com/dataengy/MLInside-course/issues/4))
 
 - **Рубрика приехала с листа**: `settings/gsheet.yml` (полная карта колонок — loader замещает
