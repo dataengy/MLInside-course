@@ -74,6 +74,18 @@ just publish                    # dbt: build --all + open + publish-new --deck d
 
 ## Транспорт (Google write-лента)
 
+**Состояние на 2026-08-19.** ЧТЕНИЕ листа работает без браузера — через сервис-аккаунт
+(`just gsheet-tabs` → `Sheet1`). ЗАПИСЬ пока нет: у обоих SA `canEdit=false` (проверено
+Drive-capabilities), а ADC-консент не завершён. Два пути открыть запись:
+
+| Путь | Что сделать | Что заработает |
+|---|---|---|
+| **ADC-консент** (полный) | добить браузерный логин (скоупы `spreadsheets` + `drive.file`) | всё: Drive-загрузка **и** колонки листа |
+| **Шаринг на SA** (без браузера) | расшарить лист на `service-account-1@for-prodamus-1.iam.gserviceaccount.com` как **Редактор**, затем прописать ключ в `auth.service_account_file` | только колонки листа; Drive-лег упадёт изолированно (у SA нет storage-квоты) |
+
+Полный скоуп `.../auth/drive` использовать **нельзя**: он restricted, экран согласия gcloud
+отвечает «Приложение заблокировано». Рабочий вариант — `drive.file`.
+
 User-ADC **hnkovr@gmail.com** с write-скоупами `drive` + `spreadsheets`
 (`settings/publish.yml → auth`; токен-кэш — сам ADC-файл
 `~/.config/gcloud/application_default_credentials.json`, override —

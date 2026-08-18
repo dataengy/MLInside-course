@@ -39,7 +39,7 @@ publish:
 # Publish every built version newer than the cursor: Telegram + GDrive (stable URL) +
 # schedule-sheet columns. Idempotent; spec: docs/deck-publish-pipeline.md
 publish-new *ARGS:
-    cd {{_dir}} && PYTHONPATH=src python3 -m publisher run {{ARGS}}
+    cd {{_dir}} && PYTHONPATH=src uv run --extra gsheets python -m publisher run {{ARGS}}
 
 # Same, print intent only (no network, no writes)
 publish-new-dry:
@@ -47,11 +47,11 @@ publish-new-dry:
 
 # Cursor vs newest built version, per deck
 publish-status:
-    cd {{_dir}} && PYTHONPATH=src python3 -m publisher status
+    cd {{_dir}} && PYTHONPATH=src uv run --extra gsheets python -m publisher status
 
 # One-time: search-or-create the course Drive folder, prints id for settings/publish.yml
 publish-init-drive *ARGS:
-    cd {{_dir}} && PYTHONPATH=src python3 -m publisher init-drive {{ARGS}}
+    cd {{_dir}} && PYTHONPATH=src uv run --extra gsheets python -m publisher init-drive {{ARGS}}
 
 # Build the Dagster lecture deck (PPTX + HTML).
 dagster-build:
@@ -223,22 +223,22 @@ picstore-ids-drift:
 # One-time auth (opens a browser): just -f integrations/google/sheets/Justfile auth
 # Smoke-test auth: print the schedule sheet's tab names.
 gsheet-tabs:
-    cd {{_dir}} && PYTHONPATH=src python3 -m schedule tabs
+    cd {{_dir}} && PYTHONPATH=src uv run --extra gsheets python -m schedule tabs
 
 # Fetch the sheet verbatim → settings/schedule.yml (generated; never hand-edit)
 gsheet-dump *ARGS:
-    cd {{_dir}} && PYTHONPATH=src python3 -m schedule dump {{ARGS}}
+    cd {{_dir}} && PYTHONPATH=src uv run --extra gsheets python -m schedule dump {{ARGS}}
 
 # Upsert content/presentations.yml from the dump (hand-curated fields survive)
 presentations-plan *ARGS:
-    cd {{_dir}} && PYTHONPATH=src python3 -m schedule plan {{ARGS}}
+    cd {{_dir}} && PYTHONPATH=src uv run --extra gsheets python -m schedule plan {{ARGS}}
 
 presentations-plan-dry:
     just presentations-plan --dry
 
 # Print the current lecture → deck plan
 presentations-show:
-    cd {{_dir}} && PYTHONPATH=src python3 -m schedule show
+    cd {{_dir}} && PYTHONPATH=src uv run --extra gsheets python -m schedule show
 
 sync:
     cd {{_dir}} && uv sync --extra dev --extra gsheets

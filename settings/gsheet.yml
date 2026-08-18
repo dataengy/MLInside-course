@@ -19,7 +19,7 @@ read:
   max_cols: 40
 
 mapping:
-  tab: null             # null → первый таб; сузить после `just gsheet-tabs`
+  tab: Sheet1           # реальное имя (just gsheet-tabs, 2026-08-19); лист «mlinside-mlops»
   header_row: 1
   columns:
     n: ["№", "номер", "no", "#", "n"]

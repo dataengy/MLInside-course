@@ -10,8 +10,8 @@
 # ──────────────────────────────────────────────────────────────────────────────
 source:
   gsheet: https://docs.google.com/spreadsheets/d/1cxYGtU36nbmO5DhjtNkm_HMESiNPwoWdd6QY8yb2JaU/edit
-  tab: sheet1 (drive-connector fetch)
-  fetched_at: '2026-08-16'
+  tab: Sheet1
+  fetched_at: '2026-08-19'
   raw: settings/schedule.yml
 presentations:
 - topic: Разработка ML-сервисов и контейнеризация (FastAPI & Docker)
@@ -46,9 +46,9 @@ presentations:
   owner: Влад Бояджи
   accents:
   - 'Эволюция хранения: Различия, архитектурные сдвиги и юзкейсы для концепций Data Lake (сырые данные),
-    Data Warehouse (структурированные DWH) и Lakehouse (Delta Lake / Iceberg).'
-  - 'Парадигмы обработки:  Смена подходов ETL (классический) на ELT (современный подход, где тяжелые трансформации
-    переносятся внутрь мощных БД).'
+    Data Warehouse (структурированные DWH) и Lakehouse (Delta Lake / Iceberg).Парадигмы обработки:'
+  - Смена подходов ETL (классический) на ELT (современный подход, где тяжелые трансформации переносятся
+    внутрь мощных БД).
   - 'Архитектура MPP (Massively Parallel Processing): Принципы распределенного выполнения запросов, разделение
     данных по узлам (Sharding) и репликация. Почему MPP незаменимы для Big Data.'
   - 'Моделирование данных: Проектирование классических схем «Звезда» (Star Schema) и «Снежинка» (Snowflake

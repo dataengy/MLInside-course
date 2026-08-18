@@ -2,6 +2,27 @@
 
 Canonical project changelog (finalize-issue passes migrate shipped work here).
 
+## 2026-08-19 — Лист читается штатным API; TG-лег отработал вживую ([#6](https://github.com/dataengy/MLInside-course/issues/6))
+
+- **Найден настоящий блокер google-ленты**: рецепты звали системный `python3` без
+  `google-api-python-client` — падение на импортах ДО всякой авторизации (поэтому и
+  первый дамп пришлось делать через Drive-коннектор). Все google-рецепты переведены на
+  `uv run --extra gsheets python`. Итог: `just gsheet-tabs` → `Sheet1`, `just gsheet-dump`
+  → настоящий `fetch_raw` (лист `mlinside-mlops`, locale en_US) через сервис-аккаунт,
+  **без браузера**. Оговорка про Drive-коннектор снята; отличие реального дампа от
+  реконструкции ровно одно — перенос строки в ячейке лекции по ClickHouse (не наша).
+  `mapping.tab` запинен в `Sheet1`.
+- **Пересинк на реальных данных подтвердил контракт**: `just presentations-plan` (+0/~1/3
+  stale) сохранил `published:`-блоки нетронутыми; `preza-review-all` — dbt/Dagster/CI-CD
+  по-прежнему **4/4** каждый.
+- **TG-лег отработал вживую**: 6 дек (dbt v3.14 · 52, Dagster v1.3 · 51, CI/CD v1.3 · 42,
+  Airflow v1.1 · 40, Prefect v1.2 · 30, OGIP v1.2 · 31) — текст + файл в топик 118.
+  Повторный прогон: «already ok» по всем шести, дублей нет.
+- **Запись пока закрыта**: у обоих сервис-аккаунтов `canEdit=false`, ADC-консент не добит.
+  Полный `.../auth/drive` — restricted, gcloud-экран отвечает «Приложение заблокировано»;
+  перешли на `drive.file` (не-чувствительный, покрывает свои папку и файлы). Добавлена
+  SA-лента в `publisher.auth` как безбраузерный запасной путь для колонок листа.
+
 ## 2026-08-18 — Deck publish pipeline: TG + GDrive (вечный URL) + колонки листа ([#6](https://github.com/dataengy/MLInside-course/issues/6))
 
 - **`src/publisher/`** (`just publish-new{,-dry}`, `publish-status`, `publish-init-drive`):

@@ -16,19 +16,31 @@ content/presentations.yml → accents:    (рубрика; курируемые 
 docs/reviews/<out_name>.{md,findings.yml}
 ```
 
-## Предусловие: Google ADC (user-lane)
+## Авторизация чтения: сервис-аккаунт (работает), ADC — опционально
 
-Читалка (`integrations/google/sheets/`) использует Application Default Credentials
-аккаунта `hnkovr@gmail.com` (readonly-скоупы sheets+drive):
+Читалка (`integrations/google/sheets/auth.py`) пробует ADC, а при его отсутствии падает на
+**сервис-аккаунт** из реестра `~/.ai/settings/gcloud.yml`. Лист `mlinside-mlops`
+(таб `Sheet1`) уже расшарен на чтение обоим SA, поэтому лента живёт без браузера:
 
 ```bash
-just -f ~/.ai/scripts/gcloud/Justfile adc-status
-just -f ~/.ai/scripts/gcloud/Justfile adc-login account=hnkovr@gmail.com  # браузерный консент ОБЯЗАН завершиться
-just gsheet-tabs                                                          # smoke + имена табов
+just gsheet-tabs     # smoke: печатает Sheet1 (через SA gsheets-reader@…, ADC не нужен)
+just gsheet-dump     # штатный fetch_raw → settings/schedule.yml
 ```
 
-Прерванный логин = нет ADC-файла — это и была причина исходного блокера
-(см. скилл `/reset-google-account-creds`, там этот репозиторий в `known_usages`).
+**Грабля, стоившая двух дней (2026-08-19):** рецепты вызывали системный `python3`, где нет
+`google-api-python-client` — лента падала на `ModuleNotFoundError` ещё до всякой
+авторизации. Все google-рецепты теперь идут через `uv run --extra gsheets python`.
+
+ADC (`just -f ~/.ai/scripts/gcloud/Justfile adc-login account=hnkovr@gmail.com`) нужен
+только для **записи** — см. [`deck-publish-pipeline.md`](deck-publish-pipeline.md):
+у сервис-аккаунтов `canEdit=false`. Прерванный логин = нет ADC-файла; исходный блокер был
+именно в этом плюс баг `account=` в самом рецепте
+([hnkovr/.ai#8](https://github.com/hnkovr/.ai/issues/8)).
+
+> Историческая оговорка снята: первый дамп (2026-08-16) приезжал через claude.ai
+> Drive-коннектор, потому что штатная лента падала на импортах. Дамп 2026-08-19 сделан
+> настоящим Sheets API; отличие нашлось ровно одно — в ячейке лекции по ClickHouse
+> (не наша) перенос строки стоит ПОСЛЕ «Парадигмы обработки:», а не перед.
 
 ## settings/gsheet.yml — грабли
 
