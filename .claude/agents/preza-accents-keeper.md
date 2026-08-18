@@ -8,7 +8,10 @@ description: >-
   respect the review matcher (literal accent vocabulary, stem_len 5, ё≠е). Reads
   docs/schedule-gsheet-lane.md as its spec. For ADC auth failures route to
   /reset-google-account-creds; for whole-repo commit/push invariants use
-  workstation-bootstrapper; for building/publishing decks use the preza-* just recipes.
+  workstation-bootstrapper; for BUILDING decks use the preza-* just recipes and for
+  PUBLISHING them (Telegram + GDrive stable URL + sheet URL/version/slides columns) use
+  `just publish-new` — the sibling write lane, spec docs/deck-publish-pipeline.md; both
+  lanes write content/presentations.yml, so never run them concurrently.
 tools: All tools
 scope: project
 ---
