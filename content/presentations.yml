@@ -86,6 +86,16 @@ presentations:
     - 048-domashnee-zadanie
     - 049-dz-vitriny-na-datasete-olist
     - 050-dz-kriterii-ocenki
+  published:
+    version: '3.14'
+    slides: 52
+    url: null
+    drive_file_id: null
+    at: null
+    legs:
+      tg: ok
+      drive: pending
+      sheet: pending
 - topic: Оркестрация данных (Apache Airflow)
   owner: Влад Бояджи
   status: draft
@@ -97,6 +107,16 @@ presentations:
   content: content/preza-apache-airflow-content.yml
   out_name: MLInside_Оркестрация-данных-Apache-Airflow
   slides: 40
+  published:
+    version: '1.1'
+    slides: 40
+    url: null
+    drive_file_id: null
+    at: null
+    legs:
+      tg: ok
+      drive: pending
+      sheet: pending
 - topic: Современная оркестрация ML-пайплайнов (Dagster)
   owner: Николай Крупий
   status: draft
@@ -118,6 +138,16 @@ presentations:
     - 047-domashnee-zadanie
     - 048-dz-orkestriruem-dbt-proekt-v
     - 049-dz-kriterii-ocenki
+  published:
+    version: '1.3'
+    slides: 51
+    url: null
+    drive_file_id: null
+    at: null
+    legs:
+      tg: ok
+      drive: pending
+      sheet: pending
 - topic: Трекинг экспериментов и реестр моделей (MLflow / ClearML)
   owner: Влад Бояджи
   accents:
@@ -140,12 +170,32 @@ presentations:
   content: content/preza-cicd-observability-content.yml
   out_name: MLInside_Автоматизация-и-мониторинг-CICD-Prometheus-Grafana
   slides: 42
+  published:
+    version: '1.3'
+    slides: 42
+    url: null
+    drive_file_id: null
+    at: null
+    legs:
+      tg: ok
+      drive: pending
+      sheet: pending
 - topic: 'Современная оркестрация ML-пайплайнов: Prefect'
   status: draft
   accents: []
   content: content/preza-prefect-content.yml
   out_name: MLInside_Современная-оркестрация-ML-пайплайнов-Prefect
   slides: 30
+  published:
+    version: '1.2'
+    slides: 30
+    url: null
+    drive_file_id: null
+    at: null
+    legs:
+      tg: ok
+      drive: pending
+      sheet: pending
 - topic: 'Оркестрация данных: Apache Airflow (внешний дек, лекция 5)'
   status: draft
   accents: []
@@ -160,3 +210,13 @@ presentations:
   content: content/preza-ogip-content.yml
   out_name: MLInside_OGIP-Open-Games-Intelligence-Platform
   slides: 31
+  published:
+    version: '1.2'
+    slides: 31
+    url: null
+    drive_file_id: null
+    at: null
+    legs:
+      tg: ok
+      drive: pending
+      sheet: pending
