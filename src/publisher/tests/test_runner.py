@@ -22,6 +22,7 @@ def _cfg(tmp_path, folder_id="D1") -> PublishConfig:
         telegram=TelegramSettings(),
         scopes=[],
         token_cache=tmp_path / "token.json",
+        service_account_file=None,
         state_file=tmp_path / "state.json",
         out_dir=tmp_path / "generated",
         plan_path=tmp_path / "presentations.yml",

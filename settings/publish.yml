@@ -27,10 +27,20 @@ auth:
   # gcloud user-ADC file (authorized_user JSON) is the token cache; the write scopes below
   # must have been granted at adc-login time (see /reset-google-account-creds — its
   # defaults.yml carries the same write scopes since 2026-08-16).
+  # drive.file (NOT full drive): non-sensitive, covers files this app created — its own
+  # folder + one file per subject. Full `drive` is restricted and Google blocks it on the
+  # gcloud consent screen (2026-08-18). Consequence: find_by_name only sees app-created
+  # files, which is exactly what the adopt-on-lost-cursor path needs.
   scopes:
-    - https://www.googleapis.com/auth/drive
+    - https://www.googleapis.com/auth/drive.file
     - https://www.googleapis.com/auth/spreadsheets
   token_cache_env: GOOGLE_OAUTH_TOKEN_CACHE
   token_cache_default: ~/.config/gcloud/application_default_credentials.json
+  # Fallback lane WITHOUT a browser: point at a service-account key and share the sheet
+  # with its address as Editor. Covers the sheet leg only — a service account has no
+  # storage quota on a personal Drive, so the drive leg then fails in isolation.
+  # Env override: $GOOGLE_SERVICE_ACCOUNT_FILE.
+  service_account_file_env: GOOGLE_SERVICE_ACCOUNT_FILE
+  service_account_file: null
 
 state_file: data/.state/deck-publish-state.json

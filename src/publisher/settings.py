@@ -19,8 +19,10 @@ from schedule.gsheet import REPO_ROOT
 
 PUBLISH_YML = REPO_ROOT / "settings" / "publish.yml"
 
+# drive.file, not full drive: the restricted `drive` scope is blocked on the gcloud
+# consent screen; drive.file covers everything this pipeline creates (see publish.yml).
 WRITE_SCOPES = [
-    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/drive.file",
     "https://www.googleapis.com/auth/spreadsheets",
 ]
 
@@ -58,6 +60,9 @@ class PublishConfig:
     telegram: TelegramSettings
     scopes: list[str]
     token_cache: Path
+    # Set → service-account lane (no browser; sheet must be shared with the SA as Editor;
+    # a SA cannot upload to a personal Drive, so the drive leg fails in isolation).
+    service_account_file: Path | None
     state_file: Path
     out_dir: Path  # data/generated — where built versions live
     plan_path: Path  # content/presentations.yml
@@ -108,6 +113,10 @@ def load(path: str | Path = PUBLISH_YML) -> PublishConfig:
         or "~/.config/gcloud/application_default_credentials.json"
     ).expanduser()
 
+    sa_env = a.get("service_account_file_env") or "GOOGLE_SERVICE_ACCOUNT_FILE"
+    sa_raw = os.environ.get(sa_env) or a.get("service_account_file")
+    service_account_file = Path(sa_raw).expanduser() if sa_raw else None
+
     sched = sched_settings.load()
     return PublishConfig(
         drive=drive,
@@ -115,6 +124,7 @@ def load(path: str | Path = PUBLISH_YML) -> PublishConfig:
         telegram=telegram,
         scopes=list(a.get("scopes") or WRITE_SCOPES),
         token_cache=token_cache,
+        service_account_file=service_account_file,
         state_file=REPO_ROOT / (raw.get("state_file") or "data/.state/deck-publish-state.json"),
         out_dir=REPO_ROOT / "data" / "generated",
         plan_path=sched_settings.out_path(sched, "plan"),
