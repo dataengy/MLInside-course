@@ -20,6 +20,12 @@
             "command": "bash scripts/hooks/deck-publish-status.sh",
             "timeout": 10,
             "statusMessage": "Checking unpublished deck versions"
+          },
+          {
+            "type": "command",
+            "command": "bash scripts/hooks/branch-pr-status.sh",
+            "timeout": 10,
+            "statusMessage": "Checking branches without PRs"
           }
         ]
       }
