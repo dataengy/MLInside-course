@@ -13,6 +13,7 @@ package (`src/preza_gen/`); safe to delete. Run via the local Justfile from the 
 | `publish` | Build the deck, open the newest version locally, then send it to Telegram. |
 | `contact_sheet.py` | Labeled montage of a source deck's media (source-slide → image) — to pick correct images per slide. |
 | `extract_source.py` | Per-slide text + URLs / "Доп материалы" blocks from a source deck. |
+| `probe_google_access.py` | Read-only gate check for the publish pipeline: can each credential SEE the course sheet, and may it EDIT it (`canEdit`)? Re-run after changing sharing or finishing the ADC consent. |
 
 ## Usage
 ```bash
