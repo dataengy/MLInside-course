@@ -54,14 +54,26 @@ class TelegramSettings:
 
 
 @dataclass
+class AuthLane:
+    """One credential recipe: what to authenticate with, for which scopes, billed where."""
+
+    scopes: list[str]
+    token_cache: Path
+    # Set → service-account lane (no browser; target must be shared with the SA as Editor;
+    # a SA cannot upload to a personal Drive, so it can serve the sheet, never the upload).
+    service_account_file: Path | None = None
+    # Drive rejects user-ADC calls without one; attached per credential so the machine-wide
+    # ADC quota project stays untouched. Irrelevant for service accounts.
+    quota_project: str | None = None
+
+
+@dataclass
 class PublishConfig:
     drive: DriveSettings
     sheet: SheetSettings
     telegram: TelegramSettings
     scopes: list[str]
     token_cache: Path
-    # Set → service-account lane (no browser; sheet must be shared with the SA as Editor;
-    # a SA cannot upload to a personal Drive, so the drive leg fails in isolation).
     service_account_file: Path | None
     state_file: Path
     out_dir: Path  # data/generated — where built versions live
@@ -72,6 +84,29 @@ class PublishConfig:
     # The reader's candidate-header map (settings/gsheet.yml) — the write lane locates the
     # topic column with the exact same rules (mapper.resolve_columns), one identity model.
     columns_map: dict[str, list[str]] = field(default_factory=dict)
+    quota_project: str | None = None
+    # Sheet-leg credential override (auth.sheet in publish.yml). None → default lane.
+    sheet_auth: AuthLane | None = None
+
+    def lane(self, api: str) -> AuthLane:
+        """Credential recipe for ``api`` — the sheet override when set, else the default.
+
+        >>> cfg = PublishConfig(DriveSettings(), SheetSettings(), TelegramSettings(), ["a"],
+        ...                     Path("t"), None, Path("s"), Path("o"), Path("p"), "id", 1, None)
+        >>> cfg.lane("sheets").scopes, cfg.lane("drive").scopes
+        (['a'], ['a'])
+        >>> cfg.sheet_auth = AuthLane(scopes=["b"], token_cache=Path("t2"))
+        >>> cfg.lane("sheets").scopes, cfg.lane("drive").scopes
+        (['b'], ['a'])
+        """
+        if api == "sheets" and self.sheet_auth is not None:
+            return self.sheet_auth
+        return AuthLane(
+            scopes=self.scopes,
+            token_cache=self.token_cache,
+            service_account_file=self.service_account_file,
+            quota_project=self.quota_project,
+        )
 
 
 def _get(raw: dict, key: str) -> dict:
@@ -117,6 +152,17 @@ def load(path: str | Path = PUBLISH_YML) -> PublishConfig:
     sa_raw = os.environ.get(sa_env) or a.get("service_account_file")
     service_account_file = Path(sa_raw).expanduser() if sa_raw else None
 
+    sheet_raw = a.get("sheet")
+    sheet_auth = None
+    if isinstance(sheet_raw, dict):
+        sheet_sa = sheet_raw.get("service_account_file")
+        sheet_auth = AuthLane(
+            scopes=list(sheet_raw.get("scopes") or a.get("scopes") or WRITE_SCOPES),
+            token_cache=Path(sheet_raw.get("token_cache") or token_cache).expanduser(),
+            service_account_file=Path(sheet_sa).expanduser() if sheet_sa else None,
+            quota_project=sheet_raw.get("quota_project"),
+        )
+
     sched = sched_settings.load()
     return PublishConfig(
         drive=drive,
@@ -132,4 +178,6 @@ def load(path: str | Path = PUBLISH_YML) -> PublishConfig:
         header_row=int(sched["mapping"].get("header_row") or 1),
         sheet_tab_override=sched["mapping"].get("tab"),
         columns_map=dict(sched["mapping"].get("columns") or {}),
+        quota_project=a.get("quota_project"),
+        sheet_auth=sheet_auth,
     )

@@ -11,7 +11,7 @@ telegram:
   thread: null
 
 drive:
-  folder_id: null              # REQUIRED before first real run: just publish-init-drive
+  folder_id: 1L-Jau_Xl78f_dXA611grdsKnxLUKU5Tp   # just publish-init-drive (2026-08-20)
   folder_name: "MLInside 2026 — decks"
   parent_folder_id: root
   share: anyone_reader         # anyone_reader | none — ensured on every successful upload
@@ -24,23 +24,38 @@ sheet:
   link_style: url              # url (plain string) | hyperlink (=HYPERLINK formula)
 
 auth:
-  # gcloud user-ADC file (authorized_user JSON) is the token cache; the write scopes below
-  # must have been granted at adc-login time (see /reset-google-account-creds — its
-  # defaults.yml carries the same write scopes since 2026-08-16).
+  # DEFAULT LANE (Drive) — gcloud user-ADC file (authorized_user JSON) as the token cache.
   # drive.file (NOT full drive): non-sensitive, covers files this app created — its own
   # folder + one file per subject. Full `drive` is restricted and Google blocks it on the
   # gcloud consent screen (2026-08-18). Consequence: find_by_name only sees app-created
   # files, which is exactly what the adopt-on-lost-cursor path needs.
+  # `spreadsheets` is NOT here on purpose: it is a *sensitive* scope and the gcloud consent
+  # screen blocks it too («This app is blocked», 2026-08-20) — the sheet leg therefore runs
+  # on its own lane below. google-auth raises RefreshError when a requested scope was not
+  # granted, so this list must match what adc-login actually got.
   scopes:
     - https://www.googleapis.com/auth/drive.file
-    - https://www.googleapis.com/auth/spreadsheets
   token_cache_env: GOOGLE_OAUTH_TOKEN_CACHE
   token_cache_default: ~/.config/gcloud/application_default_credentials.json
-  # Fallback lane WITHOUT a browser: point at a service-account key and share the sheet
-  # with its address as Editor. Covers the sheet leg only — a service account has no
-  # storage quota on a personal Drive, so the drive leg then fails in isolation.
-  # Env override: $GOOGLE_SERVICE_ACCOUNT_FILE.
+  # Drive API refuses user-ADC calls without a quota project, and the ADC file's own
+  # quota project (stambul-tts) has the API off. Set here — per-credential, via
+  # with_quota_project — so the machine-wide ADC quota project stays untouched (other
+  # local projects depend on it). No data lives in this project: it only accounts API
+  # usage; it must have drive.googleapis.com enabled.
+  quota_project: tg2gcal
+  # Env override: $GOOGLE_SERVICE_ACCOUNT_FILE. A service account has no storage quota on a
+  # personal Drive, so it can serve the sheet, never the Drive upload.
   service_account_file_env: GOOGLE_SERVICE_ACCOUNT_FILE
   service_account_file: null
+  # SHEET LANE — overrides for the sheet leg only (unset keys fall back to the block above).
+  # Browser-less: a service-account key, with the schedule sheet shared to its address as
+  # Editor. Without it the sheet leg fails in isolation (drive + tg still publish).
+  sheet:
+    scopes:
+      - https://www.googleapis.com/auth/spreadsheets
+    # gsheets-reader@for-prodamus-1-494316.iam.gserviceaccount.com — the same key the READ
+    # lane uses; the sheet must additionally grant it Editor (it holds Viewer today).
+    service_account_file: ~/.secrets/google-sa-for-prodamus-1-494316.json
+    quota_project: null          # a service account bills its own project
 
 state_file: data/.state/deck-publish-state.json

@@ -28,9 +28,17 @@ FIX_IT = "just -f ~/.ai/scripts/gcloud/Justfile adc-login account=hnkovr@gmail.c
 
 
 def load_credentials(
-    token_cache: Path, scopes: list[str], service_account_file: Path | None = None
+    token_cache: Path,
+    scopes: list[str],
+    service_account_file: Path | None = None,
+    quota_project: str | None = None,
 ) -> Any:
-    """Service-account key when configured, else cached authorized_user token."""
+    """Service-account key when configured, else cached authorized_user token.
+
+    ``quota_project`` is attached to the credential (never to the machine-wide ADC file):
+    the Drive API refuses user-ADC calls that carry no quota project, and other local
+    projects depend on the ADC file's own setting staying put.
+    """
     try:
         from google.auth.transport.requests import Request
         from google.oauth2.credentials import Credentials
@@ -42,8 +50,11 @@ def load_credentials(
             raise RuntimeError(f"service-account key not found: {service_account_file}")
         from google.oauth2 import service_account
 
-        return service_account.Credentials.from_service_account_file(
-            str(service_account_file), scopes=scopes
+        return _with_quota(
+            service_account.Credentials.from_service_account_file(
+                str(service_account_file), scopes=scopes
+            ),
+            quota_project,
         )
 
     if not token_cache.is_file():
@@ -56,12 +67,22 @@ def load_credentials(
             creds.refresh(Request())
         except Exception as e:
             raise RuntimeError(f"Google token refresh failed ({e}) — re-consent: {FIX_IT}") from e
-    return creds
+    return _with_quota(creds, quota_project)
+
+
+def _with_quota(creds: Any, quota_project: str | None) -> Any:
+    """Attach a quota project when asked and the credential type supports it."""
+    if not quota_project or not hasattr(creds, "with_quota_project"):
+        return creds
+    return creds.with_quota_project(quota_project)
 
 
 def get_service(api: str, version: str, cfg: PublishConfig) -> Any:
-    """``googleapiclient`` service for ``drive``/``sheets`` with the pipeline's credentials."""
+    """``googleapiclient`` service for ``drive``/``sheets`` on that api's credential lane."""
     from googleapiclient.discovery import build
 
-    creds = load_credentials(cfg.token_cache, cfg.scopes, cfg.service_account_file)
+    lane = cfg.lane(api)
+    creds = load_credentials(
+        lane.token_cache, lane.scopes, lane.service_account_file, lane.quota_project
+    )
     return build(api, version, credentials=creds, cache_discovery=False)

@@ -2,6 +2,25 @@
 
 Canonical project changelog (finalize-issue passes migrate shipped work here).
 
+## 2026-08-20 — Google-запись открыта: две ленты кредлов, Drive-папка создана ([#6](https://github.com/dataengy/MLInside-course/issues/6))
+
+- **Найдено, что именно блокировал экран согласия**: `spreadsheets` — *sensitive*-скоуп, и
+  gcloud-клиент на нём получает «This app is blocked» ровно так же, как на restricted
+  `drive`. Тот же `adc-login` **без** `spreadsheets` прошёл с первого раза → ADC-файл с
+  долгоживущим refresh-токеном есть.
+- **Отсюда две ленты кредлов** (`PublishConfig.lane` / `auth.get_service` выбирают по API):
+  Drive ← user-ADC `hnkovr@gmail.com` (`drive.file`), лист ← сервис-аккаунт
+  `gsheets-reader@…` (`spreadsheets`). Список `auth.scopes` теперь обязан совпадать с
+  выданным: google-auth роняет `RefreshError`, если запрошенный скоуп не выдан.
+- **Quota-project** вешается на кредл (`with_quota_project`), а не на ADC-файл: Drive API
+  отказывает user-ADC без quota-проекта, а машинный ADC (`stambul-tts`, Drive API выключен)
+  используют другие проекты — его настройку не трогаем.
+- **Drive-папка создана**: «MLInside 2026 — decks» (`drive.folder_id` в `settings/publish.yml`).
+- **Осталось два внешних условия**: место на Drive `hnkovr@gmail.com` (98.69 GiB при лимите
+  15 — аплоад отвечает `storageQuotaExceeded`; владелец расширяет квоту) и роль **Редактор**
+  для `gsheets-reader@for-prodamus-1-494316.iam.gserviceaccount.com` на листе расписания
+  (сейчас Viewer, `canEdit=false`).
+
 ## 2026-08-20 — Нагающий хук перестал противоречить сам себе ([#6](https://github.com/dataengy/MLInside-course/issues/6))
 
 - `deck-publish-status.sh` печатал «не опубликованы свежие версии: … v3.14 (издано: 3.14)» —

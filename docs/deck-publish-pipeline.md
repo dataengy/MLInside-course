@@ -79,48 +79,56 @@ just publish                    # dbt: build --all + open + publish-new --deck d
 
 ## Транспорт (Google write-лента)
 
-**Состояние на 2026-08-19.** ЧТЕНИЕ листа работает без браузера — через сервис-аккаунт
-(`just gsheet-tabs` → `Sheet1`). ЗАПИСЬ пока нет: у обоих SA `canEdit=false` (проверено
-Drive-capabilities), а ADC-консент не завершён. Два пути открыть запись:
+**Одного кредла на обе записи не существует** — экран согласия gcloud пропускает только
+не-чувствительные скоупы. Отсюда две ленты, выбираются по API (`PublishConfig.lane`,
+`auth.get_service`):
 
-| Путь | Что сделать | Что заработает |
-|---|---|---|
-| **ADC-консент** (полный) | добить браузерный логин (скоупы `spreadsheets` + `drive.file`) | всё: Drive-загрузка **и** колонки листа |
-| **Шаринг на SA** (без браузера) | расшарить лист на `service-account-1@for-prodamus-1.iam.gserviceaccount.com` как **Редактор**, затем прописать ключ в `auth.service_account_file` | только колонки листа; Drive-лег упадёт изолированно (у SA нет storage-квоты) |
+| Лег | Кредл | Скоуп | Что нужно человеку |
+|---|---|---|---|
+| **Drive** | user-ADC `hnkovr@gmail.com` (`~/.config/gcloud/application_default_credentials.json`) | `drive.file` | консент `adc-login` (сделан 2026-08-20) + место на диске аккаунта |
+| **Sheet** | сервис-аккаунт `gsheets-reader@for-prodamus-1-494316.iam.gserviceaccount.com` (`~/.secrets/google-sa-…json`) | `spreadsheets` | расшарить лист этому адресу как **Редактор** (сейчас Viewer) |
 
-Полный скоуп `.../auth/drive` использовать **нельзя**: он restricted, экран согласия gcloud
-отвечает «Приложение заблокировано». Рабочий вариант — `drive.file`.
+Что перепробовано и почему отвергнуто (не возвращать):
 
-User-ADC **hnkovr@gmail.com** с write-скоупами `drive` + `spreadsheets`
-(`settings/publish.yml → auth`; токен-кэш — сам ADC-файл
-`~/.config/gcloud/application_default_credentials.json`, override —
-`$GOOGLE_OAUTH_TOKEN_CACHE`). Логин:
+- **`.../auth/drive`** (полный) — restricted-скоуп, консент отвечает «Приложение
+  заблокировано». Работает `drive.file`: он покрывает всё, что лента сама создала — свою
+  папку и по одному файлу на предмет.
+- **`spreadsheets` в ADC** — *sensitive*-скоуп, тот же экран блокировки (2026-08-20).
+  Тот же логин **без** него проходит. Поэтому лист пишет SA, а не ADC. Важно: список
+  `auth.scopes` обязан совпадать с реально выданным — google-auth роняет `RefreshError`,
+  если запрошенный скоуп не был выдан.
+- **SA для Drive** — у сервис-аккаунта нет storage-квоты на личном Drive, а Shared Drives
+  требуют Workspace. SA обслуживает только лист.
+- **Свой OAuth-клиент (AGD-gen)** — умер `invalid_grant`: у клиента в Testing-статусе
+  refresh-токены живут 7 дней. У gcloud-клиента refresh-токен долгоживущий.
 
-```bash
-just -f ~/.ai/scripts/gcloud/Justfile adc-login account=hnkovr@gmail.com   # браузер ДОБИТЬ
-```
+**Quota-project.** Drive API отказывает user-ADC без quota-проекта, а у ADC-файла свой
+(`stambul-tts`) с выключенным Drive API. Проект задан в `auth.quota_project` и вешается
+**на кредл** (`with_quota_project`), а не на ADC-файл — машинный ADC используют другие
+проекты, его настройку не трогаем. В проекте не лежат данные, он только учитывает вызовы;
+единственное требование — включённый `drive.googleapis.com`.
 
-История выбора: OAuth-токен AGD-gen умер (`invalid_grant` — 7-дневная смерть
-refresh-токенов у клиента в Testing-статусе), у сервис-аккаунтов нет storage-квоты на
-Drive (а на личном аккаунте нет Shared Drives), у gcloud-клиента refresh-токен
-долгоживущий. Попутно починен корневой баг ADC-ленты — `just` не имеет именованных
-аргументов, `adc-login account=X` кормил gcloud `--account="account=X"`
-([hnkovr/.ai#8](https://github.com/hnkovr/.ai/issues/8)); write-скоупы закреплены в
-дефолтах `reset-google-account-creds`. `publisher/auth.py` принципиально **не умеет**
-интерактивный флоу (google_auth_oauthlib не импортируется): мёртвый токен = громкий
-RuntimeError с командой починки.
+Логин (когда токен умрёт): `just -f ~/.ai/scripts/gcloud/Justfile adc-login account=hnkovr@gmail.com`.
+Попутно починен корневой баг этой ленты — `just` не имеет именованных аргументов, и
+`adc-login account=X` кормил gcloud `--account="account=X"`
+([hnkovr/.ai#8](https://github.com/hnkovr/.ai/issues/8)). `publisher/auth.py`
+принципиально **не умеет** интерактивный флоу (google_auth_oauthlib не импортируется):
+мёртвый токен = громкий RuntimeError с командой починки.
 
 ## Чек-лист первого живого прогона
 
-1. Добить браузерный консент (`adc-login` выше) — появится ADC-файл.
-2. Смок: `python -m publisher status` (или scratchpad-смок) — refresh, Drive list,
-   canEdit листа.
-3. `just publish-init-drive` → вставить id в `settings/publish.yml → drive.folder_id`.
-4. `just publish-new-dry` → глазами; затем первый прогон на неучебной деке:
-   `just publish-new --deck MLInside_OGIP-Open-Games-Intelligence-Platform`.
-5. Все деки: `just publish-new`. Проверить: стабильность URL на ребилде (та же ссылка),
-   идемпотентность повторного прогона («nothing to do»), 3 колонки в листе без дублей.
-6. Запинить реальное имя таба в `settings/gsheet.yml → mapping.tab`.
+Пройдено 2026-08-20: ① консент `drive.file` ✅ · ② Drive-папка создана
+(`drive.folder_id` в `settings/publish.yml`) ✅ · ③ TG-лег отработал на всех шести деках ✅.
+Осталось два внешних условия:
+
+1. **Место на Drive** `hnkovr@gmail.com` — сейчас 98.69 GiB при лимите 15 GiB (сам Drive
+   занимает 0.07 GiB, переполнены Gmail/Photos), аплоад отвечает `storageQuotaExceeded`.
+   После расширения квоты: `just publish-new --only drive`.
+2. **Права на лист** — выдать `gsheets-reader@for-prodamus-1-494316.iam.gserviceaccount.com`
+   роль **Редактор** на таблице расписания. После этого: `just publish-new --only sheet`.
+
+Затем полный прогон `just publish-new` и проверка: стабильность URL на ребилде (та же
+ссылка), идемпотентность повторного прогона («already ok»), три колонки в листе без дублей.
 
 ## Известные ограничения
 
@@ -130,5 +138,7 @@ RuntimeError с командой починки.
   бинарников) — не блокер.
 - `anyone_reader` — ссылка открываема всем, у кого она есть (снимается
   `drive.share: none`).
-- Лист должен быть расшарен hnkovr@gmail.com как **Editor**, иначе sheet-лег ловит 403
+- Лист должен давать **Editor** сервис-аккаунту лист-ленты, иначе sheet-лег ловит 403
   (TG/Drive при этом работают — изоляция легов).
+- Drive-лег упирается в квоту аккаунта-владельца папки: `storageQuotaExceeded` — это про
+  место, а не про права.

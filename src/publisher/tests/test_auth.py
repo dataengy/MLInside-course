@@ -66,6 +66,45 @@ def test_missing_service_account_key_is_loud(tmp_path):
         auth.load_credentials(tmp_path / "t.json", ["s"], service_account_file=tmp_path / "no.json")
 
 
+def test_quota_project_is_attached_to_the_credential_not_the_adc_file(tmp_path, monkeypatch):
+    """Drive rejects user-ADC without a quota project; the machine-wide ADC must stay put."""
+    sa = tmp_path / "sa.json"
+    sa.write_text("{}", encoding="utf-8")
+    seen = {}
+
+    class FakeCreds:
+        def with_quota_project(self, project):
+            seen["project"] = project
+            return "SCOPED"
+
+        @staticmethod
+        def from_service_account_file(path, scopes):
+            return FakeCreds()
+
+    monkeypatch.setattr("google.oauth2.service_account.Credentials", FakeCreds)
+    got = auth.load_credentials(tmp_path / "t.json", ["sc"], sa, quota_project="proj-x")
+    assert got == "SCOPED" and seen == {"project": "proj-x"}
+    # unchanged when no project is configured
+    assert isinstance(auth.load_credentials(tmp_path / "t.json", ["sc"], sa), FakeCreds)
+
+
+def test_sheet_lane_overrides_only_the_sheets_api(tmp_path):
+    """The gcloud consent screen blocks `spreadsheets`, so the sheet leg runs on its own key."""
+    from publisher.settings import AuthLane, DriveSettings, PublishConfig, SheetSettings
+    from publisher.settings import TelegramSettings as T
+
+    cfg = PublishConfig(
+        DriveSettings(), SheetSettings(), T(), ["drive.file"], tmp_path / "adc.json", None,
+        tmp_path / "s.json", tmp_path, tmp_path / "plan.yml", "sid", 1, None,
+        quota_project="proj-x",
+        sheet_auth=AuthLane(["spreadsheets"], tmp_path / "adc.json", tmp_path / "sa.json"),
+    )
+    assert cfg.lane("drive").scopes == ["drive.file"]
+    assert cfg.lane("drive").quota_project == "proj-x"
+    assert cfg.lane("sheets").service_account_file == tmp_path / "sa.json"
+    assert cfg.lane("sheets").quota_project is None  # a service account bills its own project
+
+
 def test_never_imports_interactive_flow():
     """A hook must never open a browser — the oauthlib flow is code-absent, not guarded."""
     code = [
