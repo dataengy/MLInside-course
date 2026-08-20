@@ -218,5 +218,5 @@ presentations:
     at: null
     legs:
       tg: ok
-      drive: pending
+      drive: error
       sheet: pending
