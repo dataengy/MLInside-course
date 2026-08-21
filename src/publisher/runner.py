@@ -18,7 +18,7 @@ from typing import Any
 import yaml
 from loguru import logger as log
 
-from publisher import auth, detect, gdrive, gsheet_write, plan_writer, telegram_leg
+from publisher import auth, detect, errors, gdrive, gsheet_write, plan_writer, telegram_leg
 from publisher import state as st
 from publisher.settings import PublishConfig
 
@@ -204,8 +204,7 @@ class Runner:
                 else:
                     self._leg_sheet(entry, ds)
             except Exception as e:  # noqa: BLE001 — leg isolation is the product requirement
-                ds_leg = st.LegStatus("error", _now(), str(e))
-                setattr(ds, name, ds_leg)
+                setattr(ds, name, st.LegStatus("error", _now(), errors.explain(e)))
             leg = ds.leg(name)
             out.lines.append(f"{name}: {leg.status}" + (f" — {leg.error}" if leg.error else ""))
             if leg.status == "error":
