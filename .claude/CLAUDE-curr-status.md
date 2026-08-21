@@ -1,5 +1,26 @@
 # CLAUDE-curr-status — MLInside-course
 
+## Session 2026-08-19..22 — авторизация решена, публикация ждёт двух внешних условий
+
+**Что оказалось правдой про блокировку консента**: gcloud-клиент режет не только restricted
+`drive`, но и **sensitive `spreadsheets`** — тот же логин без него прошёл сразу. Отсюда
+**две ленты кредлов** (`b0cac14`): Drive ← user-ADC hnkovr@gmail.com (`drive.file`,
+quota-проект вешается на кредл, машинный ADC не трогаем), лист ← сервис-аккаунт
+`gsheets-reader@for-prodamus-1-494316…`. Папка Drive создана
+(`drive.folder_id` в `settings/publish.yml`), TG-лег отработал на всех шести деках.
+
+**Осталось внешнее** (обе — действия человека, код готов):
+1. место на Drive `hnkovr@gmail.com` — 98.70 GiB при лимите 15 → `storageQuotaExceeded`;
+   владелец расширяет квоту, дальше `just publish-new --only drive`;
+2. роль **Редактор** на листе для `gsheets-reader@…` (`canEdit=false`) →
+   `just publish-new --only sheet`.
+
+Репетиция листа по живым данным (`978f677`): таб `Sheet1`, тема в **B**, колонки встанут в
+**E/F/G**, деки в строки 5/6/7/9 (Prefect и OGIP законно без строки). Отказы теперь
+переводятся в действие (`publisher/errors.py`), ворота проверяются
+`.tmp/probe_google_access.py`. Хук `deck-publish-status.sh` больше не противоречит себе
+(`db8fc69`). Тесты: 248 passed, 4 skipped.
+
 ## Session 2026-08-16..18 — публикационная лента: TG + GDrive (вечный URL) + колонки листа
 
 **Код-комплит, закоммичено** (`dcad8e6` → [#6](https://github.com/dataengy/MLInside-course/issues/6)):
