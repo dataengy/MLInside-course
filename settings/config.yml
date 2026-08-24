@@ -36,7 +36,8 @@ planning:
 # Bounds enforced by the skill's validate_content.py before every build.
 deck_generation:
   slides_min: 20
-  slides_max: 64                  # 2026-08-25: 58→64 — тулинг (VS Code/IDE), Fusion+Core v2, ещё пакеты, пакеты в CI, slim CI, State/Wizard; SQLMesh сжат с 3 слайдов до 2
+  slides_max: 72                  # 2026-08-25: 64→72 — моделирование (ER, medallion/EDW, project_evaluator, Data Vault), MV в ClickHouse, микробатчинг, стриминг, права доступа
+                                  # 2026-08-25: 58→64 — тулинг (VS Code/IDE), Fusion+Core v2, ещё пакеты, пакеты в CI, slim CI, State/Wizard; SQLMesh сжат с 3 слайдов до 2
                                   # 2026-08-24: 55→58 — блок про dbt-пакеты (DQ, рефакторинг, версии) + переезд двух SQLMesh-слайдов из Dagster-деки
                                   # 2026-08-13: 50→55 — dbt-дека 51+ слайд после ДЗ-секции, Dagster 50→51 под акцент ML-пайплайна
   visuals_default: code-tables    # code-tables | reuse-source | image-pipeline
