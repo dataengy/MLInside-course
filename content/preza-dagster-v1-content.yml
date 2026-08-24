@@ -331,11 +331,11 @@ content:
   table:
     headers: [Блок, Баллы, Доказательство]
     rows:
-    - [dbt assets + lineage, 3, 'UI graph и selective materialization']
-    - [Partition / backfill, 2, '7 partition keys и успешный run']
-    - [Checks / observability, 2, 'failed check + metadata']
-    - [Sensor / idempotency, 1, 'cursor или run_key']
-    - [Architecture note, 2, 'Dagster vs Airflow+Cosmos и trade-offs']
+    - [dbt assets + lineage, '3', 'UI graph и selective materialization']
+    - [Partition / backfill, '2', '7 partition keys и успешный run']
+    - [Checks / observability, '2', 'failed check + metadata']
+    - [Sensor / idempotency, '1', 'cursor или run_key']
+    - [Architecture note, '2', 'Dagster vs Airflow+Cosmos и trade-offs']
   notes: 'Extension — для тех, кто хочет показать production thinking. Особое внимание: повторный запуск не должен дублировать данные, а backfill не должен случайно затронуть весь warehouse.'
 - kind: closing
   title: Главное
