@@ -58,4 +58,11 @@ auth:
     service_account_file: ~/.secrets/google-sa-for-prodamus-1-494316.json
     quota_project: null          # a service account bills its own project
 
+api:
+  # Google отвечает 503/500/429 на здоровый запрос время от времени (наблюдалось на чтении
+  # листа 2026-08-25 — повтор прошёл сразу). Без ретрая такой чих неотличим от настоящего
+  # отказа: лег пишется `error` в git-tracked `published:`. Ретраятся ТОЛЬКО транзиентные
+  # коды — 403 (квота/права) и 404 повторять бессмысленно, это работа для человека.
+  retries: 4
+
 state_file: data/.state/deck-publish-state.json

@@ -14,6 +14,7 @@ from typing import Any
 
 from loguru import logger as log
 
+from publisher import gapi
 from schedule.gsheet import sheet_utils
 from schedule.mapper import normalize, resolve_columns
 
@@ -22,7 +23,7 @@ MAX_SCAN_ROWS = 200  # topic-row search depth below the header
 
 def resolve_tab_title(service: Any, spreadsheet_id: str, want: str | None) -> str:
     """The tab to write to: explicit ``mapping.tab`` override wins, else the first tab."""
-    names = sheet_utils().list_sheet_names(service, spreadsheet_id)
+    names = gapi.call(sheet_utils().list_sheet_names, service, spreadsheet_id)
     if not names:
         raise ValueError(f"spreadsheet {spreadsheet_id} has no tabs")
     if want:
@@ -33,10 +34,8 @@ def resolve_tab_title(service: Any, spreadsheet_id: str, want: str | None) -> st
 
 
 def sheet_locale(service: Any, spreadsheet_id: str) -> str | None:
-    meta = (
-        service.spreadsheets()
-        .get(spreadsheetId=spreadsheet_id, fields="properties.locale")
-        .execute()
+    meta = gapi.run(
+        service.spreadsheets().get(spreadsheetId=spreadsheet_id, fields="properties.locale")
     )
     return (meta.get("properties") or {}).get("locale")
 
@@ -45,7 +44,7 @@ def read_header(service: Any, spreadsheet_id: str, tab: str, header_row: int) ->
     """Current header row, ragged (API omits trailing empties) — same shape the reader sees."""
     utils = sheet_utils()
     rng = f"'{tab}'!A{header_row}:ZZ{header_row}"
-    values = utils.get_sheet_values(service, spreadsheet_id, rng)
+    values = gapi.call(utils.get_sheet_values, service, spreadsheet_id, rng)
     return ["" if c is None else str(c) for c in (values[0] if values else [])]
 
 
@@ -112,7 +111,7 @@ def find_row_by_topic(
     utils = sheet_utils()
     col = utils.col_letter(topic_col)
     rng = f"'{tab}'!{col}{header_row + 1}:{col}{header_row + MAX_SCAN_ROWS}"
-    values = sheet_utils().get_sheet_values(service, spreadsheet_id, rng)
+    values = gapi.call(sheet_utils().get_sheet_values, service, spreadsheet_id, rng)
     want = normalize(topic)
     matches = [
         header_row + 1 + i
@@ -161,7 +160,9 @@ def apply_updates(service: Any, spreadsheet_id: str, updates: list[dict]) -> Non
     """One ``values().batchUpdate`` for header + data cells together."""
     if not updates:
         return
-    service.spreadsheets().values().batchUpdate(
-        spreadsheetId=spreadsheet_id,
-        body={"valueInputOption": "USER_ENTERED", "data": updates},
-    ).execute()
+    gapi.run(
+        service.spreadsheets().values().batchUpdate(
+            spreadsheetId=spreadsheet_id,
+            body={"valueInputOption": "USER_ENTERED", "data": updates},
+        )
+    )

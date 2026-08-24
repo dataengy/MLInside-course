@@ -14,6 +14,7 @@ from pathlib import Path
 
 import yaml
 
+from publisher import gapi
 from schedule import settings as sched_settings
 from schedule.gsheet import REPO_ROOT
 
@@ -162,6 +163,10 @@ def load(path: str | Path = PUBLISH_YML) -> PublishConfig:
             service_account_file=Path(sheet_sa).expanduser() if sheet_sa else None,
             quota_project=sheet_raw.get("quota_project"),
         )
+
+    # One process-wide knob: the API modules are called from places that have no config
+    # in hand (pure helpers, the hardlinked read lane) — see publisher.gapi.
+    gapi.set_retries((_get(raw, "api") or {}).get("retries"))
 
     sched = sched_settings.load()
     return PublishConfig(

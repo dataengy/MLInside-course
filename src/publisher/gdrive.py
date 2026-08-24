@@ -15,6 +15,8 @@ from typing import Any
 
 from loguru import logger as log
 
+from publisher import gapi
+
 PPTX_MIME = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 FOLDER_MIME = "application/vnd.google-apps.folder"
 
@@ -37,7 +39,7 @@ def _q_escape(name: str) -> str:
 def find_by_name(service: Any, folder_id: str, filename: str) -> str | None:
     """fileId of a non-trashed ``filename`` inside ``folder_id``, else None."""
     q = f"name = '{_q_escape(filename)}' and '{folder_id}' in parents and trashed = false"
-    r = service.files().list(q=q, fields="files(id,name)", pageSize=5).execute()
+    r = gapi.run(service.files().list(q=q, fields="files(id,name)", pageSize=5))
     files = r.get("files", [])
     if len(files) > 1:
         log.warning(f"drive: {len(files)} files named {filename!r} in folder — using the first")
@@ -48,12 +50,12 @@ def ensure_shared(service: Any, file_id: str, mode: str) -> None:
     """Idempotently apply the share policy (list first, create only when absent)."""
     if mode != "anyone_reader":
         return
-    perms = service.permissions().list(fileId=file_id, fields="permissions(type,role)").execute()
+    perms = gapi.run(service.permissions().list(fileId=file_id, fields="permissions(type,role)"))
     if any(p.get("type") == "anyone" for p in perms.get("permissions", [])):
         return
-    service.permissions().create(
-        fileId=file_id, body={"type": "anyone", "role": "reader"}
-    ).execute()
+    gapi.run(
+        service.permissions().create(fileId=file_id, body={"type": "anyone", "role": "reader"})
+    )
     log.info(f"drive: anyone-with-link reader set on {file_id}")
 
 
@@ -80,10 +82,10 @@ def upload_or_update(
     file_id = existing_file_id
     if file_id:
         try:
-            f = (
-                service.files()
-                .update(fileId=file_id, body=meta, media_body=_media(), fields=fields)
-                .execute()
+            f = gapi.run(
+                service.files().update(
+                    fileId=file_id, body=meta, media_body=_media(), fields=fields
+                )
             )
             ensure_shared(service, f["id"], share)
             return DriveResult(f["id"], f["webViewLink"])
@@ -94,16 +96,14 @@ def upload_or_update(
 
     found = find_by_name(service, folder_id, filename)
     if found:
-        f = (
-            service.files()
-            .update(fileId=found, body=meta, media_body=_media(), fields=fields)
-            .execute()
+        f = gapi.run(
+            service.files().update(fileId=found, body=meta, media_body=_media(), fields=fields)
         )
     else:
-        f = (
-            service.files()
-            .create(body={**meta, "parents": [folder_id]}, media_body=_media(), fields=fields)
-            .execute()
+        f = gapi.run(
+            service.files().create(
+                body={**meta, "parents": [folder_id]}, media_body=_media(), fields=fields
+            )
         )
         log.info(f"drive: created {filename!r} → {f['id']}")
     ensure_shared(service, f["id"], share)
@@ -116,14 +116,14 @@ def ensure_folder(service: Any, *, name: str, parent_id: str = "root") -> str:
         f"name = '{_q_escape(name)}' and '{parent_id}' in parents "
         f"and mimeType = '{FOLDER_MIME}' and trashed = false"
     )
-    r = service.files().list(q=q, fields="files(id,name)", pageSize=5).execute()
+    r = gapi.run(service.files().list(q=q, fields="files(id,name)", pageSize=5))
     files = r.get("files", [])
     if files:
         return files[0]["id"]
-    f = (
-        service.files()
-        .create(body={"name": name, "mimeType": FOLDER_MIME, "parents": [parent_id]}, fields="id")
-        .execute()
+    f = gapi.run(
+        service.files().create(
+            body={"name": name, "mimeType": FOLDER_MIME, "parents": [parent_id]}, fields="id"
+        )
     )
     log.info(f"drive: created folder {name!r} → {f['id']}")
     return f["id"]

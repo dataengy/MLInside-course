@@ -48,6 +48,13 @@ _HINTS: tuple[tuple[tuple[str, ...], str], ...] = (
         ("requires a quota project",),
         "user-ADC без quota-проекта: задать auth.quota_project в settings/publish.yml",
     ),
+    # Последним: транзиентное пережило все ретраи (api.retries) — значит у Google
+    # действительно плохо, и повтор прогона осмысленнее любой правки конфига.
+    (
+        ("backenderror", "internal error encountered", "service is currently unavailable"),
+        "транзиентный отказ Google пережил все ретраи — просто повторить прогон "
+        "(леги изолированы, уже ok не переотправятся)",
+    ),
 )
 
 
