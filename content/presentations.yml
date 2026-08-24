@@ -76,7 +76,7 @@ presentations:
   - 'Инкрементальные модели: Оптимизация расчетов через обновление только новых данных в ClickHouse.'
   content: content/preza-dbt-v3-content.yml
   out_name: MLInside_Введение-в-dbt
-  slides: 52
+  slides: 57
   visuals: reuse-source
   generated: false
   homework:
@@ -87,8 +87,8 @@ presentations:
     - 049-dz-vitriny-na-datasete-olist
     - 050-dz-kriterii-ocenki
   published:
-    version: '3.14'
-    slides: 52
+    version: '3.15'
+    slides: 57
     url: null
     drive_file_id: null
     at: null
@@ -130,7 +130,7 @@ presentations:
   - 'Версионирование данных: Отслеживание происхождения (lineage) датасетов и версий моделей.'
   content: content/preza-dagster-content.yml
   out_name: MLInside_Современная-оркестрация-ML-пайплайнов-Dagster
-  slides: 51
+  slides: 49
   homework:
     repo: https://github.com/hnkovr/mlinside-hw-olist
     spec: homework/mlinside-hw-olist/docs/HW2-dagster.md
@@ -139,8 +139,8 @@ presentations:
     - 048-dz-orkestriruem-dbt-proekt-v
     - 049-dz-kriterii-ocenki
   published:
-    version: '1.3'
-    slides: 51
+    version: '1.4'
+    slides: 49
     url: null
     drive_file_id: null
     at: null
