@@ -16,7 +16,7 @@ def load():
 
 def test_content_loads():
     cfg, content = load()
-    assert len(content.slides) == 52
+    assert len(content.slides) == 57
     assert content.slides[0].kind == "title"
     assert content.slides[-1].kind == "closing"
     assert cfg.theme.accent == "2419FF"
@@ -24,8 +24,9 @@ def test_content_loads():
 
 def test_code_slides_present():
     _, content = load()
-    # 13 code-example slides from the source deck + 1 in the Olist ДЗ section
-    assert sum(1 for s in content.slides if s.code) == 14
+    # 13 from the source deck + 1 in the Olist ДЗ section + 3 in the packages block
+    # + 1 moved in with SQLMesh from the Dagster deck (2026-08-24)
+    assert sum(1 for s in content.slides if s.code) == 18
     assert all(s.bullets for s in content.slides if s.code)
 
 
