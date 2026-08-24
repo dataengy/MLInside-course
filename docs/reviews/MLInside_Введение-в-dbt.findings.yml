@@ -6,11 +6,11 @@ lecture:
   owner: Николай Крупий
   status: draft
 stats:
-  slides: 62
+  slides: 70
   notes_coverage: 1.0
-  tables: 10
-  code_slides: 20
-  materials_slides: 36
+  tables: 11
+  code_slides: 26
+  materials_slides: 43
   accents_total: 4
   accents_hit: 4
   accents_partial: 0
