@@ -26,6 +26,11 @@ render *nums:
 render-pdf pdf *nums:
     cd {{_root}} && python3 .tmp/render_pdf_pages.py {{pdf}} {{nums}}
 
+# Скалярные поля контент-YAML: ловит значения, которые YAML разобрал как мапу
+# (буллет с двоеточием без кавычек). Без аргументов — все content/preza-*-content.yml.
+lint-scalars *files:
+    cd {{_root}} && python3 .tmp/lint_content_scalars.py {{files}}
+
 # Report code line density and whether each code slide has a left explanatory column.
 audit-code content=CONTENT:
     cd {{_root}} && python3 .tmp/audit_code_slides.py {{content}}

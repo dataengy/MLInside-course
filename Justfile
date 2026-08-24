@@ -94,6 +94,16 @@ preza-validate-all:
         --settings settings/config.yml --visuals code-tables || exit 1; \
     done
 
+# Скалярный линт контент-YAML — ловит то, что схема-валидатор и preza-review пропускают:
+# буллет/ячейку с двоеточием без кавычек YAML читает как мапу, и падает только билд.
+preza-lint *files:
+    cd {{_dir}} && python3 .tmp/lint_content_scalars.py {{files}}
+
+# Правки деки по id слайда без переформатирования файла (list/extract/remove/move/insert).
+# Пример: just preza-slides content/preza-dbt-v3-content.yml move --id 045-x --after 044-y
+preza-slides content *ARGS:
+    cd {{_dir}} && python3 scripts/preza/edit_slides.py {{content}} {{ARGS}}
+
 # Import a FOREIGN .pptx (one this repo did not generate) into a reviewable content YAML.
 # Lossy and one-way — never build from the result. Add a plan entry with `generated: false`.
 preza-import-pptx pptx out="":

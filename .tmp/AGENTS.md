@@ -13,12 +13,15 @@
   git-ignored; в git идут только `*.py`, `*.md`, `Justfile`.
 - Для визуальной проверки предпочитайте `render-pdf`: он рендерит PDF, экспортированный
   LibreOffice, и не подменяет Corbel/Consolas шрифтами Quick Look.
+- Правки контента по id слайда — `just preza-slides <content> …` (`scripts/preza/edit_slides.py`,
+  мутирующий, поэтому живёт в `scripts/`, а не здесь).
 - Продовый генератор — сабмодуль `src/preza_gen/`; курсной контент и настройки —
   `content/{preza-dbt-v3-content,build_deck_v3-settings}.yml`. Эти скрипты — вокруг пайплайна
   (QA), не вместо него.
 
 ## Быстрая проверка новой версии
 ```
+just -f .tmp/Justfile lint-scalars  # ДО билда: скалярные поля контент-YAML
 just build                       # собрать (корневой Justfile)
 just -f .tmp/Justfile verify     # counts + emphasis + author
 just -f .tmp/Justfile audit-code # длина/раскладка code-слайдов
