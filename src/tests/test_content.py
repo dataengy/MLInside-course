@@ -16,7 +16,7 @@ def load():
 
 def test_content_loads():
     cfg, content = load()
-    assert len(content.slides) == 62
+    assert len(content.slides) == 70
     assert content.slides[0].kind == "title"
     assert content.slides[-1].kind == "closing"
     assert cfg.theme.accent == "2419FF"
@@ -27,7 +27,9 @@ def test_code_slides_present():
     # 13 from the source deck + 1 in the Olist ДЗ section + 3 in the packages block
     # + 1 moved in with SQLMesh from the Dagster deck (2026-08-24)
     # + пакеты в CI, slim CI, SQLMesh поверх dbt − схлопнутый SQLMesh-слайд (2026-08-25)
-    assert sum(1 for s in content.slides if s.code) == 20
+    # + моделирование/DV, MV в ClickHouse, микробатчинг, стриминг, гранты,
+    #   dbt_project_evaluator (2026-08-25)
+    assert sum(1 for s in content.slides if s.code) == 26
     assert all(s.bullets for s in content.slides if s.code)
 
 
