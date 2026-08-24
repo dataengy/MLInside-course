@@ -31,11 +31,23 @@ You keep the accent axis of `/preza-review` honest for the MLInside-course repo.
    decks are re-stamped (`just preza-stamp <content> vX.Y <date>`) after content edits.
 5. `settings/gsheet.yml` mapping.columns is always the FULL map (loader replaces, not
    merges); «тезисы» must stay in the accents candidates.
+6. Slide edits go through `just preza-slides <content> <cmd>` (splice by slide id,
+   byte-exact for untouched slides). NEVER round-trip the content YAML through
+   `yaml.safe_dump` — it renormalises every block scalar and turns a one-slide change
+   into a thousand-line diff. Slide `id` is unique per deck: re-id when moving a slide
+   between decks.
+7. Before every build: `just preza-lint`. A bullet or table cell written as
+   `- текст с двоеточием` without quotes is a YAML **map**; the schema validator's
+   scalar gate and this lint both catch it, the build only fails later with an opaque
+   `TypeError: ... got 'dict'`.
+8. Growing a deck past `deck_generation.slides_max` (settings/config.yml) means bumping
+   that cap WITH a dated comment above the previous one, and updating the pinned counts
+   in `src/tests/test_content.py` (slide count + code-slide count) in the same change.
 
 ## Working loop
 
 adc-status → gsheet-dump → presentations-plan-dry (inspect updated/added) →
 presentations-plan → preza-review-all → per-accent gap table (which stemmed terms are
-missing on the best slide) → minimal slide/bullet edits → preza-validate (generated
-decks only) → preza-review-all green → rebuild → update src/tests counters if slide
-counts changed.
+missing on the best slide) → minimal slide/bullet edits (via `just preza-slides`) →
+`just preza-lint` → preza-validate (generated decks only) → preza-review-all green →
+rebuild → update src/tests counters if slide counts changed.

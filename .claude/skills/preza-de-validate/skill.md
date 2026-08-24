@@ -24,6 +24,10 @@ Exit 0 = clean. Exit 1 = errors printed as `[error]` lines; `[warn]` lines never
   (+ `version_major` when `naming: increment`)
 - every slide: mapping, known `kind`, only known `SlideSpec` keys
 - `kind: table` slides carry non-empty `headers` + `rows`
+- scalar types: `title`/`subtitle`/`notes`/`code`/`code_caption`, every bullet, table header
+  and cell must be text. `- Поддержано не всё: часть методов` without quotes is a YAML **map**,
+  not a string — the renderer then dies with `TypeError: ... got 'dict'`. The error prints the
+  ready-to-paste quoted fix.
 - slide count within `deck_generation.slides_{min,max}` (course default 20..50)
 - provenance stamp `— Сгенерировано:` present in FIRST and LAST slide notes
 - image policy: `code-tables` rejects any `image:`; other profiles warn on missing files
