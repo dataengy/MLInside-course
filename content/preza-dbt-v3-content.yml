@@ -710,38 +710,52 @@ content:
   id: 032-klyuchevye-pakety
   title: Ключевые пакеты
   materials:
+  - label: dbt Hub
+    url: https://hub.getdbt.com/
   - label: dbt-utils
     url: https://github.com/dbt-labs/dbt-utils
   - label: project-evaluator
     url: https://github.com/dbt-labs/dbt-project-evaluator
-  - label: audit-helper
-    url: https://github.com/dbt-labs/dbt-audit-helper
   table:
     headers:
     - Пакет
     - Назначение
+    - Когда брать
     rows:
     - - dbt_utils
       - базовые макросы и generic-тесты
+      - сразу, это де-факто стандарт
     - - dbt_expectations
       - data-quality тесты (Great Expectations)
+      - когда not_null и unique уже мало
+    - - dbt_codegen
+      - генерация schema.yml и staging-моделей
+      - старт проекта, много источников
     - - dbt-date
       - унифицированная работа с датами
+      - много календарной логики, разные СУБД
     - - audit_helper
       - сравнение моделей при рефакторинге
+      - миграция и переписывание витрин
     - - elementary
       - мониторинг качества и аномалий
+      - появились прод и дежурство
     - - project_evaluator
       - аудит структуры проекта
+      - ревью legacy, регулярная гигиена
     - - dbtVault / AutomateDV
       - автоматизация Data Vault
+      - если выбрана методология Data Vault
     col_ratios:
     - 3
-    - 7
-  notes: 'Несколько пакетов, которые стоит знать. !!dbt_utils — практически стандарт!!: базовые макросы и generic-тесты. **dbt_expectations** добавляет проверки качества данных.
+    - 4
+    - 4
+  notes: |
+    Пакеты, которые стоит знать по именам. Третья колонка тут важнее второй: !!вопрос не «какой пакет лучше», а «в какой момент проекта он окупается»!!.
 
+    **dbt_utils** ставят практически сразу — это __базовые макросы и generic-тесты__, на которые ссылается половина примеров в интернете. **dbt_codegen** полезен на старте: он генерирует `schema.yml` и staging-модели по источникам, когда таблиц десятки и руками это писать долго. **dbt-date** снимает боль разных диалектов дат.
 
-    **audit_helper** незаменим при __рефакторинге__ (сравнивает старую и новую модель). **elementary** следит за аномалиями, **project_evaluator** проверяет соответствие best-practices, **dbtVault/AutomateDV** — Data Vault. ~~С них удобно начинать.~~'
+    Дальше — по мере взросления проекта. **dbt_expectations** нужен, когда встроенных тестов уже не хватает и требуются __пороги и распределения__. **audit_helper** включают на время рефакторинга, **elementary** — когда появился прод и дежурный, которому нужны алерты, а **project_evaluator** — когда проект дорос до регулярного аудита структуры. ~~Пакет — это зависимость: каждый добавленный пакет придётся обновлять и объяснять новичку, поэтому берут их по потребности, а не «на всякий случай».~~
 - kind: content
   id: 033-dbt-utils-v-dele
   title: dbt_utils в деле
@@ -781,6 +795,115 @@ content:
 
 
     Главная выгода — **переносимость**: один и тот же проект может компилироваться под __ClickHouse, Postgres и Snowflake__. ~~Пакет уменьшает boilerplate, но команда должна версионировать его и понимать generated SQL при обновлении.~~'
+- kind: content
+  id: 053-dq-pakety-expectations-elementary
+  title: 'Пакеты качества: dbt_expectations и elementary'
+  materials:
+  - label: dbt_expectations
+    url: https://github.com/calogica/dbt-expectations
+  - label: elementary
+    url: https://github.com/elementary-data/elementary
+  code_caption: models/schema.yml — проверки поверх generic-тестов
+  code: |
+    models:
+      - name: fct_orders
+        tests:
+          - dbt_expectations.expect_table_row_count_to_be_between:
+              min_value: 1000
+        columns:
+          - name: total_amount
+            tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+          - name: order_date
+            tests:
+              - dbt_expectations.expect_row_values_to_have_recent_data:
+                  datepart: day
+                  interval: 2
+              - elementary.volume_anomalies:
+                  timestamp_column: order_date
+  bullets:
+  - 'dbt_expectations: пороги, диапазоны и свежесть там, где not_null и unique уже мало'
+  - Тесты живут в том же schema.yml и запускаются обычным dbt test
+  - 'elementary: те же прогоны плюс история результатов и детект аномалий'
+  - Аномалия считается от прошлых прогонов, а не от жёсткого порога в коде
+  - Отчёт и алерты уходят дежурному в Slack или Telegram, а не в лог CI
+  notes: |
+    Два пакета закрывают разные половины качества данных. **dbt_expectations** — это __порты проверок Great Expectations в мир dbt__: диапазоны значений, ожидаемое число строк, свежесть данных, соответствие типу и регулярному выражению. Синтаксис привычный: тест объявляется в `schema.yml` рядом с моделью и запускается обычным `dbt test`, то есть !!новых сущностей в проекте не появляется!!.
+
+    **elementary** решает другую задачу — __наблюдаемость во времени__. Он сохраняет результаты прогонов в служебные таблицы и сравнивает новый прогон с историей: объём строк, доля NULL, распределение значений. Поэтому он ловит то, что нельзя записать порогом заранее: витрина не сломалась, но строк вдруг стало вдвое меньше.
+
+    Практическое правило: **dbt_expectations — про инвариант, который вы знаете**, elementary — про изменение, которого вы не ждали. ~~Оба пакета добавляют время в прогон, поэтому тяжёлые проверки обычно вешают на marts и на ночной run, а не на каждый pull request.~~
+- kind: content
+  id: 054-audit-helper-i-project-evaluator
+  title: 'Рефакторинг под контролем: audit_helper'
+  materials:
+  - label: audit_helper
+    url: https://github.com/dbt-labs/dbt-audit-helper
+  - label: project_evaluator
+    url: https://github.com/dbt-labs/dbt-project-evaluator
+  code_caption: analyses/compare_orders.sql — старая витрина против новой
+  code: |
+    {% set old = adapter.get_relation(
+         database=target.database,
+         schema='analytics',
+         identifier='fct_orders_legacy') %}
+
+    {{ audit_helper.compare_relations(
+         a_relation=old,
+         b_relation=ref('fct_orders'),
+         primary_key='order_id',
+         exclude_columns=['updated_at']) }}
+
+    -- в выводе: сколько строк совпало и
+    -- сколько есть только в одной из витрин
+  bullets:
+  - Рефакторинг витрины — это не «переписал и задеплоил», а доказанная эквивалентность
+  - 'compare_relations и compare_column_values: расхождения по строкам и по колонкам'
+  - Живёт в analyses/ — результат читаем глазами, ничего не материализуется
+  - 'project_evaluator: аудит структуры — модели без тестов, прямые ссылки на source'
+  - Оба пакета — разовые проверки на время работ, а не постоянная нагрузка на прод
+  notes: |
+    Самая частая правка в зрелом проекте — не новая витрина, а !!переписывание старой!!. И главный вопрос ревью здесь один: __данные остались теми же или нет__. **audit_helper** отвечает на него численно: `compare_relations` сопоставляет старое и новое отношение по первичному ключу и показывает, сколько строк совпало, сколько есть только слева и только справа.
+
+    Обратите внимание на две детали. Запрос лежит в `analyses/` — это **скомпилированный, но не выполняемый в графе SQL**, поэтому проверка не превращается в лишнюю модель. И технические колонки вроде `updated_at` исключаются явно: иначе расхождение будет стопроцентным и бесполезным. Если совпадение не 100 %, `compare_column_values` покажет, __в какой именно колонке разошлись значения__.
+
+    Второй пакет из той же серии — **project_evaluator**. Он проверяет не данные, а устройство проекта: модели без тестов и описаний, прямые ссылки на source в обход staging, «многоэтажные» цепочки и rejoin-ы. ~~Его удобно запускать не в каждом CI, а раз в спринт или при приёме чужого legacy-проекта: получается объективный список технического долга вместо спора о вкусах.~~
+- kind: content
+  id: 055-pakety-versii-i-riski
+  title: 'Пакеты: версии, обновление и риски'
+  materials:
+  - label: packages.yml
+    url: https://docs.getdbt.com/docs/build/packages
+  - label: dbt deps
+    url: https://docs.getdbt.com/reference/commands/deps
+  code_caption: packages.yml — версии пинятся, dbt_packages не коммитим
+  code: |
+    packages:
+      - package: dbt-labs/dbt_utils
+        version: [">=1.3.0", "<2.0.0"]
+
+      - package: calogica/dbt_expectations
+        version: 0.10.4
+
+      - git: https://github.com/org/dbt-internal.git
+        revision: v1.2.0      # тег, а не ветка
+
+    # dbt deps  -> dbt_packages/  (в .gitignore)
+    # package-lock.yml коммитим: он фиксирует,
+    # что реально скачалось
+  bullets:
+  - Версия пинится диапазоном или тегом — «последняя» ломает сборку в чужой день
+  - package-lock.yml коммитим, каталог dbt_packages/ — нет
+  - Пакет — это чужой код в вашем проекте, его макросы могут переопределить ваши
+  - Транзитивные зависимости конфликтуют по версиям, dbt deps скажет об этом сразу
+  - Обновление пакета — отдельный MR с прогоном тестов, а не «заодно с фичей»
+  notes: |
+    Пакеты — это **зависимости**, и обращаться с ними надо как с зависимостями кода. Версию всегда пиньте: диапазоном (`>=1.3.0, <2.0.0`) или точным значением; для приватных пакетов из git указывайте __тег, а не ветку__, иначе сборка меняется в тот день, когда кто-то запушил в main чужого репозитория. С dbt 1.7 рядом появляется `package-lock.yml` — !!его коммитят, потому что он фиксирует то, что скачалось на самом деле!!, а сам каталог `dbt_packages/` в git не хранят: он воспроизводится командой `dbt deps`.
+
+    Риск, о котором забывают: макросы пакета живут в **одном пространстве имён** с вашими. Пакет может переопределить макрос, а два пакета — потребовать несовместимые версии третьего; `dbt deps` сообщает о конфликте, но выбор остаётся за вами. Поэтому вызов через префикс (`dbt_utils.star`) — не формальность, а способ понимать, чей код исполняется.
+
+    И организационное правило: **обновление пакета — это отдельный merge request** с прогоном тестов и чтением changelog. ~~В major-версиях пакеты меняют сигнатуры макросов, и такая правка, приехавшая «заодно» с продуктовой фичей, превращает разбор падения в археологию.~~
 - kind: section
   id: 034-zapusk-v-prodakshene
   title: Запуск в продакшене
@@ -1016,6 +1139,36 @@ content:
     !!dbt MCP даёт языковым моделям и агентам стандартный, управляемый доступ!! к вашим моделям и метрикам; **context7** и MCP подключают IDE/AI к __контексту проекта__. Это полезно, когда ассистенту нужно работать не «в вакууме», а с актуальными моделями, тестами и описаниями.
 
     Важно: ИИ **ускоряет рутину**, но результат — это по-прежнему **код**, который проходит __ревью и тесты__. ~~Самая сильная схема — не автогенерация вместо инженера, а ассистент, который снимает повторяющуюся работу и уменьшает трение.~~'
+- kind: content
+  id: 056-sqlmesh-alternativa-dbt
+  title: SQLMesh — альтернатива dbt
+  materials:
+  - label: SQLMesh docs
+    url: https://sqlmesh.readthedocs.io
+  - label: SQLGlot — парсер SQL под капотом
+    url: https://github.com/tobymao/sqlglot
+  code_caption: 'Модель SQLMesh: инкрементальность и типы в самой модели'
+  code: "MODEL (\n  name analytics.stg_transactions,\n  kind INCREMENTAL_BY_TIME_RANGE (time_column ts),\n\
+    \  cron '@daily',\n  grain transaction_id,\n  audits (not_null(columns := (transaction_id)))\n);\n\
+    \nSELECT transaction_id, customer_id, amount, ts\nFROM raw.transactions\nWHERE ts BETWEEN @start_ds\
+    \ AND @end_ds;   -- границы подставит SQLMesh\n"
+  bullets:
+  - 'Понимает SQL: строит column-level lineage через парсер SQLGlot'
+  - 'Virtual data environments: дешёвые изолированные среды'
+  - plan/apply показывает, что реально надо пересчитать
+  - Инкрементальность и расписание — часть модели
+  - Интеграция с Dagster есть, но в основном силами сообщества
+  notes: '**SQLMesh** — самый интересный вызов монополии dbt. Его отличие принципиальное: он __не подставляет
+    строки шаблоном, а разбирает SQL в синтаксическое дерево__ (через SQLGlot). Отсюда !!column-level
+    lineage!! и понимание, какие изменения ломающие, а какие нет.
+
+
+    Вторая сильная идея — **virtual data environments**: среда создаётся как набор ссылок на уже посчитанные
+    таблицы, поэтому «своя копия хранилища для ветки» стоит копейки. `plan/apply` показывает __что именно
+    придётся пересчитать__ до применения. ~~Интеграция с Dagster существует, но по зрелости она заметно
+    уступает dagster-dbt.~~
+
+    '
 - kind: table
   id: 045-sqlmesh-i-dbt-upravlenie
   title: 'SQLMesh и dbt: управление изменениями'
@@ -1053,6 +1206,53 @@ content:
 
 
     У dbt зрелая экосистема, привычные packages и простой workflow **build + CI**; у SQLMesh сильнее акцент на plan/apply, impact analysis и виртуальном продвижении. ~~Выбор зависит от команды и warehouse: это сравнение подходов к изменению данных, а не универсальный рейтинг инструментов.~~'
+- kind: table
+  id: 057-dbt-protiv-sqlmesh
+  title: dbt против SQLMesh
+  table:
+    headers:
+    - Критерий
+    - dbt
+    - SQLMesh
+    rows:
+    - - Работа с SQL
+      - шаблонизация Jinja
+      - разбор SQL в AST (SQLGlot)
+    - - Lineage
+      - на уровне моделей
+      - на уровне колонок
+    - - Инкрементальность
+      - руками в конфиге и фильтрах
+      - декларативно, вид модели
+    - - Изолированные среды
+      - отдельные схемы, дорого
+      - virtual environments, дёшево
+    - - Понимание изменений
+      - нет, пересчёт по выбору
+      - plan/apply с влиянием изменений
+    - - Экосистема и пакеты
+      - огромная (hub, packages)
+      - небольшая
+    - - Рынок труда и найм
+      - стандарт индустрии
+      - нишевый
+    - - Интеграция с Dagster
+      - официальная, зрелая
+      - есть, менее зрелая
+    col_ratios:
+    - 3
+    - 4
+    - 4
+  notes: 'Честное сравнение: !!технически SQLMesh во многом сильнее!!. Column-level lineage, дешёвые среды
+    и осмысленный `plan` — это то, чего в dbt действительно не хватает.
+
+
+    Но выигрывает не только техника. У **dbt** — __огромная экосистема пакетов, документация, обучение
+    и рынок труда__; нового человека вы наймёте за недели, а не месяцы. Поэтому практический совет: **на
+    новом greenfield-проекте SQLMesh стоит серьёзно рассмотреть**, а миграцию работающего dbt-проекта
+    нужно обосновывать конкретной болью. ~~В нашем курсе мы остаёмся на dbt именно по этой причине.~~
+
+    '
 - kind: content
   id: 046-deklarativnye-transformacii
   title: 'Декларативные трансформации: ещё четыре подхода'

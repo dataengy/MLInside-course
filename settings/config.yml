@@ -36,7 +36,8 @@ planning:
 # Bounds enforced by the skill's validate_content.py before every build.
 deck_generation:
   slides_min: 20
-  slides_max: 55                  # 2026-08-13: 50→55 — dbt-дека 51+ слайд после ДЗ-секции, Dagster 50→51 под акцент ML-пайплайна
+  slides_max: 58                  # 2026-08-24: 55→58 — блок про dbt-пакеты (DQ, рефакторинг, версии) + переезд двух SQLMesh-слайдов из Dagster-деки
+                                  # 2026-08-13: 50→55 — dbt-дека 51+ слайд после ДЗ-секции, Dagster 50→51 под акцент ML-пайплайна
   visuals_default: code-tables    # code-tables | reuse-source | image-pipeline
   provenance:                     # stamped into the FIRST + LAST slide notes
     harness: "Claude Code"
