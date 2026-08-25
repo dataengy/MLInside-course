@@ -143,6 +143,21 @@ preza-stamp content version date:
       --model claude-opus-4-8 --harness "Claude Code" --effort max \
       --version {{version}} --date {{date}}
 
+# План блоков записи (монтаж режет уроки до 25 мин → паузы между блоками): покрытие слайдов
+# + оценка минут. План — content/presentations.yml → recording.blocks; лимиты — settings/config.yml
+# → course_production. Флаги: --md (таблица для docs), --strict (длинный блок = ошибка).
+preza-blocks content *ARGS:
+    cd {{_dir}} && PYTHONPATH=src python3 -m course blocks {{content}} {{ARGS}}
+
+# …для всех дек, у которых задан recording.blocks
+preza-blocks-all *ARGS:
+    cd {{_dir}} && PYTHONPATH=src python3 -m course blocks {{ARGS}}
+
+# Статус правил продакшена курса (то же, что SessionStart-хук): дедлайн записи, деки без плана
+# блоков, длинные блоки, открытые вопросы менеджеру (docs/course-qa.md). Spec: docs/course-rules.md
+course-status *ARGS:
+    cd {{_dir}} && PYTHONPATH=src python3 -m course status {{ARGS}}
+
 # Build the distribution-ready HSU deck from the reviewed template-native dbt deck.
 dbt-final:
     just -f src/preza_gen/preza_refactoring/Justfile build

@@ -16,23 +16,66 @@ project:
 
 # ── People ──────────────────────────────────────────────────────────────────
 participants:
-  - name: "Nikolai Krupii"
-    role: "lecturer (dbt, Dagster)"
+  - name: "Nikolai Krupii (Николай Крупий)"
+    role: "lecturer — dbt (лекция 4), Dagster (лекция 6); соавтор CI/CD + мониторинг (8)"
     github: "github.com/dataengy"
     telegram: "https://t.me/NikolayKrupiy"
     email: "nikolai.krupii@prodamus.io"
-  - name: "Vlad Boyadzhi"
-    role: "co-author / lecturer (MLInside 2026 materials)"
-    telegram: "https://web.telegram.org/k/#@Boyadzhi"
-    github: "TBD"          # request GitHub profile from Nikolai
-  - name: "Alina"
-    role: "editor"
+  - name: "Vlad Boyadzhi (Влад Бояджи)"
+    role: "lecturer (co-teacher) — лекции 1–3, 5, 7; ревью наших дек и домашек"
+    telegram: "https://t.me/Boyadzhi"
+    github: "github.com/vboyadzhi"     # confirmed 2026-07-28 — note the `dzh`
+  - name: "Alina Vedenskaya (Алина Веденская)"
+    role: "course manager / curator — менеджер образовательных проектов MLInside: координация подготовки, финальный дизайн-пасс дек, связь с монтажёром"
+    telegram: "https://t.me/alina_3V"
+
+# ── Course production rules (SSoT скаляров) ────────────────────────────────
+# Нарратив — docs/course-rules.md; Q&A + открытые вопросы — docs/course-qa.md. Источник —
+# чат с менеджером курса (Алина Веденская), июль–август 2026. Читается fail-loud из
+# src/course: just preza-blocks, just course-status, SessionStart-хук course-production-status.sh.
+course_production:
+  manager: "Алина Веденская"
+  docs:
+    rules: docs/course-rules.md
+    qa: docs/course-qa.md
+  deadlines:
+    record_all_by: 2026-08-31       # «ооочень важно постараться всё записать в августе»
+    announce_module: "2026-09"      # анонс модуля студентам — сентябрь; ДЗ можно доделывать во время монтажа
+  lecture:
+    duration_min: [50, 90]          # ограничений нет; «50 минут — 1,5 часа отлично»
+    block_max_min: 25               # монтаж режет запись на уроки до ~25 мин → лекция заранее делится на блоки, на записи между ними пауза
+    min_per_slide: 1.3              # эвристика оценки блока: ~50 слайдов v3.10 Николай оценил в 50–90 мин → 1.0–1.8 мин/слайд
+    slides_limit: null              # ограничений по числу слайдов нет — первичен тайминг (deck_generation.slides_* — наш внутренний гейт)
+  design:
+    template_final: true            # макет финальный; менеджер выровняла шрифт/отступы в pptx — «можно прям в них исправлять»
+    manager_final_pass: true        # финальная версия → менеджеру на мелкие правки → потом запись
+    headings_caps: ok               # капслок в заголовках — «вроде везде ок»; менять только где теряется смысл
+    code_blocks: "белый на чёрном — ок; синяя обводка убрана; подсветка синтаксиса — опционально (на другом курсе: скрины из редактора кода)"
+    extra_materials_block: ok       # блок «доп. материалы» внизу справа — ок
+  recording:
+    no_splicing: true               # не склеивать самим — слать кусочки, монтажёр соберёт (максимальное качество)
+    test_clip_min: [1, 2]           # пробная запись 1–2 мин: лицо + демонстрация экрана + звук → монтажёру на проверку
+    background: "светлый однотонный фон; без окна в кадре (засветы)"
+    software_guide: "https://docs.google.com/document/d/1Ciq1WCZ4nYKdpQBkrSanVE0xGtg5rcSoVmaVoIz4voc/edit?usp=sharing"
+    plan_required_owner_match: "Николай"   # regex по owner в content/presentations.yml: у этих дек хук требует recording.blocks
+  homework:
+    checked: false                  # ДЗ делают самостоятельно, не проверяются
+    grading_scale: open             # вопрос менеджера: нужна ли балльная система? → docs/course-qa.md
+  pipeline:                         # порядок шагов по одной лекции
+    - deck-final-to-manager         # готовые презы — по готовности, не обязательно все сразу
+    - vlad-review                   # при необходимости Влад смотрит и «окает»
+    - manager-design-pass           # менеджер проверяет дизайн, мелкие правки
+    - test-clip                     # пробная запись → монтажёру
+    - record-in-blocks              # запись блоками с паузами
+    - editing                       # монтаж (уроки ≤25 мин); ДЗ доделываются параллельно
 
 # ── Planning & schedule ─────────────────────────────────────────────────────
 planning:
   schedule_gsheet: "https://docs.google.com/spreadsheets/d/1cxYGtU36nbmO5DhjtNkm_HMESiNPwoWdd6QY8yb2JaU/edit"
 
 # ── Deck generation policy (create-preza-about-de-tool) ─────────────────────
+# Курс НЕ ограничивает число слайдов (менеджер, 2026-08): первичен тайминг →
+# course_production.lecture. Границы ниже — внутренний гейт генератора.
 # Bounds enforced by the skill's validate_content.py before every build.
 deck_generation:
   slides_min: 20
