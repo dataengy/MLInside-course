@@ -1,0 +1,22 @@
+# formats.yml — named FORMATTING profiles for preza_gen. Referenced from a deck settings
+# yaml via `settings.formats_file`; a deck picks one with `deck.format`.
+#
+# GENERATED-AND-EDITED: `just preza-merge-apply` rewrites this whole file, so keep prose
+# out of it — durable explanation lives in docs/preza-merge-lane.md.
+#
+# classic — the behaviour hard-coded in the renderer before profiles existed. Pinned by
+# src/preza_gen/tests/test_format_profile.py; do not "improve" it, add a new profile.
+formats:
+  classic:
+    body_font: {bullets_only: {0: 26, 1: 21, 2: 18}, with_image: {0: 20, 1: 17, 2: 15}}
+    visual_anchor: box
+    visual_bottom: 7.0
+    visual_top_min: 1.7
+    table_top: 1.5
+    bullets_width: fixed
+    bullets_width_full: 12.3
+    bullets_width_narrow: 6.2
+    bullets_gap: 0.25
+    drop_empty_placeholders: false
+    title_slide_uppercase: false
+    code_border: accent

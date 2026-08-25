@@ -5,6 +5,7 @@ deck:
   out_name: MLInside_Введение-в-dbt   # base stem (no version); naming appends the version
   naming: increment                    # increment → _v{major}.{n} | timestamp → _{YYYYMMDD-HHMM} | fixed
   version_major: 3
+  format: classic
   downloads_dir: ~/Downloads
   source_deck: data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
 content:
