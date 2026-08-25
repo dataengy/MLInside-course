@@ -51,3 +51,9 @@ src/*.egg-info/
 .claude/skills-canonical/
 .gitsecret/keys/random_seed
 !*.secret
+
+# Native Claude Code worktrees (EnterWorktree) — per-session isolation, never committed.
+.claude/worktrees/
+
+# agent-session-lock runtime files (session-lock hooks)
+.ai/.locks/

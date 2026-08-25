@@ -94,3 +94,13 @@ Auth is one-time Application Default Credentials — see
 root, older in `.history/`), generated `CATALOG.md` with deterministic doc-props
 (slides/pages/pictures/code blocks, word stats incl. speaker notes) + curated
 reviews from `data/reviews.yml`. Do not move files in `data/` by hand.
+
+## Parallel sessions (shared checkout)
+
+Several agent sessions may share this checkout. Edits go in a **native worktree**
+(`EnterWorktree` → `.claude/worktrees/<name>`, branch from `origin/main`; then
+`git submodule update --init --recursive`, `python3 -m pytest`); land with
+`git fetch && git rebase origin/main && git push origin HEAD:main`. In the shared root only
+read — or `agent-lock acquire` + `settle-check` + `only <paths>` staging; never `git reset`
+/ `checkout` there. SessionStart hooks `scripts/hooks/shared-tree-guard.sh` and the
+session-lock hooks print where the session is. Why: [#14](https://github.com/dataengy/MLInside-course/issues/14).

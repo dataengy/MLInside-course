@@ -5,6 +5,12 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash scripts/hooks/shared-tree-guard.sh",
+            "timeout": 10,
+            "statusMessage": "Checking shared-tree isolation"
+          },
+          {
+            "type": "command",
             "command": "bash scripts/hooks/repo-sync-status.sh",
             "timeout": 10,
             "statusMessage": "Checking repo sync state"
@@ -32,6 +38,27 @@
             "command": "bash scripts/hooks/course-production-status.sh",
             "timeout": 10,
             "statusMessage": "Checking course production rules"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.ai/skills/_scripts/session/session-lock-hook.sh\" on-start",
+            "timeout": 10,
+            "statusMessage": "session-lock"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.ai/skills/_scripts/session/session-lock-hook.sh\" on-end",
+            "timeout": 5
           }
         ]
       }
