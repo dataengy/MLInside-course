@@ -15,6 +15,7 @@ def _add(prs, title, bullets, *, sizes=None, body_width=None, body_top=None):
     slide = prs.slides.add_slide(prs.slide_layouts[1])  # Title and Content
     slide.shapes.title.text = title
     body = slide.placeholders[1]
+    body.name = "Text Placeholder 2"  # matches the real generator's shape-name prefix
     if body_width is not None:
         body.width = Inches(body_width)
     if body_top is not None:

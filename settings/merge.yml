@@ -1,0 +1,17 @@
+# merge.yml — SSoT of the deck merge lane (preza_merge). Spec: docs/preza-merge-lane.md.
+merge:
+  # A change becomes a profile RULE only when it is systematic: at least this share of the
+  # slides that could carry it actually does. Below the threshold it stays a per-slide note.
+  min_share: 0.8
+  # Rebuilt-with-the-profile vs the fork: how far a box may sit from where the reviewer put
+  # it by hand before verification calls it a mismatch (inches).
+  tolerances: {left: 0.4, top: 0.4, width: 0.4, height: 0.4}
+  # Where reports and proposals land.
+  report_dir: docs/reviews/merge
+  # SessionStart hook: a fork candidate is a deck-named .pptx carrying one of these markers.
+  fork_markers: [" (1)", " (2)", " копия", "-copy", " copy"]
+  fork_search_dir: ~/Downloads
+  # Profile written by `apply` when the proposal does not name one.
+  default_profile: merged
+  # Rendering profile every deck starts from.
+  base_profile: classic
