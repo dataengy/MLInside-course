@@ -20,3 +20,18 @@ formats:
     drop_empty_placeholders: false
     title_slide_uppercase: false
     code_border: accent
+
+  # alina-2026-08 — derived from the reviewer's fork of v3.15 (docs/preza-merge-lane.md).
+  alina-2026-08:
+    body_font: inherit
+    visual_anchor: bottom
+    visual_bottom: 7.0
+    visual_top_min: 1.7
+    table_top: 2.45
+    bullets_width: adaptive
+    bullets_width_full: 12.3
+    bullets_width_narrow: 6.2
+    bullets_gap: 0.25
+    drop_empty_placeholders: true
+    title_slide_uppercase: false
+    code_border: dark
