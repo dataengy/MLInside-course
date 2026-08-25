@@ -26,6 +26,12 @@
             "command": "bash scripts/hooks/branch-pr-status.sh",
             "timeout": 10,
             "statusMessage": "Checking branches without PRs"
+          },
+          {
+            "type": "command",
+            "command": "bash scripts/hooks/course-production-status.sh",
+            "timeout": 10,
+            "statusMessage": "Checking course production rules"
           }
         ]
       }
