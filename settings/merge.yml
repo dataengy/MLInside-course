@@ -3,6 +3,18 @@ merge:
   # A change becomes a profile RULE only when it is systematic: at least this share of the
   # slides that could carry it actually does. Below the threshold it stays a per-slide note.
   min_share: 0.8
+  # Per-rule overrides of min_share, with the reason each one exists. A rule absent here
+  # uses min_share. These are deliberate, documented exceptions — never lower min_share
+  # itself to make a stubborn rule fire.
+  min_share_overrides:
+    # R4 proposes a CONDITIONAL behaviour: the generator's `adaptive` width widens a column
+    # only where the text clears the visual, which is exactly why the manager widened 27 of
+    # 34 such slides and not all of them. Measured against an unconditional denominator a
+    # conditional rule can never reach 0.8.
+    R4: 0.75
+    # R6 is unconditional, but it is applied BY HAND: the manager removed the empty
+    # placeholder on 5 of 7 eligible slides and missed two section slides.
+    R6: 0.70
   # Rebuilt-with-the-profile vs the fork: how far a box may sit from where the reviewer put
   # it by hand before verification calls it a mismatch (inches).
   tolerances: {left: 0.4, top: 0.4, width: 0.4, height: 0.4}

@@ -50,6 +50,7 @@ class MergeConfig:
     fork_search_dir: Path
     default_profile: str
     base_profile: str
+    min_share_overrides: dict
 
     @classmethod
     def load(cls, path: str | Path) -> MergeConfig:
@@ -66,7 +67,12 @@ class MergeConfig:
             fork_search_dir=Path(m["fork_search_dir"]).expanduser(),
             default_profile=m["default_profile"],
             base_profile=m["base_profile"],
+            min_share_overrides=dict(m["min_share_overrides"]),
         )
+
+    def threshold(self, rule: str) -> float:
+        """The min_share to use for ``rule`` — its documented override, or the deck-wide default."""
+        return float(self.min_share_overrides.get(rule, self.min_share))
 
 
 def _shapes_named(deck: Deck, prefix: str):
@@ -77,14 +83,22 @@ def _shapes_named(deck: Deck, prefix: str):
                 yield slide.n, shape
 
 
-def _r1(rep: DiffReport, cfg: MergeConfig) -> Finding | None:
+def _has_explicit_size(slide) -> bool:
+    """True when at least one run on the slide carries an explicit ``sz``."""
+    return any(r.size is not None for sh in slide.shapes for p in sh.paras for r in p.runs)
+
+
+def _r1(base: Deck, rep: DiffReport, cfg: MergeConfig) -> Finding | None:
     cleared = sum(s.runs_size_cleared for s in rep.slides)
     if not cleared:
         return None
-    eligible = [s for s in rep.slides if s.paras_before]
+    # Eligible = base slides that HAD at least one explicitly-sized run — not every slide
+    # with paragraphs. A slide whose only sized text lives in a table cell (untouched by
+    # this rule) must not dilute the share of slides where the reviewer actually cleared it.
+    eligible = [s for s in base.slides if _has_explicit_size(s)]
     hit = [s.n for s in rep.slides if s.runs_size_cleared]
     share = len(hit) / len(eligible) if eligible else 0.0
-    if share < cfg.min_share:
+    if share < cfg.threshold("R1"):
         return None
     return Finding(
         "R1",
@@ -110,7 +124,7 @@ def _r2(base: Deck, theirs: Deck, cfg: MergeConfig) -> Finding | None:
     median = round(st.median(values), 2)
     hit = [n for n, b in pairs if abs(b - median) <= 0.35]
     share = len(hit) / len(pairs)
-    if share < cfg.min_share:
+    if share < cfg.threshold("R2"):
         return None
     base_pairs = _bottoms(base, _CODE_PANEL) + _bottoms(base, _PICTURE)
     if base_pairs and abs(st.median([b for _, b in base_pairs]) - median) < 0.2:
@@ -136,7 +150,7 @@ def _r3(base: Deck, theirs: Deck, cfg: MergeConfig) -> Finding | None:
     hit = [n for n, t in tops if abs(t - median) <= 0.15]
     share = len(hit) / len(tops)
     base_tops = [t for _, t in ((n, sh.top) for n, sh in _shapes_named(base, _TABLE))]
-    if share < cfg.min_share or (base_tops and abs(st.median(base_tops) - median) < 0.2):
+    if share < cfg.threshold("R3") or (base_tops and abs(st.median(base_tops) - median) < 0.2):
         return None
     return Finding(
         "R3",
@@ -152,7 +166,14 @@ def _r3(base: Deck, theirs: Deck, cfg: MergeConfig) -> Finding | None:
 def _r4(base: Deck, theirs: Deck, cfg: MergeConfig) -> Finding | None:
     widened, total = [], 0
     base_by_slide = {n: sh for n, sh in _shapes_named(base, _BODY)}
+    # Eligible = a body placeholder that shares its (base) slide with a code panel or a
+    # picture. A bullets-only slide has nothing for the column to "clear" and can never
+    # widen for that reason, so it must not sit in the denominator.
+    visual_slides = {n for n, _ in _shapes_named(base, _CODE_PANEL)}
+    visual_slides |= {n for n, _ in _shapes_named(base, _PICTURE)}
     for n, shape in _shapes_named(theirs, _BODY):
+        if n not in visual_slides:
+            continue
         before = base_by_slide.get(n)
         if before is None or not before.width:
             continue
@@ -162,7 +183,7 @@ def _r4(base: Deck, theirs: Deck, cfg: MergeConfig) -> Finding | None:
     if not total:
         return None
     share = len(widened) / total
-    if share < cfg.min_share:
+    if share < cfg.threshold("R4"):
         return None
     return Finding(
         "R4",
@@ -191,7 +212,7 @@ def _r6(base: Deck, theirs: Deck, rep: DiffReport, cfg: MergeConfig) -> Finding 
     if not eligible:
         return None
     share = len(hit) / eligible
-    if share < cfg.min_share:
+    if share < cfg.threshold("R6"):
         return None
     return Finding(
         "R6",
@@ -229,7 +250,7 @@ def _r11(base: Deck, theirs: Deck, cfg: MergeConfig) -> Finding | None:
         return None
     changed = [n for n in common if before[n] != after[n]]
     share = len(changed) / len(common)
-    if share < cfg.min_share:
+    if share < cfg.threshold("R11"):
         return None
     values = {after[n] for n in changed}
     if values <= _DARK_BORDERS:
@@ -297,7 +318,7 @@ def _regressions(base: Deck, theirs: Deck, rep: DiffReport) -> list[Finding]:
 def detect(base: Deck, theirs: Deck, rep: DiffReport, cfg: MergeConfig) -> list[Finding]:
     """All findings about the fork: profile rules first, then regressions."""
     found = [
-        _r1(rep, cfg),
+        _r1(base, rep, cfg),
         _r2(base, theirs, cfg),
         _r3(base, theirs, cfg),
         _r4(base, theirs, cfg),
