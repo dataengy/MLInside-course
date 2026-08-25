@@ -26,6 +26,9 @@ _TABLE = "Table"
 _BODY = "Text Placeholder"
 # Theme roles / hex values that read as "the dark theme text colour" rather than the accent.
 _DARK_BORDERS = {"tx1", "1A1A1A", "000000"}
+# Every rule id that carries a share gate — the only valid keys for min_share_overrides.
+# R8/R9/R10 (regressions) are exempt: they fire unconditionally, with no min_share to override.
+_RULE_IDS = frozenset({"R1", "R2", "R3", "R4", "R6", "R7", "R11"})
 
 
 @dataclass(frozen=True)
@@ -59,6 +62,15 @@ class MergeConfig:
         if not p.is_file():
             raise FileNotFoundError(f"merge settings not found: {p}")
         m = yaml.safe_load(p.read_text(encoding="utf-8"))["merge"]
+        overrides = dict(m["min_share_overrides"])
+        unknown = set(overrides) - _RULE_IDS
+        if unknown:
+            # A typo'd rule id here would silently never apply — fail loud at load time,
+            # not at the first (or never) detect() call that happens to consult it.
+            raise ValueError(
+                f"merge.yml: min_share_overrides has unknown rule id(s): {sorted(unknown)} "
+                f"— known ids are {sorted(_RULE_IDS)}"
+            )
         return cls(
             min_share=float(m["min_share"]),
             tolerances=m["tolerances"],
@@ -67,11 +79,15 @@ class MergeConfig:
             fork_search_dir=Path(m["fork_search_dir"]).expanduser(),
             default_profile=m["default_profile"],
             base_profile=m["base_profile"],
-            min_share_overrides=dict(m["min_share_overrides"]),
+            min_share_overrides=overrides,
         )
 
     def threshold(self, rule: str) -> float:
-        """The min_share to use for ``rule`` — its documented override, or the deck-wide default."""
+        """The min_share to use for ``rule`` — its documented override, or the deck-wide
+        default. Raises on a rule id outside the known set, so a typo can't silently fall
+        back to the default instead of applying the override the caller expected."""
+        if rule not in _RULE_IDS:
+            raise ValueError(f"unknown rule id: {rule!r} — known ids are {sorted(_RULE_IDS)}")
         return float(self.min_share_overrides.get(rule, self.min_share))
 
 
