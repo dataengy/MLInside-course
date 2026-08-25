@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 import click
+import yaml
 
 from . import align, diff, model, report, rules
 from .rules import MergeConfig
@@ -25,6 +26,22 @@ def _content_at_rev(rev: str, path: str, dest: Path) -> Path:
         )
     dest.write_bytes(out.stdout)
     return dest
+
+
+def _scratch_settings(deck_settings: Path, tmp_path: Path) -> Path:
+    """Copy a deck settings yaml with out_dir redirected into a scratch dir."""
+    doc = yaml.safe_load(deck_settings.read_text(encoding="utf-8"))
+    doc["settings"]["out_dir"] = str(tmp_path / "generated")
+    out = tmp_path / "settings.yml"
+    out.write_text(yaml.safe_dump(doc, allow_unicode=True), encoding="utf-8")
+    return out
+
+
+def _drop_downloads_dir(content_path: Path) -> None:
+    """Blank a scratch content's downloads_dir so the build cannot hardlink into ~/Downloads."""
+    doc = yaml.safe_load(content_path.read_text(encoding="utf-8"))
+    doc["deck"]["downloads_dir"] = None
+    content_path.write_text(yaml.safe_dump(doc, allow_unicode=True), encoding="utf-8")
 
 
 @click.group()
@@ -108,6 +125,77 @@ def apply_cmd(proposal_path, patch_of, descr, settings_path, deck_settings, form
         backend=backend,
     )
     click.echo(f"собрано: {out}")
+
+
+@main.command("verify")
+@click.argument("proposal_path")
+@click.argument("merged_pptx")
+@click.option("--settings", "settings_path", default=str(_SETTINGS), show_default=True)
+@click.option(
+    "--deck-settings", default="content/build_deck_v3-settings.yml", show_default=True
+)
+@click.option("--contact-sheet", "want_sheet", is_flag=True, help="also render PNG pages")
+def verify_cmd(proposal_path, merged_pptx, settings_path, deck_settings, want_sheet):
+    """Rebuild the base content with the profile and check it against the fork."""
+    import tempfile
+
+    from preza_gen import pipeline
+
+    from . import verify as verify_mod
+
+    cfg = MergeConfig.load(settings_path)
+    doc = report.load_proposal(proposal_path)["proposal"]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        base_content = _content_at_rev(doc["base_content_rev"], doc["deck"], tmp_path / "base.yml")
+        # The verification build is scratch: redirect out_dir (and drop the ~/Downloads
+        # hardlink) so it never lands beside the real versions the publisher scans.
+        scratch_settings = _scratch_settings(Path(deck_settings), tmp_path)
+        _drop_downloads_dir(base_content)
+        res = pipeline.build_deck(scratch_settings, base_content, pptx=True)
+        rebuilt = model.load(res.out_path)
+        theirs = model.load(doc["theirs_pptx"])
+        ours = model.load(doc["ours_pptx"])
+        merged = model.load(merged_pptx)
+
+        out = verify_mod.structural(rebuilt, theirs, cfg).merge(
+            verify_mod.invariants(ours, merged)
+        )
+        if want_sheet:
+            sheet = verify_mod.contact_sheet(Path(merged_pptx), cfg.report_dir / "contact")
+            click.echo(f"contact-sheet: {sheet or 'LibreOffice не найден — пропущено'}")
+
+    for line in out.lines:
+        click.echo(line)
+    for bad in out.mismatches:
+        click.echo(f"✗ {bad}", err=True)
+    if not out.ok:
+        sys.exit(1)
+    click.echo("✓ верификация пройдена")
+
+
+@main.command()
+@click.pass_context
+@click.option("--deck", required=True)
+@click.option("--base", "base_pptx", required=True)
+@click.option("--ours", "ours_pptx", required=True)
+@click.option("--theirs", "theirs_pptx", required=True)
+@click.option("--base-content-rev", required=True)
+@click.option("--profile", default=None)
+def run(ctx, deck, base_pptx, ours_pptx, theirs_pptx, base_content_rev, profile):
+    """propose, then stop at the decisions — apply/verify are deliberate follow-ups."""
+    ctx.invoke(
+        propose,
+        deck=deck,
+        base_pptx=base_pptx,
+        ours_pptx=ours_pptx,
+        theirs_pptx=theirs_pptx,
+        base_content_rev=base_content_rev,
+        profile=profile,
+        settings_path=str(_SETTINGS),
+    )
+    click.echo("\nдальше: проставьте decision: в *.proposal.yml → just preza-merge-apply …")
 
 
 if __name__ == "__main__":
