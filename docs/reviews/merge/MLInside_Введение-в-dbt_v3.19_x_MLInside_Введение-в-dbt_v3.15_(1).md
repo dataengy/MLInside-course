@@ -35,7 +35,7 @@
 ## Что дальше
 
 1. Проставить `decision:` (accept | reject) у каждого правила в `*.proposal.yml`.
-2. `just preza-merge-apply --proposal <файл>`
-3. `just preza-merge-verify --proposal <файл>`
+2. `just preza-merge-apply <proposal.yml>`
+3. `just preza-merge-verify <proposal.yml> <merged.pptx>`
 
 Спека ленты: [docs/preza-merge-lane.md](../../preza-merge-lane.md)

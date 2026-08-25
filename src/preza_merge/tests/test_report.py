@@ -57,3 +57,21 @@ def test_accepted_rules_become_profile_keys(tmp_path):
     data = report.load_proposal(prop)
     data["proposal"]["rules"][0]["decision"] = "accept"
     assert report.accepted_keys(data) == {"body_font": "inherit"}
+
+
+def test_two_ours_versions_get_two_different_report_stems(tmp_path):
+    """Regression: deck filenames carry a version dot (v3.18, v3.19). Path.with_suffix
+    treats the LAST dot in the whole stem as an existing extension and replaces everything
+    after it — so two different `ours` versions merged against the same fork used to
+    collapse onto the SAME report filename, silently overwriting one another.
+    """
+    stem_18 = tmp_path / "MLInside_x_v3.18_x_fork_v3.15"
+    stem_19 = tmp_path / "MLInside_x_v3.19_x_fork_v3.15"
+    md_18, prop_18 = report.write(stem_18, _ctx(tmp_path))
+    md_19, prop_19 = report.write(stem_19, _ctx(tmp_path))
+
+    assert md_18 != md_19
+    assert prop_18 != prop_19
+    assert md_18.name == "MLInside_x_v3.18_x_fork_v3.15.md"
+    assert prop_18.name == "MLInside_x_v3.18_x_fork_v3.15.proposal.yml"
+    assert md_19.name == "MLInside_x_v3.19_x_fork_v3.15.md"
