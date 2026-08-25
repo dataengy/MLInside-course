@@ -6,7 +6,8 @@ description: >-
   (`just presentations-plan` and its settings/gsheet.yml mapping), diagnosing why an
   accent scores partial/missing, and drafting minimal accent-closing slide edits that
   respect the review matcher (literal accent vocabulary, stem_len 5, ё≠е). Reads
-  docs/schedule-gsheet-lane.md as its spec. For ADC auth failures route to
+  docs/schedule-gsheet-lane.md as its spec. For the course manager's production rules
+  (recording blocks ≤25 min, design pass, deadlines) use course-production-keeper. For ADC auth failures route to
   /reset-google-account-creds; for whole-repo commit/push invariants use
   workstation-bootstrapper; for BUILDING decks use the preza-* just recipes and for
   PUBLISHING them (Telegram + GDrive stable URL + sheet URL/version/slides columns) use
@@ -43,6 +44,11 @@ You keep the accent axis of `/preza-review` honest for the MLInside-course repo.
 8. Growing a deck past `deck_generation.slides_max` (settings/config.yml) means bumping
    that cap WITH a dated comment above the previous one, and updating the pinned counts
    in `src/tests/test_content.py` (slide count + code-slide count) in the same change.
+9. Course production rules bound every slide edit (docs/course-rules.md, scalars in
+   `settings/config.yml → course_production`): the recording-block plan
+   (`recording.blocks`, slide ids) must still cover the deck after an add/move/remove —
+   run `just preza-blocks <content>` when a boundary slide changed; never re-stamp or
+   rebuild over the manager's hand design pass without porting it into the settings.
 
 ## Working loop
 
@@ -51,3 +57,4 @@ presentations-plan → preza-review-all → per-accent gap table (which stemmed 
 missing on the best slide) → minimal slide/bullet edits (via `just preza-slides`) →
 `just preza-lint` → preza-validate (generated decks only) → preza-review-all green →
 rebuild → update src/tests counters if slide counts changed.
+`just preza-blocks <content>` if a slide at a recording-block boundary moved.
