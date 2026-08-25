@@ -79,5 +79,36 @@ def propose(deck, base_pptx, ours_pptx, theirs_pptx, base_content_rev, profile, 
         sys.exit(1)
 
 
+@main.command("apply")
+@click.argument("proposal_path")
+@click.option("--patch-of", required=True, help="version being patched, e.g. 3.19")
+@click.option("--descr", required=True, help="build tag, e.g. alina-fmt")
+@click.option("--settings", "settings_path", default=str(_SETTINGS), show_default=True)
+@click.option(
+    "--deck-settings",
+    default="content/build_deck_v3-settings.yml",
+    show_default=True,
+    help="settings yaml the deck renders with",
+)
+@click.option("--formats", "formats_path", default="settings/formats.yml", show_default=True)
+@click.option("--backend", default="settings", show_default=True, help="settings | graft")
+def apply_cmd(proposal_path, patch_of, descr, settings_path, deck_settings, formats_path, backend):
+    """Write the profile, switch the deck, build the patch version."""
+    from . import apply as apply_mod
+
+    cfg = MergeConfig.load(settings_path)
+    doc = report.load_proposal(proposal_path)
+    out = apply_mod.run(
+        doc,
+        cfg,
+        settings_yml=Path(deck_settings),
+        formats_path=Path(formats_path),
+        patch_of=patch_of,
+        descr=descr,
+        backend=backend,
+    )
+    click.echo(f"собрано: {out}")
+
+
 if __name__ == "__main__":
     main()
