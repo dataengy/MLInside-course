@@ -16,7 +16,9 @@ lecture materials, deck generators and the course data library.
 | `settings/` | project SSoT (`config.yml`) + ingest provenance (`files.yml`) + schedule dump (`schedule.yml`) |
 | `integrations/google/sheets/` | Google Sheets client — `connector.py`/`utils.py` hardlinked from pdp, project-owned `auth.py` ([README](integrations/google/sheets/README.md)) |
 | `src/schedule/` | course schedule sheet → `settings/schedule.yml` → `content/presentations.yml` |
+| `src/course/` | правила продакшена как код: план блоков записи ≤25 мин (`just preza-blocks`) + статус для SessionStart-хука (`just course-status`) |
 | `docs/reviews/` | per-deck review reports from `/preza-review` |
+| `docs/course-rules.md`, `docs/course-qa.md` | правила подготовки и записи лекций от менеджера курса + журнал Q&A / открытые вопросы (скаляры — `settings/config.yml → course_production`) |
 | `homework/` | authored course assignments — submodule [hnkovr/mlinside-hw-olist](https://github.com/hnkovr/mlinside-hw-olist) |
 | `scripts/` | repo ops — `secrets-sync.sh` (Bitwarden ⇄ `.env.secrets` ⇄ git-secret, [runbook](docs/secrets-sync.md)) |
 
@@ -31,6 +33,8 @@ just airflow-build   # Apache Airflow lecture deck
 just preza-validate-all         # schema + slide-count + provenance gate for all DE-tool decks
 just preza-review <content>     # score a deck against its lecture's accents + the DE-tool outline
 just preza-review-all           # …every deck mapped in content/presentations.yml
+just preza-blocks <content>     # план блоков записи (паузы под монтаж ≤25 мин): покрытие слайдов + оценка минут
+just course-status              # дедлайн записи, деки без плана блоков, открытые вопросы менеджеру (docs/course-qa.md)
 just preza-import-pptx <pptx>   # import a foreign .pptx → content/imported/ so it can be reviewed
 just gsheet-tabs                # smoke-test Sheets auth (tab names of the schedule sheet)
 just gsheet-dump                # schedule sheet → settings/schedule.yml (verbatim)
