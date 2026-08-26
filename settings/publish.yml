@@ -8,6 +8,11 @@ telegram:
   kind: milestone
   max_upload_mb: 49            # pre-flight guard under tg-send-file.sh's hard 50MB cap
   chat: null                   # null → ~/.ai deck-publish.yml default (MLInside topic 118)
+  # Stop-хук scripts/hooks/deck-publish-auto-send.sh: отправлять новую версию деки в конце
+  # хода, без явной команды. Публикатор берёт только новейшую версию (промежуточные билды
+  # одного хода пропускаются), курсор держит «одна версия — одна отправка».
+  # false → лента снова полностью явная (just publish-new --only tg).
+  auto_send: true
   thread: null
 
 drive:

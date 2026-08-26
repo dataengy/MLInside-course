@@ -41,6 +41,18 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/hooks/deck-publish-auto-send.sh",
+            "timeout": 180,
+            "statusMessage": "Sending new deck versions to Telegram"
+          }
+        ]
+      }
     ]
   }
 }
