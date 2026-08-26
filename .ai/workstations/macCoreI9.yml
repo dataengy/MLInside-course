@@ -1,0 +1,37 @@
+workstation: macCoreI9
+user: nk.myg
+os: Darwin 23.4.0
+updated: 2026-08-26T18:00:55Z
+repo:
+  path: /Users/nk.myg/github/@dataengy/MLInside-course
+  origin: https://github.com/dataengy/MLInside-course.git
+  default_branch: main
+  branch: feat/preza-merge
+  head: bf6bbae
+  ahead: 0
+  behind: 0
+  dirty: 0
+  untracked: 1
+  worktrees:
+    - {path: "~/github/@dataengy/MLInside-course/.claude/worktrees/course-rules-session", branch: "[worktree-course-rules-session]"}
+  unpushed_branches:
+    - {branch: worktree-course-rules-session, state: no-upstream}
+sessions:  # from ~/.claude/history.jsonl, presence of work — resume ids only
+  - {id: f04f1053-0db7-4db1-bd55-1aee4e815db8, last: "2026-08-26 21:54", clean_end: false, last_cmd: "[Pasted text #6 +5 lines]"}
+  - {id: 890cc998-1985-4946-b5a2-735b52bd316a, last: "2026-08-26 21:53", clean_end: false, last_cmd: "[Pasted text #3 +7 lines]"}
+  - {id: 91a04dbe-f4d0-4ee8-bd43-8e5d0207ff26, last: "2026-08-26 21:52", clean_end: false, last_cmd: "go on"}
+  - {id: 4cf23c69-2d96-4623-9278-6b7a8ede4b2e, last: "2026-08-26 20:36", clean_end: false, last_cmd: "[Pasted text #2 +8 lines]"}
+  - {id: b2b90471-6893-4cff-aa05-2b210eb579ea, last: "2026-08-26 20:21", clean_end: false, last_cmd: "[Pasted text #1 +12 lines]"}
+  - {id: d925286e-901d-4bad-912b-2ae4885126da, last: "2026-08-26 20:18", clean_end: false, last_cmd: "/compact-safely"}
+  - {id: 4d1be80c-ac8c-4aec-88e9-f6f6be65c463, last: "2026-08-25 03:17", clean_end: false, last_cmd: "go on"}
+  - {id: 4799c760-b6b0-4ccc-949e-812496c66834, last: "2026-08-24 16:29", clean_end: false, last_cmd: "/install-github-app"}
+secret_files:  # presence only — values never leave the machine except via bw / git-secret lanes
+  - {path: settings/.env.secrets, present: true, mode: "600"}
+  - {path: settings/.env.secrets.secret, present: true, mode: "644"}
+  - {path: settings/.env.secrets.template, present: true, mode: "644"}
+tools:
+  python3: 3.13.0
+  uv: 0.10.3
+  just: 1.46.0
+  gh: 2.71.0
+  claude: 2.1.246
