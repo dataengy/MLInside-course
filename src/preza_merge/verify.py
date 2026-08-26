@@ -17,8 +17,8 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .diff import compare
-from .model import Deck
+from .diff import _GEOM_ATTRS, compare
+from .model import Deck, Slide
 from .rules import MergeConfig
 
 _MATERIALS_MARK = "📚"
@@ -40,6 +40,14 @@ class VerifyResult:
 
 def structural(rebuilt: Deck, theirs: Deck, cfg: MergeConfig) -> VerifyResult:
     """Rebuilt-with-profile vs the fork: residual geometry must fit the tolerances."""
+    # Fail-loud: a tolerance missing for one of diff._GEOM_ATTRS must not silently disable
+    # that dimension's check — it must stop verification with a name-the-key error instead.
+    missing = [attr for attr in _GEOM_ATTRS if attr not in cfg.tolerances]
+    if missing:
+        raise KeyError(
+            f"settings/merge.yml: merge.tolerances missing {missing} — every attribute in "
+            f"diff._GEOM_ATTRS must have a configured tolerance, add {missing} there"
+        )
     rep = compare(rebuilt, theirs)
     res = VerifyResult(ok=True)
     res.lines.append(
@@ -48,9 +56,7 @@ def structural(rebuilt: Deck, theirs: Deck, cfg: MergeConfig) -> VerifyResult:
     )
     for sd in rep.slides:
         for change in sd.geometry:
-            tol = cfg.tolerances.get(change.attr)
-            if tol is None:
-                continue
+            tol = cfg.tolerances[change.attr]
             if abs(change.delta) > tol:
                 res.ok = False
                 res.mismatches.append(
@@ -82,18 +88,40 @@ def _notes(deck: Deck) -> int:
     return sum(1 for s in deck.slides if s.notes.strip())
 
 
+def _texts(slide: Slide, *, upcase_title: bool) -> list[str]:
+    """Every shape's text, in order. On the title slide (``upcase_title``), the title
+    shape's own text is uppercased first — R7 (rules._r7) may upcase it, and that same
+    text also flows through here via the title placeholder's shape, so the exception has
+    to apply here too or the shape-level check would re-flag what the title check above
+    already tolerates."""
+    out: list[str] = []
+    for sh in slide.shapes:
+        texts = sh.text()
+        if upcase_title and sh.name == slide.shapes_title_name:
+            texts = [t.upper() for t in texts]
+        out.extend(texts)
+    return out
+
+
 def invariants(ours: Deck, merged: Deck) -> VerifyResult:
     """A formatting profile must not change what the deck says."""
     res = VerifyResult(ok=True)
     if len(ours.slides) != len(merged.slides):
         res.ok = False
         res.mismatches.append(f"слайдов: {len(ours.slides)} → {len(merged.slides)}")
-    for a, b in zip(ours.slides, merged.slides):
-        if a.title.upper() != b.title.upper():  # R7 may upcase the title slide
+    for idx, (a, b) in enumerate(zip(ours.slides, merged.slides)):
+        # R7 (rules._r7) upcases ONLY the title slide (base.slides[0]/theirs.slides[0]) —
+        # the case-insensitive exception must stay scoped to slide 1, or a genuine
+        # case-only title change anywhere else would be masked instead of caught.
+        is_title_slide = idx == 0
+        titles_match = (
+            a.title.upper() == b.title.upper() if is_title_slide else a.title == b.title
+        )
+        if not titles_match:
             res.ok = False
             res.mismatches.append(f"слайд {a.n}: заголовок {a.title!r} → {b.title!r}")
-        ta = [t for sh in a.shapes for t in sh.text()]
-        tb = [t for sh in b.shapes for t in sh.text()]
+        ta = _texts(a, upcase_title=is_title_slide)
+        tb = _texts(b, upcase_title=is_title_slide)
         if ta != tb:
             res.ok = False
             res.mismatches.append(f"слайд {a.n}: изменился текст буллетов/панелей")

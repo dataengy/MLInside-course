@@ -1,5 +1,6 @@
 """Verification: residual geometry within tolerance, content invariants exact."""
 
+import dataclasses
 from pathlib import Path
 
 import pytest
@@ -26,7 +27,20 @@ def test_large_residuals_fail_with_a_slide_reference(make_deck, cfg):
     b = model.load(make_deck("b", [("T", ["раз"])], body_width=11.0))
     res = verify.structural(a, b, cfg)
     assert not res.ok
-    assert any("1" in m for m in res.mismatches)
+    # Pin the actual slide reference — "1" alone would also match a digit inside a width
+    # value (e.g. "11.0") and pass for the wrong reason.
+    assert any("слайд 1" in m for m in res.mismatches)
+
+
+def test_structural_requires_a_tolerance_for_every_geometry_attribute(make_deck, cfg):
+    """A tolerances map missing one of diff._GEOM_ATTRS must raise, not silently skip it."""
+    a = model.load(make_deck("a", [("T", ["раз"])], body_width=6.2))
+    b = model.load(make_deck("b", [("T", ["раз"])], body_width=11.0))
+    incomplete = dataclasses.replace(
+        cfg, tolerances={k: v for k, v in cfg.tolerances.items() if k != "width"}
+    )
+    with pytest.raises(KeyError, match="width"):
+        verify.structural(a, b, incomplete)
 
 
 def test_invariants_catch_content_drift(make_deck):
@@ -38,6 +52,19 @@ def test_invariants_catch_content_drift(make_deck):
     bad = verify.invariants(ours, merged_drift)
     assert not bad.ok
     assert any("буллет" in m or "текст" in m for m in bad.mismatches)
+
+
+def test_invariants_allow_uppercase_only_on_the_title_slide(make_deck):
+    """R7 upcases ONLY slide 1 — the same case-only change on any other slide is real drift."""
+    ours = model.load(make_deck("o", [("Алина", ["x"]), ("Бета", ["y"])]))
+    merged_title_upcased = model.load(make_deck("m1", [("АЛИНА", ["x"]), ("Бета", ["y"])]))
+    merged_other_upcased = model.load(make_deck("m2", [("Алина", ["x"]), ("БЕТА", ["y"])]))
+
+    assert verify.invariants(ours, merged_title_upcased).ok
+
+    bad = verify.invariants(ours, merged_other_upcased)
+    assert not bad.ok
+    assert any("слайд 2" in m for m in bad.mismatches)
 
 
 def test_invariants_catch_a_lost_slide(make_deck):
