@@ -95,8 +95,11 @@ presentations:
     - title: 'dbt Core: архитектура, структура проекта, моделирование'
       from: 009-dbt-core-arhitektura-i-proekt
       to: 068-data-vault-i-automatedv
-    - title: 'dbt Core: компиляция, Jinja, материализации, сущности'
+    - title: 'dbt Core: компиляция, DAG и Jinja'
       from: 012-sql-kompilyaciya-obertka-koda
+      to: 076-makrosy-v-proekte
+    - title: 'dbt Core: материализации, сущности, конфиги'
+      from: 017-materializacii
       to: 025-adaptery
     - title: Тестирование, документация, пакеты
       from: 026-testirovanie-dokumentaciya
