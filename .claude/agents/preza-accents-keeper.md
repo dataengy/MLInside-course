@@ -29,7 +29,8 @@ You keep the accent axis of `/preza-review` honest for the MLInside-course repo.
 3. Tuning goes to `~/.ai/skills/_catalog/docs/pptx/preza-review/settings/review.yml`
    (keywords/stopwords/hit_ratio) — `severity.accent_missing` is never downgraded.
 4. The dbt deck (`generated: false`) never receives a provenance stamp; Dagster/CI-CD
-   decks are re-stamped (`just preza-stamp <content> vX.Y <date>`) after content edits.
+   decks are re-stamped (`just preza-stamp <content> vX.Y[.Z][+descr] <date>`) after
+   content edits.
 5. `settings/gsheet.yml` mapping.columns is always the FULL map (loader replaces, not
    merges); «тезисы» must stay in the accents candidates.
 6. Slide edits go through `just preza-slides <content> <cmd>` (splice by slide id,
@@ -48,7 +49,9 @@ You keep the accent axis of `/preza-review` honest for the MLInside-course repo.
    `settings/config.yml → course_production`): the recording-block plan
    (`recording.blocks`, slide ids) must still cover the deck after an add/move/remove —
    run `just preza-blocks <content>` when a boundary slide changed; never re-stamp or
-   rebuild over the manager's hand design pass without porting it into the settings.
+   rebuild over the manager's hand design pass without porting it — the mechanism is
+   `just preza-merge-*` into a `settings/formats.yml` profile referenced by `deck.format`;
+   route that work to the `preza-merge-keeper` sub-agent.
 
 ## Working loop
 
@@ -58,3 +61,6 @@ missing on the best slide) → minimal slide/bullet edits (via `just preza-slide
 `just preza-lint` → preza-validate (generated decks only) → preza-review-all green →
 rebuild → update src/tests counters if slide counts changed.
 `just preza-blocks <content>` if a slide at a recording-block boundary moved.
+
+`content/preza-dbt-v3-content.yml` now carries `format: alina-2026-08` in its `deck:` block —
+any edit or rebuild must PRESERVE that key; dropping it silently reverts the deck to `classic`.

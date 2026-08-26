@@ -39,10 +39,15 @@ MLInside-course repo. Tracker: GitHub Issues only (Jira forbidden here) —
    the tool errors otherwise. A block over `lecture.block_max_min` is a warning: split it or
    note the agreement with the editor; `--strict` for gating.
 5. **The manager's design pass is the last word on layout** (`design.template_final`),
-   but our decks are built from YAML: her hand-edits to a `.pptx` must be ported into
-   `content/build_deck_v3-settings.yml` / the renderer (or ingested into `data/decks/` as
-   the reference), never left only in her file — otherwise the next build silently reverts
-   them. Keep that as an open question until proven ported.
+   but our decks are built from YAML: her hand-edits to a `.pptx` are ported through the
+   merge lane (`just preza-merge-{propose,apply,verify}`, spec
+   [docs/preza-merge-lane.md](../../docs/preza-merge-lane.md)) into a NAMED PROFILE in
+   `settings/formats.yml`, selected per-deck by `deck.format` in the deck's content YAML —
+   never into the shared `content/build_deck_v3-settings.yml`, and never left only in her
+   `.pptx` — otherwise the next `just build` silently reverts them. Route this porting work
+   to the `preza-merge-keeper` sub-agent. Status: the dbt deck is done
+   (`format: alina-2026-08`, built as `v3.19.1+alina-fmt`); the Dagster fork is still not
+   downloaded from the chat (open — [#9](https://github.com/dataengy/MLInside-course/issues/9)).
 6. **Recording rules are not ours to relax**: no self-splicing (send raw pieces), pauses
    between blocks, test clip before the first lecture, light plain background, no window in
    frame. They are in the rules doc verbatim; do not paraphrase them into something softer.
