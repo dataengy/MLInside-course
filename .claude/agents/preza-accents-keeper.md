@@ -49,6 +49,11 @@ You keep the accent axis of `/preza-review` honest for the MLInside-course repo.
    (`recording.blocks`, slide ids) must still cover the deck after an add/move/remove —
    run `just preza-blocks <content>` when a boundary slide changed; never re-stamp or
    rebuild over the manager's hand design pass without porting it into the settings.
+10. Decks listed in `settings/config.yml → deck_generation.editing_excluded` are NOT ours
+   to edit — another lecturer owns that subject's content (Apache Airflow → Влад Бояджи).
+   Read them freely (review, accents diagnosis, block plans, publishing); never patch
+   their slides, not through `just preza-slides` (it refuses) and not with a direct file
+   edit either. A missing accent there is a REPORT to the owner, not a patch.
 
 ## Working loop
 
