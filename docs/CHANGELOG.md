@@ -65,6 +65,24 @@ Canonical project changelog (finalize-issue passes migrate shipped work here).
 - Тесты `src/tests/test_editing_excluded.py` (+5 → 285 passed, 4 skipped): список
   содержит деку, пути в нём существуют (мёртвая запись = молча снятый запрет), запись
   отбивается, свои деки правятся, битые настройки не открывают запрет.
+## 2026-08-26 — Глоссарий проекта, лента напоминаний и её тесты ([#16](https://github.com/dataengy/MLInside-course/issues/16))
+
+- **Глоссарий** `.ai/AI-glossary.{ru,en}.md` (новые файлы, 15 терминов сессии, порядок
+  простые → составные): worktree, agent-lock, общее дерево, fail-open hook, fail-loud settings,
+  блок записи, `recording.blocks`, `course_production`, дизайн-пасс, форк деки, тест-клип,
+  склейка, MAX_PROJECTS_LIMIT_REACHED, ключ напоминания, снимок keep-листа. Записан через
+  `/update-terms-glossaries`; кросс-языковые ссылки переписаны на `AI-glossary.<lang>.md#anchor`
+  (писатель рендерит их внутрифайловыми, и `verify-anchors` считал их битыми) — теперь оба
+  файла проходят проверку якорей.
+- **Лента напоминаний**: `settings/reminders.yml` (9 напоминаний под дедлайн 2026-08-31) +
+  `src/course/reminders.py` (разбор, план-diff, рендер — без сети) +
+  `scripts/todoist/upsert_reminders.py` (HTTP-клиент и CLI) + `just course-reminders[-apply]`.
+  Идемпотентность по строке `key: <key>` в описании задачи: матч по ключу, а не по тексту, —
+  переименованная руками задача не дублируется; свои лейблы лента не снимает; задача, созданная
+  до ленты, принимается полем `adopt:`.
+- **Тесты** `src/tests/test_course_reminders.py` (+14 → 294 passed): разбор и fail-loud спека,
+  create/ok/update по каждому дрейфующему полю, «только добавляем лейблы», матч по ключу при
+  переименовании, adopt по id, пины живого `settings/reminders.yml`.
 
 ## 2026-08-26 — Изоляция параллельных сессий: worktree по умолчанию, shared-tree-guard, session-lock ([#14](https://github.com/dataengy/MLInside-course/issues/14))
 

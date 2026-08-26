@@ -1,0 +1,125 @@
+# ── settings/reminders.yml — напоминания курса в Todoist (src/course/reminders.py) ────────
+# Данные ленты: что напоминать, когда и с каким приоритетом. Мутирующий вход —
+# `just course-reminders-apply` (scripts/todoist/upsert_reminders.py); без --apply — план.
+# Spec: docs/course-rules.md#напоминания. Правила и сроки — settings/config.yml → course_production.
+#
+# Идемпотентность: в описании задачи пишется строка `key: <key>`; повторный прогон находит
+# задачу по ней и синхронизирует срок/приоритет/лейблы/текст вместо создания дубля
+# (см. глоссарий: .ai/AI-glossary.ru.md#ключ-напоминания). Задачу можно переименовать руками.
+#
+# priority: 4=срочный (p1 в UI) · 3=очень высокий · 2=высокий · 1=обычный.
+# Проекты Todoist: free-тариф ограничен 8 активными (см. AI-glossary.en.md#max_projects_limit_reached);
+# ёмкость и слияния — `just -f ~/.ai/skills/_scripts/tasks/todoist/Justfile projects-capacity`.
+
+projects:
+  mlinside: 6hMWcRPhHrC8Jqhx      # проект «MLInside» (создан 2026-08-26)
+  sys: 6gvqjhf4FQcPMc3c           # проект «sys» — инструментальные баги ~/.ai
+
+issue_url: https://github.com/dataengy/MLInside-course/issues/
+
+reminders:
+  - key: mlinside-reply-alina
+    project: mlinside
+    adopt: 6hMVWW78RWgM8w2F       # задача создана до появления ленты — принять по id, не дублировать
+    content: "MLInside: ответить Алине — баллы ДЗ (#13), тест-запись, дата записи dbt; записать лекции до 2026-08-31 (#10)"
+    due: 2026-08-26
+    priority: 4
+    labels: [mlinside, course]
+    description: |
+      Кому: Алина Веденская, @alina_3V (менеджер курса), чат MLInside.
+      Черновики ответов — под чекбоксами в docs/course-qa.md (раздел «Открытые вопросы»).
+      Issues: {issues}13 · {issues}10
+
+  - key: mlinside-test-clip
+    project: mlinside
+    content: "MLInside: пробная запись 1–2 мин (лицо + экран + звук) → Алине для монтажёра (#10)"
+    due: 2026-08-26
+    priority: 4
+    labels: [mlinside, course, recording]
+    description: |
+      Гейт всей записи: без ок монтажёра лекции не пишем.
+      - [ ] установить ПО по инструкции (course_production.recording.software_guide)
+      - [ ] светлый однотонный фон, без окна в кадре
+      - [ ] снять 1–2 мин и отправить Алине
+      {issues}10
+
+  - key: mlinside-record-dbt
+    project: mlinside
+    content: "MLInside: записать лекцию 4 (dbt) — 6 блоков с паузами, без склеек (#10)"
+    due: 2026-08-28
+    priority: 4
+    labels: [mlinside, course, recording]
+    description: |
+      План блоков: just preza-blocks content/preza-dbt-v3-content.yml (70 сл. ≈ 91 мин).
+      Пауза между блоками; кусочки слать как есть — монтажёр соберёт сам.
+      Формат Алины уже в генераторе (#8 закрыт, v3.19.1+alina-fmt) — перед записью издать
+      финал (just publish-new) и получить её последний дизайн-пасс.
+      {issues}10
+
+  - key: mlinside-deck-screens
+    project: mlinside
+    content: "MLInside: dbt-дека — решить про скрины Airflow/Dagster на слайдах 036/037 (#12)"
+    due: 2026-08-28
+    priority: 1
+    labels: [mlinside, course, deck]
+    description: |
+      Обещано в чате «пару картинок»; сейчас там текст/код. Либо скрины через picstore, либо
+      снять обещание. {issues}12
+
+  - key: mlinside-alina-format-merge
+    project: mlinside
+    content: "MLInside: скачать форк Dagster-деки v1.4 от Алины и слить формат в генератор (#9)"
+    due: 2026-08-29
+    priority: 3
+    labels: [mlinside, course, deck]
+    description: |
+      dbt-часть закрыта (#8: профиль alina-2026-08, сборка v3.19.1+alina-fmt). Остался форк
+      Dagster v1.4: он ещё не скачан из чата — без него правки живут только в её pptx и
+      умирают на следующем build.
+      Лента: just preza-merge-propose → accept → apply → verify (docs/preza-merge-lane.md),
+      агент preza-merge-keeper. Блокирует запись лекции 6. {issues}9
+
+  - key: mlinside-cicd-blocks
+    project: mlinside
+    content: "MLInside: CI/CD-дека (лекция 8) — план блоков записи + черновик Алине и Владу (#11)"
+    due: 2026-08-29
+    priority: 2
+    labels: [mlinside, course, deck]
+    description: |
+      Единственная дека без recording.blocks — хук course-production-status напоминает каждую
+      сессию. Согласовать с Владом разделение блоков и спикеров. {issues}11
+
+  - key: mlinside-hw-grading
+    project: mlinside
+    content: "MLInside: ДЗ — переписать критерии с баллов на уровни, если баллы не нужны (#13)"
+    due: 2026-08-29
+    priority: 2
+    labels: [mlinside, course, homework]
+    description: |
+      Условная: только если решение по #13 — отказаться от баллов. Тогда: слайды
+      050-dz-kriterii-ocenki (dbt) и 049-dz-kriterii-ocenki (Dagster) через just preza-slides,
+      плюс homework/mlinside-hw-olist/docs/HW1-dbt.md и HW2-dagster.md; пересобрать деки,
+      just preza-review. Скаляр course_production.homework.grading_scale: open → points|levels.
+      {issues}13
+
+  - key: mlinside-record-dagster
+    project: mlinside
+    content: "MLInside: записать лекцию 6 (Dagster) — 4 блока (#10)"
+    due: 2026-08-30
+    priority: 4
+    labels: [mlinside, course, recording]
+    description: |
+      План блоков: just preza-blocks content/preza-dagster-content.yml (49 сл. ≈ 63.7 мин).
+      Дека v1.4 «сыровата» — доработать и отдать Алине на дизайн-пасс до записи. {issues}10
+
+  - key: ai-tooling-bugs
+    project: sys
+    content: "~/.ai: pre-commit-check.sh обрывается на WARN github.com; todoist upsert/create-project (hnkovr/.ai#19, #20)"
+    due: 2026-09-02
+    priority: 1
+    labels: [sys, tooling]
+    description: |
+      https://github.com/hnkovr/.ai/issues/19 — WARN про github.com завершает прогон,
+      остальные проверки не выполняются.
+      https://github.com/hnkovr/.ai/issues/20 — upsert.py падает при PROJECT=,
+      create-project не объясняет лимит проектов.

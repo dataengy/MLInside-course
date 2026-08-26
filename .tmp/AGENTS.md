@@ -15,6 +15,8 @@
   LibreOffice, и не подменяет Corbel/Consolas шрифтами Quick Look.
 - Правки контента по id слайда — `just preza-slides <content> …` (`scripts/preza/edit_slides.py`,
   мутирующий, поэтому живёт в `scripts/`, а не здесь).
+- Напоминания в Todoist — `just course-reminders[-apply]` (`scripts/todoist/upsert_reminders.py`,
+  пишет во внешний сервис → тоже `scripts/`; чистая логика плана — `src/course/reminders.py`).
 - Продовый генератор — сабмодуль `src/preza_gen/`; курсной контент и настройки —
   `content/{preza-dbt-v3-content,build_deck_v3-settings}.yml`. Эти скрипты — вокруг пайплайна
   (QA), не вместо него.

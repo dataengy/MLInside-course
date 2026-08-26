@@ -161,6 +161,36 @@ CI/CD + мониторинг (лекция 8, совместно с Владом
 | Пробная запись | не сделана |
 | Ответ про баллы ДЗ | не дан — [#13 — ДЗ: балльная система](https://github.com/dataengy/MLInside-course/issues/13) |
 
+## Напоминания
+
+Открытые вопросы и сроки продублированы задачами в Todoist (проект «MLInside»), чтобы дедлайн
+менеджера не жил только в доке. Источник — [`settings/reminders.yml`](../settings/reminders.yml)
+(что напоминать, срок, приоритет, лейблы, текст); логика плана — `src/course/reminders.py`,
+мутирующий вход — `scripts/todoist/upsert_reminders.py`:
+
+```bash
+just course-reminders          # план: что создать / что синхронизировать (без записи)
+just course-reminders --list   # что сейчас в проектах ленты
+just course-reminders-apply    # применить
+```
+
+Идемпотентность — по [ключу напоминания](../.ai/AI-glossary.ru.md#ключ-напоминания): в описании
+задачи лежит строка `key: <key>`, повторный прогон находит задачу по ней и выравнивает поля
+вместо создания дубля. Задачу можно переименовать или передвинуть руками; свои лейблы лента не
+снимает. Задача, созданная до появления ленты, принимается полем `adopt: <task_id>`.
+
+Ёмкость проектов Todoist (free-тариф — 8 активных, Inbox включительно) —
+`just -f ~/.ai/skills/_scripts/tasks/todoist/Justfile projects-capacity`; при 8/8 создание нового
+проекта отвечает [MAX_PROJECTS_LIMIT_REACHED](../.ai/AI-glossary.en.md#max_projects_limit_reached).
+
+## Термины
+
+Термины этой ленты (блок записи, дизайн-пасс, тест-клип, склейка, форк деки, `course_production`,
+`recording.blocks`) определены в глоссарии проекта:
+[`.ai/AI-glossary.ru.md`](../.ai/AI-glossary.ru.md) (русские и русифицированные) и
+[`.ai/AI-glossary.en.md`](../.ai/AI-glossary.en.md) (англоязычные/инфра). Пополнение —
+`/add-terms-to-glossary`.
+
 ## Как обновлять
 
 Новые договорённости из чата → `course_production` (скаляры) → этот файл (нарратив) →

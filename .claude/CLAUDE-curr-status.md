@@ -77,6 +77,8 @@ R4, R6, R11; `reject`: R7 — капслок титула, вкус, не зап
 `course-production-status.sh`, сабагент `course-production-keeper`, память
 `mlinside_course_production_rules`, кандидат скилла `course-rules-upsert`. Тесты 280 passed.
 
+**Второй проход** ([#16](https://github.com/dataengy/MLInside-course/issues/16)): глоссарий `.ai/AI-glossary.{ru,en}.md` (15 терминов), лента напоминаний `settings/reminders.yml` → `just course-reminders[-apply]` (9 задач в Todoist, идемпотентно по `key:`), тесты +14 → 294 passed. [#7](https://github.com/dataengy/MLInside-course/issues/7) и [#14](https://github.com/dataengy/MLInside-course/issues/14) закрыты.
+
 **Последние 3 задачи:** (1) правила / Q&A / блоки записи — этот раздел; (2) моделирование,
 MV/стриминг/права в dbt-деке 62→70 сл., `preza-lint` / `preza-slides` (2026-08-25);
 (3) транзиентные ретраи Google в publisher (2026-08-25).

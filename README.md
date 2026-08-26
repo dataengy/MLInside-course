@@ -17,6 +17,8 @@ lecture materials, deck generators and the course data library.
 | `integrations/google/sheets/` | Google Sheets client — `connector.py`/`utils.py` hardlinked from pdp, project-owned `auth.py` ([README](integrations/google/sheets/README.md)) |
 | `src/schedule/` | course schedule sheet → `settings/schedule.yml` → `content/presentations.yml` |
 | `src/course/` | правила продакшена как код: план блоков записи ≤25 мин (`just preza-blocks`) + статус для SessionStart-хука (`just course-status`) |
+| `settings/reminders.yml` + `scripts/todoist/` | напоминания курса в Todoist (`just course-reminders[-apply]`), идемпотентно по `key:` в описании задачи |
+| `.ai/AI-glossary.{ru,en}.md` | глоссарий проекта — термины лент курса, дек и сессий |
 | `docs/reviews/` | per-deck review reports from `/preza-review` |
 | `docs/course-rules.md`, `docs/course-qa.md` | правила подготовки и записи лекций от менеджера курса + журнал Q&A / открытые вопросы (скаляры — `settings/config.yml → course_production`) |
 | `homework/` | authored course assignments — submodule [hnkovr/mlinside-hw-olist](https://github.com/hnkovr/mlinside-hw-olist) |
@@ -35,6 +37,7 @@ just preza-review <content>     # score a deck against its lecture's accents + t
 just preza-review-all           # …every deck mapped in content/presentations.yml
 just preza-blocks <content>     # план блоков записи (паузы под монтаж ≤25 мин): покрытие слайдов + оценка минут
 just course-status              # дедлайн записи, деки без плана блоков, открытые вопросы менеджеру (docs/course-qa.md)
+just course-reminders          # план напоминаний в Todoist (--apply чтобы применить, --list чтобы посмотреть)
 just preza-import-pptx <pptx>   # import a foreign .pptx → content/imported/ so it can be reviewed
 just gsheet-tabs                # smoke-test Sheets auth (tab names of the schedule sheet)
 just gsheet-dump                # schedule sheet → settings/schedule.yml (verbatim)

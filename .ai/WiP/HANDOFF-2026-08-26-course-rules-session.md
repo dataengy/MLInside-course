@@ -45,6 +45,27 @@ Resume: `cd /Users/nk.myg/github/@dataengy/MLInside-course/.claude/worktrees/cou
 6. **Хук `course-production-status` в общем checkout** появится там только после merge `main` в их ветку / переключения на `main`.
 7. `pre-commit-check.sh` не чинил (hnkovr/.ai#19) — эквивалент проверок гонял вручную.
 
+## Второй проход (после первого снимка) — глоссарий, напоминания, закрытые issues
+
+- Закрыты: [#7](https://github.com/dataengy/MLInside-course/issues/7) (правила продакшена) и [#14](https://github.com/dataengy/MLInside-course/issues/14) (изоляция сессий) — весь скоуп в `main`.
+- Открыт [#16](https://github.com/dataengy/MLInside-course/issues/16) — глоссарий + лента напоминаний; сделано в нём же:
+  - `.ai/AI-glossary.{ru,en}.md` — 15 терминов сессии (порядок простые → составные, якоря OK);
+  - `settings/reminders.yml` + `src/course/reminders.py` + `scripts/todoist/upsert_reminders.py`
+    + `just course-reminders[-apply]` — 9 напоминаний, идемпотентно по `key:` в описании задачи;
+  - `src/tests/test_course_reminders.py` (+14 → **294 passed, 4 skipped**);
+  - доки: «Напоминания» и «Термины» в `docs/course-rules.md`, README, `.tmp/AGENTS.md`, CHANGELOG;
+  - агент `course-production-keeper` — инварианты 9 (зеркалить сроки в напоминания) и 10 (глоссарий).
+- Todoist: проект «MLInside» `6hMWcRPhHrC8Jqhx`; 9 напоминаний применены, повторный прогон — `0/0/9`.
+  Владелец слил `tg_events_week_digest`→`tg-events-parser` и `pdp-personal`→`PDP` (7/8 проектов).
+
+### Не сделано во втором проходе
+1. `just lint` красный на `src/orchestration/*` (I001, 2 ошибки, коммит `7089812`) — файлы чужой
+   ленты, не трогал; чинится `ruff check --fix src/orchestration`.
+2. Кандидаты скиллов в `~/.ai` (`session-isolate-worktree-or-lock`, `todoist-projects-capacity`,
+   `course-rules-upsert`) не промоутированы в каталог — только через `/create-skill`, отдельным решением.
+3. Компакция контекста в этой сессии так и не запускается: `/compact` из терминала приходит
+   обычным сообщением (5 попыток, одно- и многострочные). Заведён драфт фидбека.
+
 ## Согласованные решения (не переспрашивать)
 
 - Трекер репо — только GitHub Issues; коммиты `(#N)`; «JT» здесь = GH Issue.

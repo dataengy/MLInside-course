@@ -57,6 +57,15 @@ MLInside-course repo. Tracker: GitHub Issues only (Jira forbidden here) —
 8. **Contacts** go to `participants` in `settings/config.yml` (name in both alphabets,
    role as the manager phrased it, Telegram handle) and to the memory
    `project_mlinside_course.md`; never to code.
+9. **Deadlines and open questions are mirrored as reminders.** Every date the manager
+   sets and every open question gets a row in `settings/reminders.yml`; apply with
+   `just course-reminders-apply` (idempotent by the `key:` line in the task description —
+   never create tracker tasks ad hoc, they duplicate). Removing a row does NOT delete the
+   task: close it in the tracker yourself.
+10. **New vocabulary goes to the glossary**, not into prose only: `/add-terms-to-glossary`
+    writes `.ai/AI-glossary.{ru,en}.md` (RU/russified in the ru file, EN/infra in the en
+    file, simple → composite order). Cross-file references must carry the file prefix —
+    the writer emits bare `#anchor` and `verify-anchors` then reports it broken.
 
 ## Intake loop (transcript → repo)
 

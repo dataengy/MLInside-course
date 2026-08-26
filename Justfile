@@ -158,6 +158,15 @@ preza-blocks-all *ARGS:
 course-status *ARGS:
     cd {{_dir}} && PYTHONPATH=src python3 -m course status {{ARGS}}
 
+# Напоминания курса в Todoist из settings/reminders.yml (идемпотентно по `key:` в описании).
+# Без --apply — только план. Логика: src/course/reminders.py; вход: scripts/todoist/.
+course-reminders *ARGS:
+    cd {{_dir}} && python3 scripts/todoist/upsert_reminders.py {{ARGS}}
+
+# …применить план (создать недостающие, синхронизировать сроки/приоритеты/текст)
+course-reminders-apply *ARGS:
+    just course-reminders --apply {{ARGS}}
+
 # Build the distribution-ready HSU deck from the reviewed template-native dbt deck.
 dbt-final:
     just -f src/preza_gen/preza_refactoring/Justfile build
