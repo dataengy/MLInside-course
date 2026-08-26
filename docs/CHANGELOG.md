@@ -46,6 +46,26 @@ Canonical project changelog (finalize-issue passes migrate shipped work here).
   70↔70.
 - Пин-тест `test_dbt_deck_uses_the_merged_format_profile` (`src/tests/test_content.py`)
   закрепляет `format_name == "alina-2026-08"`.
+## 2026-08-26 — Изоляция параллельных сессий: worktree по умолчанию, shared-tree-guard, session-lock ([#14](https://github.com/dataengy/MLInside-course/issues/14))
+
+- **Инцидент**: параллельная сессия переключила общий checkout на `feat/preza-merge` между
+  командами — коммит `ac7062c` уехал в чужую ветку (перенесён в `main` cherry-pick'ом
+  `c279719`). Локи (`agent-lock`) от чужого `git checkout` не защищают — только worktree.
+- **Правило**: правки — в нативном worktree (`EnterWorktree`, `.claude/worktrees/`, ветка от
+  `origin/main`, сабмодули `--init --recursive`, базовые тесты); в `main` — `git push origin
+  HEAD:main` после rebase. В общем checkout — только чтение, либо agent-lock + settle-check
+  + `only <пути>`; никаких `git reset`/`checkout`/`stash` там. README, память, кандидат
+  скилла `session-isolate-worktree-or-lock` (глобальный).
+- **Хук** `scripts/hooks/shared-tree-guard.sh` (SessionStart, print-only): worktree или общий
+  checkout, ветка общего checkout ≠ main, число worktree (= параллельные сессии), держатель
+  agent-lock, рекомендация. **session-lock-hooks** включены на уровне проекта
+  (SessionStart `on-start` / SessionEnd `on-end`, те же записи, что ставит
+  `session-lock-hooks.py enable`). `.gitignore`: `.claude/worktrees/`.
+- **Todoist-ёмкость** (~/.ai): `projects_capacity.py` + `projects_policy.yml` +
+  `just projects-capacity / project-archive / project-merge` + SessionStart-строка в
+  `~/.claude/settings.json`; кандидат скилла `todoist-projects-capacity`. Проект «MLInside»
+  создать нельзя (8/8 на free-тарифе) — предложение: архив `Someday/Maybe` (0 задач),
+  слияние `tg_events_week_digest` → `tg-events-parser`, `pdp-personal` → `PDP`.
 
 ## 2026-08-26 — Правила продакшена курса от менеджера: docs, settings, блоки записи ≤25 мин, хук и агент ([#7](https://github.com/dataengy/MLInside-course/issues/7))
 

@@ -94,6 +94,14 @@ MV/стриминг/права в dbt-деке 62→70 сл., `preza-lint` / `pr
 5. Параллельная сессия в этом же дереве (#8, `docs/preza-merge-lane.md`) — её файлы не
    трогать; коммиты только path-scoped.
 
+**Трекеры (2026-08-26, upsert):** GHI [#10](https://github.com/dataengy/MLInside-course/issues/10) запись до 31.08 · [#11](https://github.com/dataengy/MLInside-course/issues/11) CI/CD-дека · [#12](https://github.com/dataengy/MLInside-course/issues/12) скрины 036/037 · [#13](https://github.com/dataengy/MLInside-course/issues/13) баллы ДЗ; #7 — статус + follow-ups; #8 (dbt) / #9 (Dagster) — перенос правок Алины (параллельная сессия). Todoist p1 сегодня: https://todoist.com/app/task/6hMVWW78RWgM8w2F (Inbox, лейблы mlinside/course — лимит проектов Todoist исчерпан). Баги ~/.ai: hnkovr/.ai#19 (pre-commit-check), #20 (todoist upsert/create-project).
+⚠ Общее рабочее дерево переключалось параллельной сессией на `feat/preza-merge` — коммит `ac7062c` уехал туда, в `main` перенесён как `c279719`; дальше коммиты в main — только через временный worktree.
+→ Решено ([#14](https://github.com/dataengy/MLInside-course/issues/14)): сессия работает в нативном worktree
+`.claude/worktrees/course-rules-session` (ветка `worktree-course-rules-session`), в `main` — push
+`HEAD:main` после rebase; хук `shared-tree-guard.sh` + session-lock хуки в `.claude/settings.json`.
+Todoist: 8/8 проектов (free) — предложение архива/слияния в `just -f ~/.ai/…/todoist/Justfile
+projects-capacity`; применять только после вашего «ок».
+
 ## Session 2026-08-19..22 — авторизация решена, публикация ждёт двух внешних условий
 
 **Что оказалось правдой про блокировку консента**: gcloud-клиент режет не только restricted

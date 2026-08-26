@@ -26,6 +26,11 @@ dirty="$(git status --porcelain=v1 2>/dev/null | wc -l | tr -d ' ')"
 drift="$(git submodule status 2>/dev/null | grep -c '^+' || true)"
 [ "${drift:-0}" != "0" ] && say "⚠ $drift submodule(s) drifted from recorded gitlinks"
 
+# Submodules ahead of their upstream: a superproject gitlink that points at an unpushed
+# commit breaks `git clone --recurse-submodules` on another machine. Push them first.
+unpushed="$(git submodule foreach --quiet 'a=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo 0); [ "${a:-0}" != "0" ] && echo "$sm_path(+$a)"' 2>/dev/null | paste -sd" " -)"
+[ -n "$unpushed" ] && say "⚠ submodule(s) ahead of upstream — push them first: $unpushed"
+
 # Secrets lanes (offline checks only)
 if [ -f settings/.env.secrets ]; then
     if [ -f settings/.env.secrets.secret ] && [ settings/.env.secrets -nt settings/.env.secrets.secret ]; then
