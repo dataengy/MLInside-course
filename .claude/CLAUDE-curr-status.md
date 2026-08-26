@@ -1,5 +1,39 @@
 # CLAUDE-curr-status — MLInside-course
 
+## Session 2026-08-26 — репозиторий подготовлен к переезду на MacBook M1
+
+**Что сделано** ([#1](https://github.com/dataengy/MLInside-course/issues/1), скилл
+`prepare-repo-for-new-workstation`): инвентаризация всех копий (1 клон, 2 воркtree, 1 стэш,
+6 сабмодулей) → всё сведено. `main` подтянут до `origin/main` (`git fetch origin main:main`,
+без checkout — дерево общее с параллельной сессией), `feat/preza-merge` получила upstream,
+machine-local стэш (`.superpowers/` в `.gitignore`) стал коммитом, ветка воркtree
+`worktree-course-rules-session` целиком содержится в `origin/main` — терять нечего.
+Все 6 сабмодулей чисты и запушены.
+
+**Три дефекта переезда, найденные и закрытые:**
+1. `secrets-doctor` отчитывался «зелено» при полностью отсутствующей Google-авторизации:
+   кредлы publish-ленты названы в `settings/publish.yml`, а не в `.env.secrets` (там
+   соответствующие переменные пустые), и проверка file-typed секретов их пропускала.
+   Теперь доктор читает пути из `publish.yml` и падает с готовой командой `bw-pull-file`.
+2. Рунбук бутстрапа клонировал репозиторий **до** `brew install git-lfs` — 72 LFS-объекта
+   (~1.2 ГБ дек) приезжали заглушками. Порядок исправлен, добавлены `git lfs pull`,
+   `just sync` и гейт.
+3. Дрейф `settings/.env.secrets` ↔ шаблона (`GOOGLE_OAUTH_TOKEN_CACHE`) — закрыт, блоб
+   git-secret перешифрован и проверен на round-trip (16 имён, все значения пустые).
+
+Добавлен снимок станции `.ai/workstations/macCoreI9.yml` (+ индекс): ветка/HEAD, воркtree'ы,
+id незакрытых сессий под `claude --resume`, наличие файлов секретов без значений.
+
+**Осталось — нужно от человека:** (1) **Bitwarden-хранилище заперто** — эскроу не выполнен;
+`export BW_SESSION=$(bw unlock --raw)` → `just secrets-push`, и главное — два реальных
+кредла вне репозитория (`~/.config/gcloud/application_default_credentials.json`,
+`~/.secrets/google-sa-for-prodamus-1-494316.json`) через `bw-push-file`: без них новая машина
+получит зелёный доктор и мёртвую ленту публикации (команды — `docs/secrets-sync.md`).
+(2) `uv.lock` в `.gitignore` → версии не запинены. (3) `just test` берёт `python3` с `PATH`,
+а не `.venv`; `uv run python -m pytest` зелёный и собирает больше тестов — смена точки входа
+меняет состав гейта, решение владельца.
+
+
 ## Session 2026-08-26 — preza_merge: dbt-дека слита с форком ревьюера → v3.19.1+alina-fmt
 
 **Что сделано** ([#8](https://github.com/dataengy/MLInside-course/issues/8), Task 15 — финальная в плане `2026-08-26-preza-merge`):
