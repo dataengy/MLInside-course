@@ -12,7 +12,9 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-_VER_RE = re.compile(r"_v(\d+)\.(\d+)\.pptx$")
+# Anchored to the .pptx suffix and paired with an exact-stem check. Patch and build tag are
+# optional: "_v3.19.pptx", "_v3.19.1.pptx", "_v3.19.1+alina-fmt.pptx" all parse.
+_VER_RE = re.compile(r"_v(\d+)\.(\d+)(?:\.(\d+))?(?:\+([a-z0-9][a-z0-9._-]*))?\.pptx$")
 
 
 @dataclass(frozen=True)
@@ -23,15 +25,20 @@ class BuiltDeck:
     path: Path
     major: int
     minor: int
+    patch: int
+    descr: str
     sig: str  # "<int mtime>:<size>"
 
     @property
     def version(self) -> str:
         """
-        >>> BuiltDeck("X", Path("X_v3.14.pptx"), 3, 14, "0:0").version
+        >>> BuiltDeck("X", Path("X_v3.14.pptx"), 3, 14, 0, "", "0:0").version
         '3.14'
+        >>> BuiltDeck("X", Path("X_v3.19.1+alina-fmt.pptx"), 3, 19, 1, "alina-fmt", "0:0").version
+        '3.19.1+alina-fmt'
         """
-        return f"{self.major}.{self.minor}"
+        core = f"{self.major}.{self.minor}" + (f".{self.patch}" if self.patch else "")
+        return core + (f"+{self.descr}" if self.descr else "")
 
 
 def sig(path: Path) -> str:
@@ -44,7 +51,8 @@ def find_versions(out_dir: Path, out_name: str) -> list[BuiltDeck]:
     """Every built version of one deck, version-ascending.
 
     The stem must match ``out_name`` exactly: ``MLInside_Dagster`` must not pick up
-    ``MLInside_Dagster-old_v1.1.pptx`` (glob prefix alone would).
+    ``MLInside_Dagster-old_v1.1.pptx`` (glob prefix alone would). Ordering is the numeric
+    triple — the build tag labels a build, it never ranks one.
     """
     found: list[BuiltDeck] = []
     if not out_dir.is_dir():
@@ -53,8 +61,18 @@ def find_versions(out_dir: Path, out_name: str) -> list[BuiltDeck]:
         m = _VER_RE.search(p.name)
         if not m or p.name[: -len(m.group(0))] != out_name:
             continue
-        found.append(BuiltDeck(out_name, p, int(m.group(1)), int(m.group(2)), sig(p)))
-    return sorted(found, key=lambda d: (d.major, d.minor))
+        found.append(
+            BuiltDeck(
+                out_name,
+                p,
+                int(m.group(1)),
+                int(m.group(2)),
+                int(m.group(3) or 0),
+                m.group(4) or "",
+                sig(p),
+            )
+        )
+    return sorted(found, key=lambda d: (d.major, d.minor, d.patch))
 
 
 def newest(out_dir: Path, out_name: str) -> BuiltDeck | None:

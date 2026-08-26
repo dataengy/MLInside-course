@@ -16,7 +16,7 @@ def load():
 
 def test_content_loads():
     cfg, content = load()
-    assert len(content.slides) == 70
+    assert len(content.slides) == 75
     assert content.slides[0].kind == "title"
     assert content.slides[-1].kind == "closing"
     assert cfg.theme.accent == "2419FF"
@@ -29,7 +29,9 @@ def test_code_slides_present():
     # + пакеты в CI, slim CI, SQLMesh поверх dbt − схлопнутый SQLMesh-слайд (2026-08-25)
     # + моделирование/DV, MV в ClickHouse, микробатчинг, стриминг, гранты,
     #   dbt_project_evaluator (2026-08-25)
-    assert sum(1 for s in content.slides if s.code) == 26
+    # + Jinja вглубь: циклы/условия, контекст и отладка, dispatch (2026-08-26)
+    # + «почему другие движки уходят от шаблонов» (2026-08-26)
+    assert sum(1 for s in content.slides if s.code) == 30
     assert all(s.bullets for s in content.slides if s.code)
 
 
@@ -65,3 +67,11 @@ def test_kinds_and_layouts_valid():
 def test_title_has_no_subtitle():
     _, content = load()
     assert content.slides[0].subtitle == ""  # reference-aligned: title-only
+
+
+def test_dbt_deck_uses_the_merged_format_profile():
+    """The dbt deck ships with the reviewer-derived profile (docs/preza-merge-lane.md)."""
+    cfg, _ = load()
+    assert cfg.format_name == "alina-2026-08"
+    assert cfg.fmt.body_font == "inherit"
+    assert cfg.fmt.visual_anchor == "bottom"

@@ -705,6 +705,12 @@ def _mini_content(tmp_path: Path, fmt_name: str) -> Path:
                 "table": {"headers": ["a", "b"], "rows": [["1", "2"]]},
             },
             {"kind": "content", "title": "Только буллеты", "bullets": ["раз", "два"]},
+            {
+                "kind": "content",
+                "title": "Код",
+                "bullets": ["раз"],
+                "code": "select 1\nfrom t",
+            },
         ],
     }
     p = tmp_path / "mini.yml"
@@ -714,7 +720,7 @@ def _mini_content(tmp_path: Path, fmt_name: str) -> Path:
 
 def _build(tmp_path: Path, fmt_name: str) -> Presentation:
     content = _mini_content(tmp_path, fmt_name)
-    out = tmp_path / "out"
+    out = tmp_path / f"out-{fmt_name}"
     out.mkdir(exist_ok=True)
     s = yaml.safe_load(SETTINGS_YML.read_text(encoding="utf-8"))
     s["settings"]["out_dir"] = str(out)
@@ -750,6 +756,19 @@ def test_profile_inherits_bullet_size_and_lowers_tables(tmp_path):
     assert abs(table.top - Inches(fmt.table_top)) < Inches(0.02)
     body = prs.slides[2].placeholders[1]
     assert all(r.font.size is None for p in body.text_frame.paragraphs for r in p.runs)
+
+
+def test_code_panel_border_follows_the_profile(tmp_path):
+    """R11: the manager removed the blue outline — the profile decides, not the renderer."""
+    from pptx.dml.color import RGBColor
+
+    classic = _build(tmp_path, "classic")
+    panel = next(sh for sh in classic.slides[3].shapes if sh.name.startswith("Rounded"))
+    assert panel.line.color.rgb == RGBColor.from_string("2419FF")
+
+    merged = _build(tmp_path, "alina-2026-08")
+    panel = next(sh for sh in merged.slides[3].shapes if sh.name.startswith("Rounded"))
+    assert panel.line.color.rgb == RGBColor.from_string("1A1A1A")  # theme dark, not accent
 
 
 def test_profile_drops_empty_placeholders_and_upcases_the_title(tmp_path):
@@ -854,11 +873,17 @@ def _add_table(slide, table: dict, theme: dict, *, top: float) -> None:
 
 ```python
 def _drop_empty_placeholders(slide) -> None:
-    """Remove layout placeholders left without text (R6) — invisible in show, noisy in XML."""
+    """Remove layout placeholders left without text (R6) — invisible in show, noisy in XML.
+
+    Identity is compared on the XML element: python-pptx builds a NEW proxy object on every
+    ``shapes.title`` access, so ``shape == slide.shapes.title`` cannot be trusted.
+    """
+    title = slide.shapes.title
+    title_el = title._element if title is not None else None
     for shape in list(slide.shapes):
         if not shape.is_placeholder or not shape.has_text_frame:
             continue
-        if shape.shape_type is not None and shape == slide.shapes.title:
+        if shape._element is title_el:
             continue
         if not shape.text_frame.text.strip():
             shape._element.getparent().remove(shape._element)
@@ -2996,7 +3021,8 @@ def propose(deck, base_pptx, ours_pptx, theirs_pptx, base_content_rev, profile, 
     alignment = align.align3(base, ours, theirs)
     findings = rules.detect(base, theirs, fork_diff, cfg)
 
-    stem = cfg.report_dir / f"{Path(ours_pptx).stem}_x_{Path(theirs_pptx).stem}".replace(" ", "_")
+    stem_name = f"{Path(ours_pptx).stem}_x_{Path(theirs_pptx).stem}".replace(" ", "_")
+    stem = cfg.report_dir / stem_name
     md, prop = report.write(
         stem,
         report.ProposalContext(

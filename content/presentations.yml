@@ -76,7 +76,7 @@ presentations:
   - 'Инкрементальные модели: Оптимизация расчетов через обновление только новых данных в ClickHouse.'
   content: content/preza-dbt-v3-content.yml
   out_name: MLInside_Введение-в-dbt
-  slides: 62
+  slides: 75
   visuals: reuse-source
   generated: false
   homework:
@@ -89,27 +89,30 @@ presentations:
   recording:
     lecture_n: 4
     blocks:
-    - title: 'Введение и экосистема'
+    - title: Введение и экосистема
       from: 001-vvedenie-v-dbt
       to: 059-fusion-i-dbt-core-v2
     - title: 'dbt Core: архитектура, структура проекта, моделирование'
       from: 009-dbt-core-arhitektura-i-proekt
       to: 068-data-vault-i-automatedv
-    - title: 'dbt Core: компиляция, Jinja, материализации, сущности'
+    - title: 'dbt Core: компиляция, DAG и Jinja'
       from: 012-sql-kompilyaciya-obertka-koda
+      to: 076-makrosy-v-proekte
+    - title: 'dbt Core: материализации, сущности, конфиги'
+      from: 017-materializacii
       to: 025-adaptery
-    - title: 'Тестирование, документация, пакеты'
+    - title: Тестирование, документация, пакеты
       from: 026-testirovanie-dokumentaciya
       to: 061-pakety-v-ci-i-prode
-    - title: 'Запуск в продакшене'
+    - title: Запуск в продакшене
       from: 034-zapusk-v-prodakshene
       to: 062-slim-ci-state-modified
-    - title: 'Дополнительные возможности + ДЗ'
+    - title: Дополнительные возможности + ДЗ
       from: 041-dopolnitelnye-vozmozhnosti-i
       to: 051-spasibo-za-vnimanie
   published:
-    version: '3.18'
-    slides: 62
+    version: '3.21'
+    slides: 75
     url: null
     drive_file_id: null
     at: null
@@ -165,13 +168,13 @@ presentations:
     - title: 'Контекст: история и настоящее'
       from: 001-sovremennaya-orkestraciya-ml
       to: 007-dagster-segodnya
-    - title: 'Архитектура и сущности'
+    - title: Архитектура и сущности
       from: 008-arhitektura-i-suschnosti
       to: 022-dg-cli-i-components
-    - title: 'Dev/prod режимы и интеграция с dbt'
+    - title: Dev/prod режимы и интеграция с dbt
       from: 023-dev-i-prod-rezhimy
       to: 032-airflow-cosmos-protiv-dagster
-    - title: 'Загрузка данных, CLI/MCP, рынок и будущее + ДЗ'
+    - title: Загрузка данных, CLI/MCP, рынок и будущее + ДЗ
       from: 035-zagruzka-dannyh-cli-i-mcp
       to: 050-spasibo-za-vnimanie
   published:

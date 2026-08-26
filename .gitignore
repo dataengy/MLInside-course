@@ -28,6 +28,9 @@ uv.lock
 .picstore-cache/
 data/images/.picstore/reports/
 
+# preza-merge contact sheets: regenerable per-merge PNG/PDF (--contact-sheet), never source.
+docs/reviews/merge/contact/
+
 # .tmp/ dev-QA artifacts (scripts + docs tracked; generated artifacts ignored)
 .tmp/render/
 .tmp/media/
@@ -51,6 +54,7 @@ src/*.egg-info/
 .claude/skills-canonical/
 .gitsecret/keys/random_seed
 !*.secret
+.superpowers/
 
 # Native Claude Code worktrees (EnterWorktree) — per-session isolation, never committed.
 .claude/worktrees/

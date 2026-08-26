@@ -1,0 +1,56 @@
+# merge.yml — SSoT of the deck merge lane (preza_merge). Spec: docs/preza-merge-lane.md.
+merge:
+  # A change becomes a profile RULE only when it is systematic: at least this share of the
+  # slides that could carry it actually does. Below the threshold it stays a per-slide note.
+  min_share: 0.8
+  # Per-rule overrides of min_share, with the reason each one exists. A rule absent here
+  # uses min_share. These are deliberate, documented exceptions — never lower min_share
+  # itself to make a stubborn rule fire.
+  min_share_overrides:
+    # R4 proposes a CONDITIONAL behaviour: the generator's `adaptive` width widens a column
+    # only where the text clears the visual, which is exactly why the manager widened 27 of
+    # 34 such slides and not all of them. Measured against an unconditional denominator a
+    # conditional rule can never reach 0.8.
+    R4: 0.75
+    # R6 is unconditional, but it is applied BY HAND: the manager removed the empty
+    # placeholder on 5 of 7 eligible slides and missed two section slides.
+    R6: 0.70
+  # Rebuilt-with-the-profile vs the fork: how far a box may sit from where the reviewer put
+  # it by hand before verification calls it a mismatch (inches).
+  #
+  # Measured 2026-08-26 on the real dbt-deck merge, AFTER fixing verify to rebuild with the
+  # proposal's own profile instead of falling back to `classic` (see CHANGELOG) — the flat
+  # 0.4″ that used to sit here was a pre-data guess, not a measurement.
+  tolerances:
+    # left/top/height are edges R2 (visual_bottom) and R3 (table_top) are meant to place
+    # EXACTLY — a large residual there means a rule genuinely did not reproduce the fork, not
+    # that the tolerance was too tight. Evidence: on shapes no rule touches (table left/top)
+    # the residual is pure float/round-trip noise (left max 0.049″, top max 0.084″); on the
+    # shapes R2 does touch (code panels, their caption textboxes, pictures) the residuals
+    # cluster ≤0.41″/≤0.43″/≤0.42″ with a clean gap to the next real value (0.78″ left, 0.48″
+    # top, 0.47″ height) — 0.45″ absorbs that rounding-scale cluster without hiding what sits
+    # above it. What sits above IS real and stays red on purpose: R2 anchors every code panel
+    # to a single `visual_bottom` (7.01″) that approximates the fork's actual 6.66–7.73″
+    # spread, and the generator's own code-shrink (`_fit_code_size`) does not always land the
+    # panel's fitted height where the reviewer's manual fit did — both cascade into top/height
+    # residuals up to ~1.1–1.3″ on a couple dozen slides. Do not raise these further to make
+    # verify pass — see docs/preza-merge-lane.md § Верификация and the CHANGELOG entry for the
+    # slide list; that gap is a real finding for the R2 approximation, not a tuning problem.
+    left: 0.45
+    top: 0.45
+    height: 0.45
+    # width is deliberately the loosest: R4 chooses BINARY between a narrow 6.2″ column and a
+    # full 12.3″ one, while the reviewer hand-tuned every width continuously across 6.2–11.6″.
+    # Measured residual: 28 `Text Placeholder` slides (R4's own target), median 0.99″, max
+    # 5.40″ — that IS the rule's documented approximation gap (see rules.py `_r4` / the
+    # lane spec's "Формализация R4"), not a defect. 5.5″ covers the observed max with margin.
+    width: 5.5
+  # Where reports and proposals land.
+  report_dir: docs/reviews/merge
+  # SessionStart hook: a fork candidate is a deck-named .pptx carrying one of these markers.
+  fork_markers: [" (1)", " (2)", " копия", "-copy", " copy"]
+  fork_search_dir: ~/Downloads
+  # Profile written by `apply` when the proposal does not name one.
+  default_profile: merged
+  # Rendering profile every deck starts from.
+  base_profile: classic

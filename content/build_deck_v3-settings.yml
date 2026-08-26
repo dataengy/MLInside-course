@@ -5,6 +5,7 @@ settings:
   template: data/source/MLinside-шаблон-презентаций.pptx
   media_dir: null
   out_dir: data/generated
+  formats_file: settings/formats.yml
   theme:
     accent: 2419FF
     white: FFFFFF
@@ -23,11 +24,6 @@ settings:
     top: 1.65
     width: 5.5
     height: 5.0
-  # Body bullet sizing (pt by indent level). Bullets-only slides go large to fill the
-  # whitespace; slides with an image/code panel keep a narrower, smaller column.
-  body_font:
-    bullets_only: {0: 26, 1: 21, 2: 18}
-    with_image:   {0: 20, 1: 17, 2: 15}
   # Code panels — dark monospace box (GitHub-dark palette). The renderer fits the height to
   # each snippet; code_box_full is only its maximum safe area, above the footer/logo.
   # size = requested max; long snippets auto-shrink toward min_size so wrapped text never

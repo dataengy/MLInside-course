@@ -165,6 +165,30 @@ dbt-final:
 dbt-final-verify:
     just -f src/preza_gen/preza_refactoring/Justfile verify
 
+# ── слияние версий и форков дек (preza_merge) — docs/preza-merge-lane.md ──
+# Пути (base/ours/theirs/proposal/...) — именованные параметры через {{quote(...)}}: имя
+# форка ревьюера всегда содержит пробел и скобки ("... v3.15 (1).pptx"), а *ARGS их не
+# переживает (just склеивает variadic-аргументы голыми пробелами перед sh -c).
+# Разобрать форк ревьюера против своей ветки: отчёт + предложение с решениями человека.
+preza-merge-propose deck base ours theirs rev *ARGS:
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_merge propose \
+      --deck {{quote(deck)}} --base {{quote(base)}} --ours {{quote(ours)}} \
+      --theirs {{quote(theirs)}} --base-content-rev {{quote(rev)}} {{ARGS}}
+
+# Применить решения: профиль в settings/formats.yml, deck.format, сборка патч-версии.
+preza-merge-apply proposal *ARGS:
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_merge apply {{quote(proposal)}} {{ARGS}}
+
+# Проверить результат: base-контент новым профилем ↔ форк + инвариант мержа.
+preza-merge-verify proposal merged *ARGS:
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_merge verify {{quote(proposal)}} {{quote(merged)}} {{ARGS}}
+
+# propose → (решения) → apply → verify одной командой.
+preza-merge-run deck base ours theirs rev *ARGS:
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_merge run \
+      --deck {{quote(deck)}} --base {{quote(base)}} --ours {{quote(ours)}} \
+      --theirs {{quote(theirs)}} --base-content-rev {{quote(rev)}} {{ARGS}}
+
 # Serve the Prefect pipeline (scan interval + build-and-publish trigger). Needs a running
 # `prefect server start` and the orchestration extra. Publishing obeys config.yml orchestration.publish.
 serve:
