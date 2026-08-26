@@ -16,19 +16,21 @@ def cfg():
 
 
 def test_small_residuals_pass(make_deck, cfg):
-    a = model.load(make_deck("a", [("T", ["раз"])], body_width=6.2))
-    b = model.load(make_deck("b", [("T", ["раз"])], body_width=6.4))  # 0.2" < 0.4" tolerance
+    # `top` is one of the TIGHT attributes (0.45″, see settings/merge.yml) — a real edge R2/R3
+    # are meant to place exactly, unlike `width` which is deliberately loose for R4.
+    a = model.load(make_deck("a", [("T", ["раз"])], body_top=1.0))
+    b = model.load(make_deck("b", [("T", ["раз"])], body_top=1.2))  # 0.2" < 0.45" tolerance
     res = verify.structural(a, b, cfg)
     assert res.ok
 
 
 def test_large_residuals_fail_with_a_slide_reference(make_deck, cfg):
-    a = model.load(make_deck("a", [("T", ["раз"])], body_width=6.2))
-    b = model.load(make_deck("b", [("T", ["раз"])], body_width=11.0))
+    a = model.load(make_deck("a", [("T", ["раз"])], body_top=1.0))
+    b = model.load(make_deck("b", [("T", ["раз"])], body_top=3.0))  # 2.0" > 0.45" tolerance
     res = verify.structural(a, b, cfg)
     assert not res.ok
-    # Pin the actual slide reference — "1" alone would also match a digit inside a width
-    # value (e.g. "11.0") and pass for the wrong reason.
+    # Pin the actual slide reference — "1" alone would also match a digit inside a geometry
+    # value and pass for the wrong reason.
     assert any("слайд 1" in m for m in res.mismatches)
 
 

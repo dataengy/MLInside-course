@@ -30,8 +30,6 @@ def test_r1_fires_when_explicit_sizes_are_cleared(make_deck, cfg):
 
 def test_r1_stays_silent_below_the_share_threshold(make_deck, cfg):
     """One slide out of five is a one-off, not a rule."""
-    from pptx.util import Pt
-
     slides = [(f"S{i}", ["раз"]) for i in range(5)]
     base = model.load(make_deck("b", slides, sizes=20))
     path = make_deck("t", slides, sizes=20)
@@ -310,6 +308,9 @@ def test_r10_regression_when_notes_are_lost(make_deck, cfg):
 
 def test_config_loads_thresholds_from_yaml(cfg):
     assert cfg.min_share == 0.8
-    assert cfg.tolerances["left"] == 0.4
+    # left/top/height are the TIGHT edges (R2/R3 place them exactly); width is deliberately
+    # the loosest — R4 picks BINARY between a narrow and a full column (see settings/merge.yml).
+    assert cfg.tolerances["left"] == cfg.tolerances["top"] == cfg.tolerances["height"] == 0.45
+    assert cfg.tolerances["width"] == 5.5
     assert cfg.min_share_overrides["R4"] == 0.75
     assert cfg.min_share_overrides["R6"] == 0.70

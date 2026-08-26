@@ -37,10 +37,18 @@ def _scratch_settings(deck_settings: Path, tmp_path: Path) -> Path:
     return out
 
 
-def _drop_downloads_dir(content_path: Path) -> None:
-    """Blank a scratch content's downloads_dir so the build cannot hardlink into ~/Downloads."""
+def _prep_scratch_content(content_path: Path, profile: str) -> None:
+    """Blank a scratch content's downloads_dir (no ~/Downloads hardlink) and pin its
+    ``deck.format`` to the profile under verification.
+
+    The historical yaml materialized at ``base_content_rev`` predates the `deck.format` key
+    (it was added by this same merge), so without this, `settings.load` falls back to
+    `classic` and the structural check compares an UNFORMATTED rebuild against the
+    reviewer's FORMATTED fork — every rule-driven geometry change then reads as a mismatch.
+    """
     doc = yaml.safe_load(content_path.read_text(encoding="utf-8"))
     doc["deck"]["downloads_dir"] = None
+    doc["deck"]["format"] = profile
     content_path.write_text(yaml.safe_dump(doc, allow_unicode=True), encoding="utf-8")
 
 
@@ -150,10 +158,13 @@ def verify_cmd(proposal_path, merged_pptx, settings_path, deck_settings, want_sh
         tmp_path = Path(tmp)
         base_content = _content_at_rev(doc["base_content_rev"], doc["deck"], tmp_path / "base.yml")
         # The verification build is scratch: redirect out_dir (and drop the ~/Downloads
-        # hardlink) so it never lands beside the real versions the publisher scans.
+        # hardlink) so it never lands beside the real versions the publisher scans. It must
+        # also carry the profile under test — see _prep_scratch_content.
         scratch_settings = _scratch_settings(Path(deck_settings), tmp_path)
-        _drop_downloads_dir(base_content)
+        _prep_scratch_content(base_content, doc["profile"])
         res = pipeline.build_deck(scratch_settings, base_content, pptx=True)
+        if res.out_path is None:
+            raise SystemExit("сборка не дала .pptx — смотрите вывод build_deck")
         rebuilt = model.load(res.out_path)
         theirs = model.load(doc["theirs_pptx"])
         ours = model.load(doc["ours_pptx"])
@@ -163,7 +174,13 @@ def verify_cmd(proposal_path, merged_pptx, settings_path, deck_settings, want_sh
             verify_mod.invariants(ours, merged)
         )
         if want_sheet:
-            sheet = verify_mod.contact_sheet(Path(merged_pptx), cfg.report_dir / "contact")
+            # Per-merge subdirectory, named after this merge's own report/proposal stem — a
+            # shared `contact/` folder across every merge would mix decks' PNGs together and,
+            # being generated and untracked, would leave the repo permanently dirty.
+            merge_name = Path(proposal_path).name.removesuffix(".proposal.yml")
+            sheet = verify_mod.contact_sheet(
+                Path(merged_pptx), cfg.report_dir / "contact" / merge_name
+            )
             click.echo(f"contact-sheet: {sheet or 'LibreOffice не найден — пропущено'}")
 
     for line in out.lines:

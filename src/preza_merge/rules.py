@@ -214,7 +214,7 @@ def _r4(base: Deck, theirs: Deck, cfg: MergeConfig) -> Finding | None:
 
 def _r6(base: Deck, theirs: Deck, rep: DiffReport, cfg: MergeConfig) -> Finding | None:
     eligible, hit = 0, []
-    for sb, sd in zip(base.slides, rep.slides):
+    for sb, sd in zip(base.slides, rep.slides, strict=False):
         empty = [
             sh.name
             for sh in sb.shapes

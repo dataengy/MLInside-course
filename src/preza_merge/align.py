@@ -36,7 +36,7 @@ def _pairs(base_titles: list[str], other_titles: list[str]) -> dict[int, int]:
     """base index → other index (both 0-based) for slides the matcher considers equal."""
     matcher = difflib.SequenceMatcher(a=base_titles, b=other_titles, autojunk=False)
     out: dict[int, int] = {}
-    for op, i1, i2, j1, j2 in matcher.get_opcodes():
+    for op, i1, i2, j1, _j2 in matcher.get_opcodes():
         if op != "equal":
             continue
         for offset in range(i2 - i1):

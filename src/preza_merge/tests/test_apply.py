@@ -60,6 +60,38 @@ def test_deck_format_replaces_an_existing_value(tmp_path):
     assert yaml.safe_load(content.read_text(encoding="utf-8"))["deck"]["format"] == "merged"
 
 
+def test_deck_format_ignores_a_lookalike_line_inside_a_code_panel(tmp_path):
+    """A Data Engineering deck can plausibly hold `format: parquet` inside a slide's code
+    block — the search must stay bounded to the `deck:` header, above `content:`, or an
+    unscoped regex would silently rewrite the code sample instead."""
+    content = tmp_path / "deck.yml"
+    content.write_text(
+        "deck:\n"
+        "  out_name: X   # keep me\n"
+        "  naming: increment\n"
+        "  version_major: 3\n"
+        "content:\n"
+        "- kind: code\n"
+        "  title: Хранение\n"
+        "  code: |\n"
+        "    df.write.format: parquet\n"
+        "    df.save('/data/out')\n",
+        encoding="utf-8",
+    )
+    before = content.read_text(encoding="utf-8")
+    assert apply.set_deck_format(content, "merged") is True
+    after = content.read_text(encoding="utf-8")
+
+    doc = yaml.safe_load(after)
+    assert doc["deck"]["format"] == "merged"
+    # The code panel's own `format: parquet` line must survive byte-for-byte.
+    assert "df.write.format: parquet" in after
+    # Nothing changed except the inserted `format:` line under `deck:`.
+    assert after == before.replace(
+        "  out_name: X   # keep me\n", "  out_name: X   # keep me\n  format: merged\n"
+    )
+
+
 def test_apply_refuses_while_a_decision_is_missing(tmp_path):
     doc = {
         "proposal": {

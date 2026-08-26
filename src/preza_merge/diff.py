@@ -75,8 +75,8 @@ def _compare_shape(name: str, a: Shape, b: Shape, sd: SlideDiff) -> None:
     sd.paras_before += len([p for p in a.paras if p.runs])
     sd.paras_after += len([p for p in b.paras if p.runs])
 
-    for pa, pb in zip(a.paras, b.paras):
-        for ra, rb in zip(pa.runs, pb.runs):
+    for pa, pb in zip(a.paras, b.paras, strict=False):
+        for ra, rb in zip(pa.runs, pb.runs, strict=False):
             if ra.size is not None and rb.size is None:
                 sd.runs_size_cleared += 1
                 sd.classes.add("font")
@@ -92,7 +92,7 @@ def compare(a: Deck, b: Deck) -> DiffReport:
     slides: list[SlideDiff] = []
     counts: Counter = Counter()
 
-    for sa, sb in zip(a.slides, b.slides):
+    for sa, sb in zip(a.slides, b.slides, strict=False):
         sd = SlideDiff(n=sa.n, title=sa.title)
         na, nb = sa.by_name(), sb.by_name()
         sd.shapes_added = sorted(set(nb) - set(na))

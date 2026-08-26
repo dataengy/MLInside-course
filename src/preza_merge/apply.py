@@ -49,18 +49,33 @@ def set_deck_format(content_path: Path, profile: str) -> bool:
 
     Surgical on purpose: the content yaml is hand-authored (comments, folded notes), so it
     is edited as TEXT rather than round-tripped through a yaml dump.
+
+    Bounded to the ``deck:`` block on purpose: every deck content yaml opens with `deck:`
+    then a top-level `content:` key (verified across content/*.yml), so the text BEFORE
+    `content:` is exactly the deck header. Without this bound, the existing-`format:` regex
+    or the `out_name:` anchor could match text deep inside a slide's code-panel body — e.g. a
+    Data Engineering lecture is entirely likely to carry a line like `format: parquet` inside
+    a fenced code block, which an unscoped regex would silently rewrite.
     """
     path = Path(content_path)
     text = path.read_text(encoding="utf-8")
-    existing = re.search(r"^(\s+)format:\s*\S.*$", text, flags=re.M)
+    content_key = re.search(r"^content:", text, flags=re.M)
+    if not content_key:
+        raise ValueError(f"cannot locate top-level `content:` key in {path}")
+    head, tail = text[: content_key.start()], text[content_key.start() :]
+
+    existing = re.search(r"^(\s+)format:\s*\S.*$", head, flags=re.M)
     if existing:
-        new = re.sub(r"^(\s+)format:\s*\S.*$", rf"\1format: {profile}", text, count=1, flags=re.M)
+        new_head = re.sub(
+            r"^(\s+)format:\s*\S.*$", rf"\1format: {profile}", head, count=1, flags=re.M
+        )
     else:
-        anchor = re.search(r"^(\s+)out_name:.*$", text, flags=re.M)
+        anchor = re.search(r"^(\s+)out_name:.*$", head, flags=re.M)
         if not anchor:
             raise ValueError(f"cannot locate deck.out_name in {path}")
         indent = anchor.group(1)
-        new = text[: anchor.end()] + f"\n{indent}format: {profile}" + text[anchor.end() :]
+        new_head = head[: anchor.end()] + f"\n{indent}format: {profile}" + head[anchor.end() :]
+    new = new_head + tail
     if new == text:
         return False
     path.write_text(new, encoding="utf-8")

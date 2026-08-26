@@ -63,10 +63,20 @@ def structural(rebuilt: Deck, theirs: Deck, cfg: MergeConfig) -> VerifyResult:
                     f"слайд {sd.n} «{sd.title[:40]}»: {change.shape}.{change.attr} "
                     f"{change.before}″ → {change.after}″ (Δ{change.delta:+.2f}″ > {tol}″)"
                 )
-    if rep.counts.get("font"):
+    # Only `runs_size_cleared` is the R1 signal: a run that STILL carries an explicit size in
+    # the rebuild while the fork cleared it — meaning R1 did not fire there. `runs_size_changed`
+    # (both sides sized, but to different values) is R5 territory instead — the spec is explicit
+    # that R5 is NOT a rule: the reviewer shrank code-panel text by hand where she made the panel
+    # shorter, and the generator's own `_fit_code_size` does the same thing independently. Those
+    # slides can never clear and must not fail verification.
+    cleared_slides = [sd for sd in rep.slides if sd.runs_size_cleared]
+    if cleared_slides:
         res.ok = False
+        total = sum(sd.runs_size_cleared for sd in cleared_slides)
+        nums = [sd.n for sd in cleared_slides]
         res.mismatches.append(
-            f"размеры шрифта разошлись на {rep.counts['font']} слайдах — правило R1 не отработало"
+            f"явный кегль не снят у {total} прогонов на {len(nums)} слайдах {nums} — "
+            f"правило R1 не отработало"
         )
     return res
 
@@ -109,7 +119,7 @@ def invariants(ours: Deck, merged: Deck) -> VerifyResult:
     if len(ours.slides) != len(merged.slides):
         res.ok = False
         res.mismatches.append(f"слайдов: {len(ours.slides)} → {len(merged.slides)}")
-    for idx, (a, b) in enumerate(zip(ours.slides, merged.slides)):
+    for idx, (a, b) in enumerate(zip(ours.slides, merged.slides, strict=False)):
         # R7 (rules._r7) upcases ONLY the title slide (base.slides[0]/theirs.slides[0]) —
         # the case-insensitive exception must stay scoped to slide 1, or a genuine
         # case-only title change anywhere else would be masked instead of caught.
