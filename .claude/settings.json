@@ -23,6 +23,12 @@
           },
           {
             "type": "command",
+            "command": "bash scripts/hooks/preza-merge-status.sh",
+            "timeout": 10,
+            "statusMessage": "Checking reviewer deck forks"
+          },
+          {
+            "type": "command",
             "command": "bash scripts/hooks/branch-pr-status.sh",
             "timeout": 10,
             "statusMessage": "Checking branches without PRs"
