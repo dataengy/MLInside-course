@@ -88,6 +88,13 @@ deck_generation:
   provenance:                     # stamped into the FIRST + LAST slide notes
     harness: "Claude Code"
     marker: "— Сгенерировано:"
+  # Деки, которые наши ПРАВЯЩИЕ ленты не трогают: предмет ведёт другой лектор, и его
+  # содержание — его зона. Запрет висит на единственной точке записи контента
+  # (scripts/preza/edit_slides.py::_write), поэтому обойти его случайно нельзя.
+  # ЧИТАЮЩИЕ ленты (preza-review, publish, планы блоков записи, presentations-plan)
+  # деку по-прежнему видят — исключение про правку, а не про существование.
+  editing_excluded:
+    - content/preza-apache-airflow-content.yml   # Apache Airflow — предмет Влада Бояджи
   decks:
     - content/preza-dbt-v3-content.yml
     - content/preza-dagster-content.yml

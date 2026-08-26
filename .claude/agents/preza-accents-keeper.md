@@ -52,6 +52,11 @@ You keep the accent axis of `/preza-review` honest for the MLInside-course repo.
    rebuild over the manager's hand design pass without porting it — the mechanism is
    `just preza-merge-*` into a `settings/formats.yml` profile referenced by `deck.format`;
    route that work to the `preza-merge-keeper` sub-agent.
+10. Decks listed in `settings/config.yml → deck_generation.editing_excluded` are NOT ours
+   to edit — another lecturer owns that subject's content (Apache Airflow → Влад Бояджи).
+   Read them freely (review, accents diagnosis, block plans, publishing); never patch
+   their slides, not through `just preza-slides` (it refuses) and not with a direct file
+   edit either. A missing accent there is a REPORT to the owner, not a patch.
 
 ## Working loop
 

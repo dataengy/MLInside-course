@@ -30,6 +30,29 @@ import click
 import yaml
 
 MARKER = "- kind:"
+SETTINGS = Path(__file__).resolve().parents[2] / "settings" / "config.yml"
+
+
+def _refuse_if_excluded(path: Path) -> None:
+    """Запрет правки деки, чей предмет ведёт другой лектор.
+
+    Список — ``deck_generation.editing_excluded`` в ``settings/config.yml``. Читается
+    fail-loud: нечитаемые настройки НЕ открывают запрет (иначе битый yaml молча снимал бы
+    защиту). Проверка стоит на единственной точке записи, поэтому её нельзя обойти,
+    выбрав другую команду; ``list``/``extract`` (чтение) продолжают работать.
+    """
+    try:
+        doc = yaml.safe_load(SETTINGS.read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError) as exc:
+        raise click.ClickException(f"не читаются настройки {SETTINGS}: {exc}") from exc
+    excluded = (doc.get("deck_generation") or {}).get("editing_excluded") or []
+    root = SETTINGS.parent.parent
+    if any(path.resolve() == (root / str(e)).resolve() for e in excluded):
+        raise click.ClickException(
+            f"{path} — вне нашей зоны правки: предмет ведёт другой лектор "
+            "(settings/config.yml → deck_generation.editing_excluded). "
+            "Читать (list/extract) можно; чтобы править — сначала снять деку из списка."
+        )
 
 
 def _split(text: str) -> tuple[str, list[str]]:
@@ -64,7 +87,8 @@ def _index(blocks: list[str], slide_id: str) -> int:
 
 
 def _write(path: Path, head: str, blocks: list[str]) -> None:
-    """Записать, предварительно проверив YAML и уникальность id."""
+    """Записать, предварительно проверив право на правку, YAML и уникальность id."""
+    _refuse_if_excluded(path)
     text = head + "".join(blocks)
     try:
         doc = yaml.safe_load(text)
