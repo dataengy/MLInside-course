@@ -1,7 +1,7 @@
-# HANDOFF 2026-08-26 — dbt-дека: Jinja вглубь, SWOT-задача впереди
+# HANDOFF 2026-08-26 — dbt-дека: Jinja, SWOT, автоотправка в TG
 
-Снимок KEEP-списка перед компакцией. Полное состояние — на диске и в git; саммари
-сохраняет только упоминания файлов, поэтому всё существенное продублировано здесь.
+Снимок KEEP-списка перед компакцией (обновлён). Полное состояние — на диске и в git;
+саммари сохраняет только упоминания файлов, поэтому существенное продублировано здесь.
 
 ## Resume
 
@@ -9,83 +9,81 @@
 claude --resume f04f1053-0db7-4db1-bd55-1aee4e815db8
 ```
 
+## ⚠️ Задача про SWOT — ЗАКРЫТА, не переделывать
+
+Промпт «add SWOT jinja / why other projects avoid it / make more accent on the 4 gsheet
+accents» **выполнен 2026-08-26** (коммит `9c2bc0e`). Если он придёт снова — это стаpый
+текст, который пользователь вставляет повторно. Что уже стоит в деке:
+
+- `077-jinja-swot` — SWOT шаблонного подхода (S/W — это одно свойство с двух сторон:
+  Jinja ничего не знает о SQL).
+- `078-pochemu-drugie-uhodyat-ot-shablonov` — SQLMesh правит семантическое представление
+  через SQLGlot (в доках прямая претензия к шаблонизаторам); Spark SDP объявляет датасеты
+  кодом без шаблонного слоя. **Премисса поправлена по документации: Bruin как раз НА Jinja**
+  (start_date/end_date, циклы) — на слайде он стоит контрпримером.
+- Четыре акцента усилены по существу, без новых слайдов: `006` (что физически означает
+  переезд pandas-скрипта в модель), `052` (почему staging строго 1:1 + правило одного
+  направления), `029` (тот же YAML даёт тесты И документацию; названы все четыре generic-
+  правила), `018` (в ClickHouse нет MERGE → delete+insert на lightweight deletes, append
+  без дедупликации, insert_overwrite по партициям).
+
 ## Открытые задачи
 
 | Ключ | Что | Статус |
 |---|---|---|
-| [#6](https://github.com/dataengy/MLInside-course/issues/6) | Deck publish pipeline: TG + GDrive + колонки листа | открыт; TG-лег работает, drive/sheet ждут внешних условий |
-| [#8](https://github.com/dataengy/MLInside-course/issues/8) | preza-merge: форк ревьюера → формат-профиль | ветка `feat/preza-merge`, 27 коммитов впереди `main`, PR не заведён |
-
-**Следующая задача (промпт пользователя, дословно):**
-
-> add
-> - SWOT jinja with other approaches
-> - why ather projects (SQLMesh, Bruin, Spark SDP?) try to avoid it
->
-> make more accent on the following (from gsheer about this subject 4 prezentaion & lecture):
-> "Подход Analytics Engineering: Перенос логики трансформации данных из Python-скрипов на уровень SQL.
-> Структурирование dbt-проекта: Источники (sources), промежуточные модели (staging) и финальные витрины признаков (marts).
-> Качество данных: Автоматическое тестирование ограничений (уникальность, null, связи) и генерация документации.
-> Инкрементальные модели: Оптимизация расчетов через обновление только новых данных в ClickHouse."
-
-Просил выполнять на `/model fable` + `/effort max` (переключает сам).
+| [#6](https://github.com/dataengy/MLInside-course/issues/6) | Deck publish pipeline | tg-лег теперь авто; drive/sheet ждут квоты Drive и роли Редактор для SA |
+| [#8](https://github.com/dataengy/MLInside-course/issues/8) | preza-merge: форк ревьюера → формат-профиль | ветка `feat/preza-merge`, ~35 коммитов впереди `main`, **PR не заведён** |
 
 ## Сделано (подтверждается коммитами)
 
 | Коммит | Что |
 |---|---|
-| `d497351` | моделирование (ER, medallion/EDW, DV+AutomateDV), MV в ClickHouse, микробатчинг, стриминг, права доступа |
-| `4a8f7f5` | `.tmp/lint_content_scalars.py` (`just preza-lint`) + `scripts/preza/edit_slides.py` (`just preza-slides`) |
-| `a0e50ac` | scalar-gate описан в скилле `preza-de-validate`; инварианты 6–8 у сабагента `preza-accents-keeper` |
-| `ec94087` | Jinja вглубь: циклы/условия (`074`), контекст и отладка через compile (`075`), диспетчеризация макросов (`076`) |
-| `230f95b` | курсор публикации: dbt `v3.20` (73 слайда) отправлена в TG, топик 118 |
+| `9c2bc0e` | SWOT по Jinja + «почему другие уходят» + усиление четырёх акцентов |
+| `7114ab4` | пины 75/30, счётчик слайдов, отчёт preza-review |
+| `9c2674c` | Stop-хук автоотправки tg + спека + выключатель |
 
-Актуальная сборка: `data/generated/MLInside_Введение-в-dbt_v3.20.pptx` — 73 слайда,
-формат-профиль `alina-2026-08` (`deck.format` в контент-YAML, профиль в `settings/formats.yml`).
+Актуальная сборка: `data/generated/MLInside_Введение-в-dbt_v3.21.pptx` — **75 слайдов**,
+формат-профиль `alina-2026-08`, **уже отправлена в TG** (`tg=ok`, топик 118).
 
 ## Не сделано и почему
 
 - **PR из `feat/preza-merge` в `main` не заведён** — ветку переключила параллельная сессия
-  под #8; мои коммиты легли туда же. Отправка в TG от ветки не зависит, но в `main`
-  изменений нет. Решение за владельцем.
-- **`~/.ai` не закоммичен** — scalar-gate в
-  `skills/_catalog/docs/pptx/create-preza-about-de-tool/scripts/validate_content.py` и его
-  описание в `preza-de-validate/SKILL.md` живут на диске, но это отдельный репозиторий со
-  своей привязкой коммитов к issues `hnkovr/.ai`, и подходящий номер задачи неизвестен.
-  Правки рабочие: скиллы читаются с диска.
-- **Остальные пять дек формат-профиль не получили** — `deck.format` стоит только у dbt-деки,
-  их последние сборки уже `tg=ok`, новых версий нет. Раздать профиль — отдельная работа.
-- **Drive- и sheet-леги публикации** — `pending` у всех дек: квота Drive у `hnkovr@gmail.com`
-  и роль Редактор для сервис-аккаунта на листе (см. `docs/deck-publish-pipeline.md`).
+  под #8; все мои коммиты легли туда же. В `main` изменений нет. Решение за владельцем.
+- **`~/.ai` не закоммичен** — scalar-gate в `create-preza-about-de-tool/scripts/validate_content.py`
+  и его описание в `preza-de-validate/SKILL.md` живут на диске (правки рабочие, скиллы
+  читаются с диска), но это отдельный репозиторий с привязкой к issues `hnkovr/.ai`, номер
+  неизвестен. Там же лежит непринятый каталог `preza-merge/` от параллельной сессии.
+- **Формат-профиль только у dbt-деки** — у остальных пяти `deck.format` не проставлен, их
+  версии уже `tg=ok`, новых сборок нет.
+- **Автоотправка не действует в ТЕКУЩЕЙ сессии** — settings.json прочитан при старте;
+  хук подхватится новой сессией или после `/hooks`.
 
 ## Принятые решения (не перерешивать)
 
-1. **Правки деки — только `just preza-slides <content> <cmd>`** (splice по id слайда).
-   Никакого round-trip через `yaml.safe_dump`: он переформатирует весь файл.
-2. **`just preza-lint` перед каждым билдом.** Буллет или ячейка вида `- текст: продолжение`
-   без кавычек — это YAML-**мапа**; билд падает поздно с `TypeError: … got 'dict'`.
-   Гейт теперь есть и в каноническом `validate_content.py`.
-3. **Рост деки** = поднять `deck_generation.slides_max` в `settings/config.yml` датированным
-   комментарием НАД предыдущим + обновить пины в `src/tests/test_content.py`
-   (число слайдов и число code-слайдов) тем же изменением. Сейчас: max 76, пины 73 / 29.
-4. **Провенанс-штамп dbt-деке не ставим** — она рукописная (`generated: false`); валидатор
-   ругается, `preza-review` понижает это до info. Это ожидаемое состояние, не дефект.
-5. **Публикация — явная**: `just publish-new --only tg`. Одна версия в TG уходит один раз;
-   повтор только через `--force`.
-6. **ЛИМИТ ЗАПИСИ (важно для следующей задачи).** `just preza-blocks content/preza-dbt-v3-content.yml`:
-   блок 3 «dbt Core: компиляция, Jinja, материализации, сущности» — **24.7 мин при лимите 25**.
-   Ещё один слайд в этот блок его ломает. Вся дека ≈95 мин против ориентира 50–90 мин.
-   Новые Jinja-слайды либо ставить вне блока 3, либо делить блок надвое
-   (`recording.blocks` в `content/presentations.yml`, правила — `docs/course-rules.md`).
-   Дедлайн записи всех лекций — 2026-08-31.
+1. **Правки деки — только `just preza-slides <content> <cmd>`** (splice по id). Никакого
+   round-trip через `yaml.safe_dump`: он переформатирует весь файл.
+2. **`just preza-lint` перед каждым билдом.** Буллет или ячейка `- текст: продолжение` без
+   кавычек — YAML-**мапа**; за сессию поймано трижды, билд падает поздно с `got 'dict'`.
+   Гейт продублирован в каноническом `validate_content.py`.
+3. **Рост деки** = поднять `deck_generation.slides_max` датированным комментарием НАД
+   предыдущим + обновить пины в `src/tests/test_content.py`. Сейчас: max 76, пины 75 / 30.
+4. **Провенанс-штамп dbt-деке не ставим** — она рукописная (`generated: false`).
+5. **Триггер публикации (изменён 2026-08-26):** лег **tg** уходит автоматически Stop-хуком
+   `scripts/hooks/deck-publish-auto-send.sh` в конце хода — НЕ на билд (билдер мятит minor
+   каждой сборкой; публикатор берёт только новейшую версию, курсор держит «одна версия —
+   одна отправка»). **drive и sheet остались явными.** Выключатель:
+   `settings/publish.yml → telegram.auto_send: false`. Глобальный `deck-watch.sh` обязан
+   остаться в `on_complete: "open"` — он шлёт мимо курсора, `open_send` = дубли.
+6. **ЛИМИТ ЗАПИСИ.** `just preza-blocks`: блок 3 «dbt Core: компиляция, Jinja, материализации»
+   — **24.7 из 25 мин**, туда больше ничего не влезает. Блок 6 — 20.8 мин, там запас есть.
+   Вся дека ≈97 мин против ориентира 50–90. Дедлайн записи всех лекций — **2026-08-31**.
 
 ## Где что лежит
 
-- Контент деки: `content/preza-dbt-v3-content.yml` (73 слайда, id-шники стабильны).
-- **Четыре акцента лекции — уже на диске**: `content/presentations.yml` → запись с
-  `out_name: MLInside_Введение-в-dbt` → `accents:` (Analytics Engineering, слои
-  sources/staging/marts, качество данных, инкрементальные модели в ClickHouse).
-  Проверка покрытия: `just preza-review content/preza-dbt-v3-content.yml` (сейчас 4/4).
-- Ленты и их спеки: `docs/deck-publish-pipeline.md`, `docs/schedule-gsheet-lane.md`,
-  `docs/preza-merge-lane.md`, `docs/course-rules.md`.
+- Контент: `content/preza-dbt-v3-content.yml` (75 слайдов, id стабильны).
+- **Четыре акцента лекции** — `content/presentations.yml` → запись `MLInside_Введение-в-dbt`
+  → `accents:`. Проверка: `just preza-review content/preza-dbt-v3-content.yml` (сейчас 4/4).
+- Спеки лент: `docs/deck-publish-pipeline.md`, `docs/preza-merge-lane.md`,
+  `docs/schedule-gsheet-lane.md`, `docs/course-rules.md`.
 - Инварианты правок: `.claude/agents/preza-accents-keeper.md` (пункты 6–8).
+- Инструменты сессии: `.tmp/lint_content_scalars.py`, `scripts/preza/edit_slides.py`.
