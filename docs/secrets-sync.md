@@ -27,15 +27,43 @@ bash scripts/secrets-sync.sh bw-push-file "$GOOGLE_APPLICATION_CREDENTIALS"
 
 ## New workstation — bootstrap
 
+**Order matters: `git-lfs` must exist before the clone.** The repo keeps 72 LFS objects
+(~1.2 GB of `.pptx` / `.pdf` / `.zip` decks and source materials); cloning without git-lfs
+silently checks them out as text pointer stubs, and every deck command then fails on a file
+that looks present.
+
 ```bash
+# 1 — toolchain FIRST (missing pieces only)
+brew install git-lfs just uv bitwarden-cli gnupg git-secret
+git lfs install                       # once per machine
+
+# 2 — clone with submodules (6 of them) and LFS payload
 git clone --recurse-submodules https://github.com/dataengy/MLInside-course.git
 cd MLInside-course
-brew install bitwarden-cli gnupg git-secret git-lfs just uv   # missing pieces only
+git lfs pull                          # no-op if step 1 preceded the clone; the repair if it didn't
 
+# 3 — Python deps
+just sync                             # uv sync --extra dev --extra gsheets
+
+# 4 — secrets
 bw login hnkovr@gmail.com
 export BW_SESSION=$(bw unlock --raw)
-just secrets-bootstrap      # Bitwarden pull → (fallback) gpg-key pull + git-secret reveal → doctor
+just secrets-bootstrap                # Bitwarden pull → (fallback) gpg-key pull + git-secret reveal → doctor
+
+# 5 — gate
+just secrets-doctor                   # must exit 0
+just test                             # 371 passed / 4 skipped as of 2026-08-26
 ```
+
+Two known traps on a fresh machine:
+
+- **`uv.lock` is git-ignored**, so dependencies re-resolve from `pyproject.toml` ranges instead
+  of being pinned — the new machine can legitimately get different versions.
+- **`just test` runs `python3 -m pytest`, i.e. whatever `python3` resolves to on `PATH`**, not
+  the `.venv` that `just sync` builds. On this workstation that happens to be a framework
+  Python 3.13 with the deps installed globally. On a clean machine the gate fails until the
+  deps are in the ambient interpreter too; `uv run python -m pytest` runs green inside the venv
+  (and collects *more* tests than the ambient interpreter does).
 
 `secrets-bootstrap` is safe to re-run; it ends with `secrets-doctor`, which checks tools,
 vault status, GPG key presence, template drift, that file-typed secrets
