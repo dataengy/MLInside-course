@@ -38,9 +38,36 @@ just secrets-bootstrap      # Bitwarden pull → (fallback) gpg-key pull + git-s
 ```
 
 `secrets-bootstrap` is safe to re-run; it ends with `secrets-doctor`, which checks tools,
-vault status, GPG key presence, template drift and that file-typed secrets
-(`YC_SERVICE_ACCOUNT_KEY_FILE`, `GOOGLE_APPLICATION_CREDENTIALS`) point at existing files —
-pull missing ones with `bash scripts/secrets-sync.sh bw-pull-file <item-name> <dest-path>`.
+vault status, GPG key presence, template drift, that file-typed secrets
+(`YC_SERVICE_ACCOUNT_KEY_FILE`, `GOOGLE_APPLICATION_CREDENTIALS`) point at existing files,
+and that the **publish-lane credentials named in [`settings/publish.yml`](../settings/publish.yml)
+exist** — pull missing ones with
+`bash scripts/secrets-sync.sh bw-pull-file <item-name> <dest-path>`.
+
+## What `.env.secrets` does NOT carry
+
+`settings/.env.secrets` is currently a **names-only skeleton — all 16 values are blank**, so
+both lanes above escrow an empty file. Everything this repo actually authenticates with lives
+in files *outside* the repo, and `.env.secrets` does not point at them (its
+`GOOGLE_*` vars are blank too). They must be escrowed **individually**, or the new
+workstation gets a green `secrets-doctor` and a dead publish lane:
+
+| file | used by | escrow (old machine) → restore (new machine) |
+|---|---|---|
+| `~/.config/gcloud/application_default_credentials.json` | Drive upload (`just publish-new`), user-ADC `hnkovr@gmail.com`, scope `drive.file` | `bw-push-file` → `bw-pull-file 'MLInside-course/files/application_default_credentials.json' ~/.config/gcloud/application_default_credentials.json` |
+| `~/.secrets/google-sa-for-prodamus-1-494316.json` | schedule sheet read + sheet columns, SA `gsheets-reader@…` | `bw-push-file` → `bw-pull-file 'MLInside-course/files/google-sa-for-prodamus-1-494316.json' ~/.secrets/google-sa-for-prodamus-1-494316.json` |
+
+```bash
+# old machine, vault unlocked — escrow both (values never printed):
+export BW_SESSION=$(bw unlock --raw)
+bash scripts/secrets-sync.sh bw-push-file ~/.config/gcloud/application_default_credentials.json
+bash scripts/secrets-sync.sh bw-push-file ~/.secrets/google-sa-for-prodamus-1-494316.json
+```
+
+The ADC file is a refreshable OAuth token, not a permanent key: re-consenting on the new
+machine (`just -f ~/.ai/scripts/gcloud/Justfile adc-login account=hnkovr@gmail.com`) is an
+equally valid restore path — see [`deck-publish-pipeline.md`](deck-publish-pipeline.md) for the
+scope traps (`drive` and `spreadsheets` are both blocked in that client).
 
 ## Rules
 

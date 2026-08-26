@@ -15,6 +15,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SECRETS_FILE="settings/.env.secrets"
 TEMPLATE_FILE="settings/.env.secrets.template"
+PUBLISH_FILE="settings/publish.yml"
 BW_ITEM_ENV="MLInside-course/.env.secrets"
 BW_ITEM_GPG="MLInside-course/git-secret-gpg-key"
 BW_ITEM_FILE_PREFIX="MLInside-course/files"
@@ -217,6 +218,19 @@ cmd_doctor() {
     else
         warn "$SECRETS_FILE missing — run bootstrap"
         rc=1
+    fi
+    # Publish-lane credentials (Drive user-ADC, sheet service account) are named in
+    # settings/publish.yml, NOT in .env.secrets — without this the doctor reports green
+    # on a fresh workstation that has no Google auth at all.
+    if [ -f "$PUBLISH_FILE" ]; then
+        while IFS= read -r p; do
+            [ -z "$p" ] && continue
+            p="${p/#\~/$HOME}"
+            [ -f "$p" ] && log "publish cred: $(basename "$p") present" \
+                || { warn "publish cred '$p' missing (bw-pull-file '$BW_ITEM_FILE_PREFIX/$(basename "$p")' '$p')"; rc=1; }
+        done < <(grep -hE '^[[:space:]]*(token_cache_default|service_account_file):' "$PUBLISH_FILE" \
+                 | sed -E 's/^[^:]*:[[:space:]]*//; s/[[:space:]]+#.*$//; s/^["'"'"']//; s/["'"'"']$//' \
+                 | grep -vxE 'null|~?' | sort -u)
     fi
     return "$rc"
 }

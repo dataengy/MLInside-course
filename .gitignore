@@ -54,3 +54,4 @@ src/*.egg-info/
 .claude/skills-canonical/
 .gitsecret/keys/random_seed
 !*.secret
+.superpowers/
