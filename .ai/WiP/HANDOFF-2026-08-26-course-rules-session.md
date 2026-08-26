@@ -63,7 +63,10 @@ Resume: `cd /Users/nk.myg/github/@dataengy/MLInside-course/.claude/worktrees/cou
    ленты, не трогал; чинится `ruff check --fix src/orchestration`.
 2. Кандидаты скиллов в `~/.ai` (`session-isolate-worktree-or-lock`, `todoist-projects-capacity`,
    `course-rules-upsert`) не промоутированы в каталог — только через `/create-skill`, отдельным решением.
-3. Компакция контекста в этой сессии так и не запускается: `/compact` из терминала приходит
+3. Тесты 392 passed, 4 skipped — но ТОЛЬКО после `git submodule update --init --recursive`:
+   ребейз на чужую ленту принёс бамп сабмодуля `src/preza_gen` (e037dd9, ключ `body_font` в
+   профилях формата), и без синка сабмодуля 7 тестов `test_content.py` падали с KeyError.
+4. Компакция контекста в этой сессии так и не запускается: `/compact` из терминала приходит
    обычным сообщением (5 попыток, одно- и многострочные). Заведён драфт фидбека.
 
 ## Согласованные решения (не переспрашивать)
