@@ -76,7 +76,7 @@ presentations:
   - 'Инкрементальные модели: Оптимизация расчетов через обновление только новых данных в ClickHouse.'
   content: content/preza-dbt-v3-content.yml
   out_name: MLInside_Введение-в-dbt
-  slides: 73
+  slides: 75
   visuals: reuse-source
   generated: false
   homework:

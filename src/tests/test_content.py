@@ -16,7 +16,7 @@ def load():
 
 def test_content_loads():
     cfg, content = load()
-    assert len(content.slides) == 73
+    assert len(content.slides) == 75
     assert content.slides[0].kind == "title"
     assert content.slides[-1].kind == "closing"
     assert cfg.theme.accent == "2419FF"
@@ -30,7 +30,8 @@ def test_code_slides_present():
     # + моделирование/DV, MV в ClickHouse, микробатчинг, стриминг, гранты,
     #   dbt_project_evaluator (2026-08-25)
     # + Jinja вглубь: циклы/условия, контекст и отладка, dispatch (2026-08-26)
-    assert sum(1 for s in content.slides if s.code) == 29
+    # + «почему другие движки уходят от шаблонов» (2026-08-26)
+    assert sum(1 for s in content.slides if s.code) == 30
     assert all(s.bullets for s in content.slides if s.code)
 
 
