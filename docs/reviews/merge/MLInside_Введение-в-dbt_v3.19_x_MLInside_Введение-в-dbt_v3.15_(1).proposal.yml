@@ -52,7 +52,7 @@ proposal:
     - 52
     - 53
     - 55
-    decision: null
+    decision: accept
   - rule: R2
     key: visual_anchor
     value:
@@ -94,7 +94,7 @@ proposal:
     - 48
     - 49
     - 55
-    decision: null
+    decision: accept
   - rule: R3
     key: table_top
     value: 2.47
@@ -110,7 +110,7 @@ proposal:
     - 50
     - 51
     - 56
-    decision: null
+    decision: accept
   - rule: R4
     key: bullets_width
     value: adaptive
@@ -144,7 +144,7 @@ proposal:
     - 48
     - 49
     - 55
-    decision: null
+    decision: accept
   - rule: R6
     key: drop_empty_placeholders
     value: true
@@ -156,7 +156,7 @@ proposal:
     - 9
     - 27
     - 54
-    decision: null
+    decision: accept
   - rule: R7
     key: title_slide_uppercase
     value: true
@@ -164,7 +164,7 @@ proposal:
     evidence: 'титул: ''Введение в dbt'' → ''ВВЕДЕНИЕ В DBT'''
     slides:
     - 1
-    decision: null
+    decision: reject
   - rule: R11
     key: code_border
     value: dark
@@ -189,7 +189,7 @@ proposal:
     - 44
     - 49
     - 55
-    decision: null
+    decision: accept
   regressions:
   - rule: R8
     evidence: 'шрифты темы {''major'': ''Corbel'', ''minor'': ''Corbel''} → {''major'': ''Calibri Light'',

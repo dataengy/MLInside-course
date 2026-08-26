@@ -65,3 +65,11 @@ def test_kinds_and_layouts_valid():
 def test_title_has_no_subtitle():
     _, content = load()
     assert content.slides[0].subtitle == ""  # reference-aligned: title-only
+
+
+def test_dbt_deck_uses_the_merged_format_profile():
+    """The dbt deck ships with the reviewer-derived profile (docs/preza-merge-lane.md)."""
+    cfg, _ = load()
+    assert cfg.format_name == "alina-2026-08"
+    assert cfg.fmt.body_font == "inherit"
+    assert cfg.fmt.visual_anchor == "bottom"

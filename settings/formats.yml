@@ -3,12 +3,17 @@
 #
 # GENERATED-AND-EDITED: `just preza-merge-apply` rewrites this whole file, so keep prose
 # out of it — durable explanation lives in docs/preza-merge-lane.md.
-#
-# classic — the behaviour hard-coded in the renderer before profiles existed. Pinned by
-# src/preza_gen/tests/test_format_profile.py; do not "improve" it, add a new profile.
 formats:
   classic:
-    body_font: {bullets_only: {0: 26, 1: 21, 2: 18}, with_image: {0: 20, 1: 17, 2: 15}}
+    body_font:
+      bullets_only:
+        0: 26
+        1: 21
+        2: 18
+      with_image:
+        0: 20
+        1: 17
+        2: 15
     visual_anchor: box
     visual_bottom: 7.0
     visual_top_min: 1.7
@@ -20,14 +25,12 @@ formats:
     drop_empty_placeholders: false
     title_slide_uppercase: false
     code_border: accent
-
-  # alina-2026-08 — derived from the reviewer's fork of v3.15 (docs/preza-merge-lane.md).
   alina-2026-08:
     body_font: inherit
     visual_anchor: bottom
-    visual_bottom: 7.0
+    visual_bottom: 7.01
     visual_top_min: 1.7
-    table_top: 2.45
+    table_top: 2.47
     bullets_width: adaptive
     bullets_width_full: 12.3
     bullets_width_narrow: 6.2

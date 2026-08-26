@@ -1,5 +1,37 @@
 # CLAUDE-curr-status — MLInside-course
 
+## Session 2026-08-26 — preza_merge: dbt-дека слита с форком ревьюера → v3.19.1+alina-fmt
+
+**Что сделано** ([#8](https://github.com/dataengy/MLInside-course/issues/8), Task 15 — финальная в плане `2026-08-26-preza-merge`):
+проставлены решения по предложению `docs/reviews/merge/*.proposal.yml` (`accept`: R1, R2, R3,
+R4, R6, R11; `reject`: R7 — капслок титула, вкус, не запрошен); `undecided: []`, `accepted_keys`
+проверены. Предложение изначально несло `profile: merged` (расхождение с уже
+закоммиченным профилем-заготовкой `alina-2026-08` и с пин-тестом `test_deck_selects_its_profile`,
+который допускает только `{classic, alina-2026-08}`) — исправлено на `profile: alina-2026-08`
+перед `apply`. `just preza-merge-apply` собрал `data/generated/MLInside_Введение-в-dbt_v3.19.1+alina-fmt.pptx`
+(70 слайдов); `content/preza-dbt-v3-content.yml` тронут РОВНО одной строкой (`format:`);
+`alina-2026-08` в `settings/formats.yml` уточнён по факту измерений (`visual_bottom` 7.0→7.01,
+`table_top` 2.45→2.47), `classic` не изменился по значениям (только YAML-форматирование).
+Независимая проверка собранного файла подтвердила: 70 слайдов, обводка `2419FF` отсутствует
+(только тёмная `1A1A1A`), нижние кромки визуала на 7.01″, верх таблиц на 2.47″, явный кегль
+тела — 0 (весь оставшийся явный кегль — в код-панелях/текстбоксах, вне R1).
+`just preza-merge-verify --contact-sheet` **завершился с кодом ≠0**: перестроенная база против
+форка показывает остаточные расхождения геометрии сверх допуска ±0.4″ на части слайдов
+(адаптивная ширина колонки и высота код-панелей воспроизводят решение правила приближённо, не
+точную ручную подгонку каждого слайда) — ожидаемо для R2/R4 (доля < 1.0); допуски и профиль
+под верификацию не подгонялись, расхождения перечислены в отчёте и в `docs/CHANGELOG.md`.
+Пин `test_dbt_deck_uses_the_merged_format_profile` добавлен в `src/tests/test_content.py`,
+`just test` зелёный (370 passed, 4 skipped). `just check` (ruff+ty) падает на
+**предсуществующем** долге вне зоны этой задачи (лишний `zip()` без `strict=` и неиспользуемая
+переменная в `src/preza_merge/{align,diff,rules,verify}.py`, unresolved-import в `src/schedule`
+и `src/tests/test_schedule.py`) — не трогалось, вне scope Task 15. Открытый вопрос «Перенос
+дизайн-правок менеджера в генератор» закрыт в `docs/course-qa.md` (перенесён в «Отвеченные»).
+
+**Осталось:** форк Dagster v1.4 ([#9](https://github.com/dataengy/MLInside-course/issues/9)) —
+файл менеджера ещё не скачан из чата; та же лента (`preza-merge-{propose,apply,verify}`), когда
+появится. Пред-существующий lint/typecheck-долг в `src/preza_merge/*` и `src/schedule/*`
+(см. выше) не устранён — не входил в scope этой задачи.
+
 ## Session 2026-08-26 — правила продакшена курса от менеджера → код, доки, хук, агент
 
 **Что сделано** ([#7](https://github.com/dataengy/MLInside-course/issues/7)): чат с менеджером курса (Алина Веденская, @alina_3V) разобран в
