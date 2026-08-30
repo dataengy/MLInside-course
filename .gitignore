@@ -61,3 +61,6 @@ src/*.egg-info/
 
 # agent-session-lock runtime files (session-lock hooks)
 .ai/.locks/
+
+# JetBrains IDE workspace (PyCharm/IDEA) — machine-local paths, module and UI state.
+.idea/
