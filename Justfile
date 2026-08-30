@@ -301,6 +301,16 @@ presentations-show:
 sync:
     cd {{_dir}} && uv sync --extra dev --extra gsheets
 
+# ── whole-repo update (docs in scripts/repo-update.sh header) ────────────────
+# Fresh clone or stale checkout → working state: git-lfs, index repair, fetch,
+# private submodules (hnkovr/*), uv sync. Idempotent.
+update *ARGS:
+    cd {{_dir}} && bash scripts/repo-update.sh {{ARGS}}
+
+# Read-only: is this checkout healthy? (lfs / index / submodules / cleanliness)
+repo-doctor:
+    cd {{_dir}} && bash scripts/repo-update.sh doctor
+
 test:
     cd {{_dir}} && python3 -m pytest
 
