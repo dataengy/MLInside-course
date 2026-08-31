@@ -16,6 +16,20 @@ package (`src/preza_gen/`); safe to delete. Run via the local Justfile from the 
 | `extract_source.py` | Per-slide text + URLs / "Доп материалы" blocks from a source deck. |
 | `probe_google_access.py` | Read-only gate check for the publish pipeline, per credential lane: Drive account + free space + folder, sheet read/`canEdit`, and a rehearsal of the sheet write (tab, topic column, which columns append where, deck → row). Re-run after changing sharing, Drive quota or the consent. |
 
+## Скрипты v4-деки (ad-hoc, в Justfile не заведены)
+
+Написаны при переработке dbt-деки в `v4.01`. Лежат здесь «на всякий случай» — под
+переиспользование специально не приспособлены, но каждый самодостаточен и с шапкой.
+
+| Script | What it does |
+|--------|--------------|
+| `fit_check.py` | До сборки: подобранный кегль код-панели, её высота против безопасной зоны профиля, ширина строки против реальной Consolas (0.55em — рендерер закладывает пессимистичные 0.72em), нижняя граница таблицы, и не наезжает ли `visual_bottom` профиля на логотип подвала. |
+| `pdf_overflow_check.py` | После сборки, по PDF от LibreOffice: блоки за краями страницы + панели, перекрывающие логотип MLINSIDE. Требует `pymupdf`. |
+| `deck_timing.py` | Сумма меток `[~N мин]` из заметок с разбивкой по секциям; слайды после `900-*` не считает. |
+| `v4_diagrams.py` | Генератор ASCII-схем (`code_lang: diagram`) — рамки строит `box()`, поэтому строки одной длины по построению. |
+| `patch_slide_code.py` | Замена блока `code:` одного слайда по `id`, без переформатирования всего контент-YAML. |
+| `v4_build_settings.yml` | Копия настроек сборки с `out_dir: .tmp/build` — черновая сборка мимо `data/generated`, чтобы Stop-хук не отправил её в Telegram. |
+
 ## Usage
 ```bash
 just -f .tmp/Justfile verify                 # verify the current v3.9 deck
