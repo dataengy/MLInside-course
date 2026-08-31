@@ -1,0 +1,616 @@
+# preza-dbt-v4-images.yml — РЕЕСТР КАРТИНОК деки content/preza-dbt-v4-content.yml.
+#
+# Пишется командой `python3 scripts/preza/images_manifest.py sync content/preza-dbt-v4-content.yml`; правится и руками.
+#
+# Зачем файл существует: картинку со слайда может снять человек — в контент-YAML или в
+# PowerPoint. Без реестра следующий проход расстановки увидел бы «неиспользованный файл»
+# и вернул картинку обратно. Здесь фиксируется НАМЕРЕНИЕ, а не факт.
+#
+#   placed          стоит на слайде; реестр и контент согласны
+#   manual-removed  снята со слайда руками → НЕ предлагать к постановке снова
+#   manual-moved    перенесена на другой слайд руками → видно откуда и куда
+#   spare           файл есть, на слайдах не используется, поставить можно
+#   wanted          картинки ещё нет — есть жёлтая 🔍-ссылка на поиск в подвале слайда
+#
+# Чтобы вернуть снятую картинку в оборот, поменяйте её state на `spare` руками.
+#
+# layout.box    — рамка из настроек сборки (settings.image_box), дюймы
+# layout.placed — фактический прямоугольник после вписывания, дюймы
+# layout.fit    — contain: вписать целиком с сохранением пропорций (fit_image_box)
+# layout.anchor — bottom: нижняя кромка прижата к fmt.visual_bottom
+deck: content/preza-dbt-v4-content.yml
+settings: .tmp/v4_build_settings.yml
+media_dir: data/source/media
+generated: '2026-08-31'
+images:
+- file: pic-roles-de-ae-da.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture3.png
+    url: null
+  note: подобрана вместо пустого «to:» в задаче
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 005-full-stack-data-specialist
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 696
+    - 522
+    scale: 0.7586
+    placed:
+      left: 7.35
+      top: 2.38
+      width: 5.5
+      height: 4.12
+- file: pic-ae-dataduel.png
+  origin:
+    kind: url
+    source: null
+    url: https://i0.wp.com/www.dataduel.co/wp-content/uploads/2024/07/image-3.png?w=1320&ssl=1
+  note: скачана по ссылке из задачи (Data Engineering / Analytics Engineering / Analytics)
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 006-pochemu-voznik-analytics-engineering
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1319
+    - 486
+    scale: 0.4003
+    placed:
+      left: 7.35
+      top: 4.48
+      width: 5.5
+      height: 2.03
+- file: pic-ideal-data-architecture.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/ideal-data-stack-architecture-whats-your-view-v0-q5mn1rnwnhna1.webp
+    url: null
+  note: 'webp перекодирован в png: python-pptx кладёт байты как есть, PowerPoint webp не рисует'
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 006b-elt-vmesto-etl
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 958
+    - 637
+    scale: 0.5511
+    placed:
+      left: 7.35
+      top: 2.85
+      width: 5.5
+      height: 3.66
+- file: pic-elt-roles-split.jpg
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture2.jpg
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 006c-dbt-viewpoint
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1130
+    - 566
+    scale: 0.4673
+    placed:
+      left: 7.35
+      top: 3.76
+      width: 5.5
+      height: 2.75
+- file: pic-dbt-overview.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture4.png
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 008-chto-daet-dbt-inzhenerno
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 755
+    - 311
+    scale: 0.6993
+    placed:
+      left: 7.35
+      top: 4.24
+      width: 5.5
+      height: 2.27
+- file: pic-data-platform-arch.jpg
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture1.jpg
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 012-skvoznaya-arhitektura
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 2196
+    - 1372
+    scale: 0.2404
+    placed:
+      left: 7.35
+      top: 3.07
+      width: 5.5
+      height: 3.44
+- file: pic-dbt-layers-flow.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/1_IYYe23xvVfLCd7jCC83Utw.png
+    url: null
+  note: выбрана заказчиком под слайд про слои
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 015a-sloi-dbt-proekta-obzor
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1024
+    - 572
+    scale: 0.5156
+    placed:
+      left: 7.35
+      top: 3.44
+      width: 5.5
+      height: 3.07
+- file: pic-model-layers-principles.jpg
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/1764912126391.jpeg
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 015b-pravila-sloev
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 800
+    - 553
+    scale: 0.66
+    placed:
+      left: 7.35
+      top: 2.71
+      width: 5.5
+      height: 3.8
+- file: pic-olist-er.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/HRhd2Y0.png
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 015e-olist-dataset
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 2486
+    - 1496
+    scale: 0.2124
+    placed:
+      left: 7.35
+      top: 3.2
+      width: 5.5
+      height: 3.31
+- file: pic-jinja-target-name.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture13.png
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 023-jinja-zachem-full-stack
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1226
+    - 254
+    scale: 0.4307
+    placed:
+      left: 7.35
+      top: 5.37
+      width: 5.5
+      height: 1.14
+- file: pic-dbt-hub-packages.jpg
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture31-пакеты.jpg
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 029-pakety-v-dele-na-olist
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1226
+    - 962
+    scale: 0.4307
+    placed:
+      left: 7.35
+      top: 2.19
+      width: 5.5
+      height: 4.32
+- file: pic-dbt-docs-model.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture21-docs.png
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 033-docs-i-lineage-pasport-priznaka
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1458
+    - 1078
+    scale: 0.3621
+    placed:
+      left: 7.35
+      top: 2.44
+      width: 5.5
+      height: 4.07
+- file: pic-dbt-lineage-graph.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture12.png
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 033b-lineage-dva-voprosa
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1874
+    - 580
+    scale: 0.2818
+    placed:
+      left: 7.35
+      top: 4.81
+      width: 5.5
+      height: 1.7
+- file: pic-lineage-model-monitor.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture16.png
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 058-a-esli-dagster
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1350
+    - 570
+    scale: 0.3911
+    placed:
+      left: 7.35
+      top: 4.19
+      width: 5.5
+      height: 2.32
+- file: pic-dbt-run-terminal.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture11.png
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 061e-dbt-run-selektory
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1668
+    - 840
+    scale: 0.3165
+    placed:
+      left: 7.35
+      top: 3.74
+      width: 5.5
+      height: 2.77
+- file: image62.png
+  origin:
+    kind: source-deck
+    source: data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
+    url: null
+  note: media исходной деки, переиспользуется с v3
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 918-semantic-layer-metricflow
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1686
+    - 1236
+    scale: 0.3132
+    placed:
+      left: 7.35
+      top: 2.48
+      width: 5.5
+      height: 4.03
+- file: pic-olist-db-schema.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/inbox_2473556_23a7d4d8cd99e36e32e57303eb804fff_db-schema.png
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 991-kartinka-olist-db-schema
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 3000
+    - 2325
+    scale: 0.176
+    placed:
+      left: 7.35
+      top: 2.25
+      width: 5.5
+      height: 4.26
+- file: pic-olist-csv-files.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/179500856-363711c0-2b7f-465e-bd68-be96a4c59e93.png
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 992-kartinka-olist-csv
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1228
+    - 641
+    scale: 0.43
+    placed:
+      left: 7.35
+      top: 3.64
+      width: 5.5
+      height: 2.87
+- file: pic-dbt-dag-large.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture0.png
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 993-kartinka-dag-bolshogo-proekta
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 2270
+    - 1398
+    scale: 0.2326
+    placed:
+      left: 7.35
+      top: 3.12
+      width: 5.5
+      height: 3.39
+- file: pic-jinja-source.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture15.png
+    url: null
+  note: пара к pic-jinja-compiled
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 994-kartinka-jinja-ishodnik
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 808
+    - 940
+    scale: 0.48
+    placed:
+      left: 8.08
+      top: 1.81
+      width: 4.04
+      height: 4.7
+- file: pic-jinja-compiled.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture15.2.png
+    url: null
+  note: пара к pic-jinja-source
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 995-kartinka-jinja-skompilirovano
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 822
+    - 940
+    scale: 0.48
+    placed:
+      left: 8.04
+      top: 1.81
+      width: 4.11
+      height: 4.7
+- file: pic-dbt-package-page.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture32-.png
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-08-31'
+  slide_id: 996-kartinka-stranica-paketa
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 998
+    - 1584
+    scale: 0.2848
+    placed:
+      left: 8.62
+      top: 1.81
+      width: 2.96
+      height: 4.7
+wanted:
+- slide_id: 040-clickhouse-specifika
+  label: 🔍 картинка — ClickHouse MergeTree parts and partitions
+  url: https://www.google.com/search?tbm=isch&q=clickhouse+mergetree+parts+partitions+diagram
+- slide_id: 052-cosmos
+  label: 🔍 скриншот — Cosmos DbtTaskGroup в Airflow UI
+  url: https://www.google.com/search?tbm=isch&q=astronomer+cosmos+dbt+task+group+airflow+ui+screenshot
+- slide_id: 054-dmp-af
+  label: 🔍 скриншот — dmp-af сгенерированные DAG-и
+  url: https://www.google.com/search?tbm=isch&q=dmp-af+dbt-af+airflow+generated+dags+screenshot
+- slide_id: 997-ssylki-na-poisk-kartinok
+  label: 🔍 ClickHouse MergeTree parts and partitions
+  url: https://www.google.com/search?tbm=isch&q=clickhouse+mergetree+parts+partitions+diagram
+- slide_id: 997-ssylki-na-poisk-kartinok
+  label: 🔍 Cosmos DbtTaskGroup в Airflow UI
+  url: https://www.google.com/search?tbm=isch&q=astronomer+cosmos+dbt+task+group+airflow+ui+screenshot
+- slide_id: 997-ssylki-na-poisk-kartinok
+  label: 🔍 dmp-af сгенерированные DAG-и
+  url: https://www.google.com/search?tbm=isch&q=dmp-af+dbt-af+airflow+generated+dags+screenshot

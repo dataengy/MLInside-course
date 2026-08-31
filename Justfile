@@ -104,6 +104,14 @@ preza-lint *files:
 preza-slides content *ARGS:
     cd {{_dir}} && python3 scripts/preza/edit_slides.py {{content}} {{ARGS}}
 
+# Реестр картинок деки: где какая стоит, откуда взялась, что снято/перенесено вручную.
+# sync пишет content/<deck>-images.yml и помечает снятые руками картинки manual-removed —
+# после этого их больше никто не поставит обратно. check ничего не пишет и падает, если
+# реестр разошёлся с контентом; spare печатает, что ещё можно поставить.
+# Пример: just preza-images sync content/preza-dbt-v4-content.yml --settings=.tmp/v4_build_settings.yml
+preza-images cmd content *ARGS:
+    cd {{_dir}} && python3 scripts/preza/images_manifest.py {{cmd}} {{content}} {{ARGS}}
+
 # Import a FOREIGN .pptx (one this repo did not generate) into a reviewable content YAML.
 # Lossy and one-way — never build from the result. Add a plan entry with `generated: false`.
 preza-import-pptx pptx out="":

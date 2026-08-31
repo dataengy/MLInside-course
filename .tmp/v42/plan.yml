@@ -1,0 +1,19 @@
+# v4.2 edit plan — применяется .tmp/v41_patch.py (шаги идут по порядку).
+#
+# Что делает этот проход:
+#   * «Пакеты в деле» разрезаны на два слайда — так у скриншота hub.getdbt.com
+#     появляется колонка, а контракт витрины получает полную ширину;
+#   * в конец деки добавлен раздел «Картинки»: иллюстрации, которым не нашлось места
+#     на содержательных слайдах, плюс дубль жёлтых 🔍-ссылок на поиск.
+
+- {op: replace,      id: 029-pakety-v-dele-na-olist, file: 029-pakety-podklyuchenie.yml}
+- {op: insert_after, id: 029-pakety-v-dele-na-olist, file: 029b-kontrakt-vitriny.yml}
+
+- {op: insert_after, id: 925-deklarativnye-transformacii, file: 990-section-kartinki.yml}
+- {op: insert_after, id: 990-kartinki,                    file: 991-olist-db-schema.yml}
+- {op: insert_after, id: 991-kartinka-olist-db-schema,    file: 992-olist-csv-files.yml}
+- {op: insert_after, id: 992-kartinka-olist-csv,          file: 993-dbt-dag-large.yml}
+- {op: insert_after, id: 993-kartinka-dag-bolshogo-proekta, file: 994-jinja-source.yml}
+- {op: insert_after, id: 994-kartinka-jinja-ishodnik,     file: 995-jinja-compiled.yml}
+- {op: insert_after, id: 995-kartinka-jinja-skompilirovano, file: 996-dbt-package-page.yml}
+- {op: insert_after, id: 996-kartinka-stranica-paketa,    file: 997-poisk-kartinok.yml}

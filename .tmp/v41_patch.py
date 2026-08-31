@@ -31,7 +31,9 @@ from pathlib import Path
 import yaml
 
 MARKER = "- kind:"
-PLAN_DIR = Path(".tmp/v41")
+# Блоки слайдов лежат рядом с планом, который на них ссылается, — так один и тот же
+# скрипт обслуживает любой проход правок (.tmp/v41/, .tmp/v42/, ...).
+PLAN_DIR = Path(".tmp/v41")  # переопределяется в main() по пути плана
 
 
 def split_blocks(text: str) -> tuple[str, list[str]]:
@@ -100,6 +102,8 @@ def apply(header: str, blocks: list[str], plan: list[dict]) -> tuple[str, list[s
 
 
 def main(content_path: str, plan_path: str) -> int:
+    global PLAN_DIR
+    PLAN_DIR = Path(plan_path).parent
     path = Path(content_path)
     header, blocks = split_blocks(path.read_text(encoding="utf-8"))
     plan = yaml.safe_load(Path(plan_path).read_text(encoding="utf-8")) or []

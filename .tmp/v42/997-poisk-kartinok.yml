@@ -1,0 +1,38 @@
+- kind: content
+  id: 997-ssylki-na-poisk-kartinok
+  title: 'Где картинки ещё нужны: ссылки на поиск'
+  code_lang: diagram
+  code: |2
+     СЛАЙД                                    ЧТО ИСКАТЬ
+     ─────────────────────────────────────    ──────────────────────────────────────────
+     ClickHouse: что меняется в инкременте     clickhouse mergetree parts partitions
+                                               diagram
+     Cosmos: Airflow-native оркестрация dbt    astronomer cosmos dbt task group
+                                               airflow ui screenshot
+     dmp-af: dbt-first оркестрация             dmp-af dbt-af airflow generated dags
+                                               screenshot
+
+     ──────────────────────────────────────────────────────────────────────────────────
+     Те же три ссылки жёлтым висят в подвале своих слайдов — здесь они собраны вместе,
+     чтобы читались как список задач, а не как разбросанные по деке пометки.
+
+     Нашли картинку → положить в data/source/media, прописать `image:` на слайде
+     и снять оттуда жёлтую ссылку. Учёт — content/preza-dbt-v4-images.yml.
+  materials:
+  - label: 🔍 ClickHouse MergeTree parts and partitions
+    url: https://www.google.com/search?tbm=isch&q=clickhouse+mergetree+parts+partitions+diagram
+    highlight: true
+  - label: 🔍 Cosmos DbtTaskGroup в Airflow UI
+    url: https://www.google.com/search?tbm=isch&q=astronomer+cosmos+dbt+task+group+airflow+ui+screenshot
+    highlight: true
+  - label: 🔍 dmp-af сгенерированные DAG-и
+    url: https://www.google.com/search?tbm=isch&q=dmp-af+dbt-af+airflow+generated+dags+screenshot
+    highlight: true
+  notes: |2
+    Три слайда деки остались без иллюстрации, и это !!осознанно!!: подходящей картинки не нашлось, а рисовать схему ради галочки хуже, чем оставить хорошую ASCII-схему.
+
+    На каждом из них в подвале висит жёлтая ссылка на поиск — маркер незакрытой задачи. Здесь те же три ссылки собраны вместе: так видно, что их ровно три, а не «где-то по деке разбросаны пометки».
+
+    **Как закрыть задачу:** нашли картинку → положить файл в `data/source/media/`, прописать `image:` на нужном слайде в контент-YAML, снять оттуда жёлтую ссылку и убрать строку отсюда. После этого прогнать `python3 scripts/preza/images_manifest.py sync content/preza-dbt-v4-content.yml` — реестр картинок подхватит изменение.
+
+    **Осторожно:** проверяйте лицензию. Скриншот интерфейса из официальной документации — обычно нормально; картинка из чужого блога — вопрос, который лучше задать до публикации деки, а не после.

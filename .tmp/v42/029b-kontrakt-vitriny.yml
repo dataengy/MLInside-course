@@ -1,0 +1,50 @@
+- kind: content
+  id: 029b-kontrakt-vitriny-na-paketah
+  title: 'Контракт витрины признаков на пакетах'
+  code_caption: models/marts/_marts__models.yml
+  code_lang: yaml
+  code: |2
+    models:
+      - name: mart_delivery_features
+        description: Признаки для предсказания просрочки доставки. Гранулярность — заказ.
+
+        tests:
+          - dbt_utils.equal_rowcount:
+              compare_model: ref('int_order_level')   # джойн не размножил строки
+
+        columns:
+          - name: order_id
+            tests: [not_null, unique]                 # «одна строка на заказ» машинно
+
+          - name: freight_share
+            tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0                        # доля по определению 0..1
+                  max_value: 1
+
+          - name: seller_avg_delay_90d
+            tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: -30                      # признак имеет право быть NULL,
+                  max_value: 120                      # но не имеет права быть абсурдным
+                  row_condition: seller_avg_delay_90d is not null
+
+          - name: target_is_late
+            tests:
+              - accepted_values: {values: [0, 1]}     # NULL сюда не просочится
+  notes: |2
+    [~1.5 мин] **Главное:** пакеты дают тесты, которые вы иначе писали бы руками и, скорее всего, не написали бы.
+
+    **Разбор кода:** четыре места. Первое — `equal_rowcount` на уровне модели: !!машинная проверка гранулярности!!, ровно та, о которой мы говорили на слайде про intermediate. Второе — `expect_column_values_to_be_between` для доли: 0..1 по определению, тут спорить не о чем.
+
+    Третье — тот же тест на `seller_avg_delay_90d`, но с `row_condition`. Признак имеет право быть NULL (у первого заказа продавца истории нет), поэтому диапазон проверяем только там, где значение есть. Границы −30..120 дней — это не «правильные» числа, а !!записанное вслух ожидание!!: если завтра появится просрочка в год, тест об этом скажет.
+
+    Четвёртое — `accepted_values` на таргете. Дешёвая защита от того, что NULL просочился в обучающую выборку и превратился в третий класс.
+
+    Не разбирать: где лежит `_marts__models.yml` и как dbt его находит.
+
+    **Для MLE:** этот файл и есть !!контракт обучающей выборки!!. Читать его надо как «что я обещаю модели про эти данные» — и каждое обещание проверяется на каждой сборке.
+
+    **Осторожно:** не превращать контракт в стену тестов. Проверяйте то, поломка чего реально испортит обучение; остальное — `severity: warn`.
+
+    **Переход:** ~~«Тесты мы уже начали писать. Разберём их системно».~~
