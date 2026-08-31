@@ -1,5 +1,9 @@
 # preza-dbt-v4-content.yml — WHAT deck: «Трансформация данных и витрины (dbt)».
 #
+# v4.6.1 — правка v4.6.0: на слайде «Когда простых marts мало» хвост «Рассказа» вынесен
+#   в раздел «Формы хранения» — 3NF/EDW и Wide/OBT методологиями моделирования не являются
+#   и в одной шкале с Medallion/Kimball/Data Vault стояли не на своём месте.
+#
 # v4.6.0 — правка v4.5.1: заметки PART 2, PART 3 и «Картинок» разложены по меткам
 #   (.tmp/label_appendix_notes.py — ручная карта «абзац → раздел», по одному ярлыку на
 #   абзац). Раньше приложения были свободной прозой и потому проходили мимо нормализации;
@@ -60,7 +64,7 @@
 # осторожно / переход, и оценку хронометража [~N мин].
 
 deck:
-  out_name: MLInside_Введение-в-dbt_v4.6.0   # semver в имени → naming: fixed
+  out_name: MLInside_Введение-в-dbt_v4.6.1   # semver в имени → naming: fixed
   naming: fixed
   version_major: 4
   format: alina-2026-08
@@ -84,7 +88,7 @@ content:
     **Переход:**
     - ~~«Посмотрим план, а потом сразу разберёмся, почему подготовка данных перестала быть чужой зоной ответственности».~~
 
-    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.6.0 · 2026-09-01
+    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.6.1 · 2026-09-01
 - kind: agenda
   id: 002-plan-lekcii
   title: План лекции
@@ -4479,7 +4483,7 @@ content:
     - Ни одна из них не входит в хронометраж — это материал для самостоятельного чтения.
     - Вопросы.
 
-    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.6.0 · 2026-09-01
+    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.6.1 · 2026-09-01
 - kind: section
   id: 950-part-2-ds-mle-nyuansy
   title: PART 2 · DS/MLE НЮАНСЫ
