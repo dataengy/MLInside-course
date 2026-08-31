@@ -28,7 +28,7 @@ formats:
   alina-2026-08:
     body_font: inherit
     visual_anchor: bottom
-    visual_bottom: 7.01
+    visual_bottom: 6.51
     visual_top_min: 1.7
     table_top: 2.47
     bullets_width: adaptive

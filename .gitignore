@@ -38,6 +38,11 @@ docs/reviews/merge/contact/
 .tmp/*.pptx
 # runtime marker written by the tmp-review session hook
 .tmp/.last-review-nudge
+.tmp/build/
+.tmp/source/
+.tmp/qa/
+# лок-файлы открытых в PowerPoint документов
+~$*
 
 
 #..

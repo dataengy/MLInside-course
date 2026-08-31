@@ -1,0 +1,50 @@
+- kind: content
+  id: 046b-dbt-pandas-i-spark
+  title: 'dbt и pandas, dbt и Spark: где исполняется ваш Python'
+  bullets:
+  - 'pandas в dbt-модели — это данные, вытянутые из хранилища В ПАМЯТЬ платформы'
+  - 'to_pandas() на витрине признаков за три года — способ убить сессию'
+  - 'На Snowflake и BigQuery «pandas» — это Snowpark/BigFrames DataFrame, ленивый'
+  - 'Spark (Databricks) — единственный вариант, где Python масштабируется как SQL'
+  - 'PySpark-модель исполняется кластером, а не одним узлом — pandas там опция, не норма'
+  - 'Правило: агрегации остаются в SQL, Python берёт только то, чего в SQL нет'
+  materials:
+  - label: Python models
+    url: https://docs.getdbt.com/docs/build/python-models
+  - label: dbt + Databricks Python
+    url: https://docs.getdbt.com/reference/resource-configs/databricks-configs
+  code_caption: три диалекта одной модели
+  code_lang: python
+  code: |2
+    # Snowflake (Snowpark) — ленивый DataFrame, считает склад
+    def model(dbt, session):
+        df = dbt.ref("int_order_level")
+        return df.group_by("seller_id").agg({"delay_days": "avg"})
+
+    # Databricks (PySpark) — считает кластер
+    def model(dbt, session):
+        df = dbt.ref("int_order_level")
+        return df.groupBy("seller_id").avg("delay_days")
+
+    # pandas — ВСЁ приезжает в память одного узла
+    def model(dbt, session):
+        pdf = dbt.ref("int_order_level").to_pandas()   # ← вот здесь и больно
+        return pdf.groupby("seller_id")["delay_days"].mean().reset_index()
+  notes: |2
+    [~2 мин] **Главное:** «Python-модель» — это три разные вещи в зависимости от платформы, и различает их !!где физически лежат данные в момент вычисления!!.
+
+    **Разбор кода:** три блока делают одно и то же — среднюю просрочку по продавцу.
+
+    Первый, **Snowpark**: `df` — ленивый DataFrame, `group_by` превращается в SQL, считает склад. Данные из хранилища не уезжают.
+
+    Второй, **PySpark на Databricks**: `df` — распределённый DataFrame, считает кластер. Это единственный из трёх вариантов, где Python масштабируется так же, как SQL.
+
+    Третий, **pandas**: `to_pandas()` — и вся таблица приезжает в память одного процесса. Для сотни тысяч строк Olist это нормально; для витрины признаков за три года это отказ.
+
+    **Для MLE:** отсюда практическое правило, которое стоит записать. !!Агрегации не выносят в pandas.!! pandas берут там, где нужна библиотека, которой нет в SQL, и берут на уже свёрнутых данных — на выходе агрегата, а не на входе.
+
+    **Пример:** кластеризация продавцов в Olist — это сотни строк после свёртки. Такой pandas безопасен. Тот же KMeans по позициям заказов — это 112 650 строк и растущая история, и его надо считать иначе.
+
+    **Осторожно:** на ClickHouse ни один из трёх блоков не заработает — Python-моделей адаптер не поддерживает. Способ обойти это без смены платформы — следующий слайд.
+
+    **Переход:** ~~«Если Python-моделей нет, а расширить dbt хочется — есть отдельный проект».~~

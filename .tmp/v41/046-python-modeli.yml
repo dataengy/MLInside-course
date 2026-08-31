@@ -1,0 +1,42 @@
+- kind: content
+  id: 046-python-modeli-v-dbt
+  title: 'Python-модели в dbt: escape hatch, а не замена SQL'
+  bullets:
+  - 'Поддержаны на Snowflake (Snowpark), Databricks (PySpark), BigQuery (BigFrames)'
+  - 'ClickHouse и Postgres Python-моделей не дают — это ограничение адаптера'
+  - 'Модель — функция model(dbt, session), возвращает ровно один DataFrame'
+  - 'ref() и source() доступны через объект dbt — модель встаёт в общий DAG'
+  - 'Ограничения: только table/incremental, нет view и ephemeral'
+  - 'print() не виден, импорт функций между Python-моделями невозможен'
+  materials:
+  - label: Python models
+    url: https://docs.getdbt.com/docs/build/python-models
+  code_caption: models/marts/mart_seller_cluster.py
+  code_lang: python
+  code: |2
+    def model(dbt, session):
+        dbt.config(materialized="table",
+                   packages=["scikit-learn"])
+
+        orders = dbt.ref("int_order_level")
+
+        from sklearn.cluster import KMeans
+        pdf = orders.to_pandas()
+        pdf["cluster"] = KMeans(
+            n_clusters=5, n_init=10
+        ).fit_predict(
+            pdf[["distance_km", "item_count"]]
+        )
+        return pdf
+  notes: |2
+    [~1.5 мин] **Главное:** Python в dbt — это !!аварийный выход!!, а не альтернативный основной путь.
+
+    **Разбор кода:** четыре строки. `def model(dbt, session)` — обязательная сигнатура. `dbt.config(packages=[...])` — зависимости объявляются здесь, а не в requirements проекта. `dbt.ref(...)` — тот же граф зависимостей, что и в SQL: Python-модель встаёт в общий DAG наравне с SQL-моделями. `return pdf` — модель обязана вернуть ровно один DataFrame.
+
+    Не разбирать: параметры KMeans, они тут для правдоподобия.
+
+    **Для MLE:** и сразу трезвая оговорка. !!На ClickHouse, с которым мы работаем в этом курсе, Python-моделей нет!! — это ограничение адаптера, а не настройка. Поддержка есть у Snowflake, Databricks и BigQuery. Проверяйте страницу конфигурации вашего адаптера, прежде чем закладывать это в архитектуру.
+
+    **Осторожно:** несколько практичных ограничений. `print()` в логах dbt не появится — код исполняет платформа, а не dbt. Функции из одной Python-модели нельзя импортировать в другую. И материализация только `table` или `incremental` — ни `view`, ни `ephemeral`.
+
+    **Переход:** ~~«Разберём, какой именно Python имеется в виду — pandas или Spark, и почему это разные истории».~~

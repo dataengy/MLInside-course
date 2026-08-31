@@ -1,0 +1,54 @@
+- kind: content
+  id: 047-opendbt
+  title: 'OpenDBT: расширение dbt-core без форка'
+  bullets:
+  - 'Не форк: динамически подменяет классы dbt-core при импорте'
+  - 'Локальный Python в моделях — там, где адаптер их не поддерживает'
+  - 'EL прямо в dbt через dlt: загрузка из web API как dbt-модель'
+  - 'Кастомные адаптеры и свои функции в Jinja-контексте'
+  - 'Callbacks на события сборки — хук во внешнюю систему'
+  - 'Мультипроектный dbt-mesh и dbt docs внутри Airflow UI'
+  - 'Apache 2.0, проект молодой — API двигается быстрее ядра'
+  materials:
+  - label: memiiso/opendbt
+    url: https://github.com/memiiso/opendbt
+  - label: OpenDBT docs
+    url: https://memiiso.github.io/opendbt/
+  - label: dlt (EL внутри модели)
+    url: https://dlthub.com/docs/intro
+  code_caption: python-таск как обычная модель проекта
+  code_lang: python
+  code: |2
+    # dbt_project.yml
+    #   dbt-custom-adapter: opendbt.adapters.ClickHouseAdapter
+
+    # models/marts/mart_seller_cluster.py
+    from opendbt import OpenDbtPythonModel
+
+    class Model(OpenDbtPythonModel):
+        def model(self, dbt, session):
+            dbt.config(materialized="table")
+            df = session.sql(
+                "select * from analytics.int_order_level"
+            ).df()
+            df["cluster"] = fit_kmeans(df)
+            return df          # исполняется ЛОКАЛЬНО,
+                               # а не движком хранилища
+
+    # callback на конец сборки — точка интеграции наружу
+    def on_run_end(ctx):
+        notify_mlflow(ctx.results)
+  notes: |2
+    [~2 мин] **Главное:** OpenDBT показывает, во что упираются в границы dbt-core чаще всего, и закрывает эти дыры !!без форка ядра!!.
+
+    **Рассказ:** ключевая идея проекта — он не переписывает dbt, а динамически расширяет его классы при импорте. Отсюда список возможностей: локальный Python в моделях, EL-загрузка через **dlt** (данные из web API приезжают как обычная dbt-модель), свои адаптеры, коллбэки на события, мультипроектная mesh-схема и встроенный просмотр `dbt docs` прямо в интерфейсе Airflow.
+
+    **Разбор кода:** две части. Верхняя — python-таск: класс наследует `OpenDbtPythonModel`, метод `model` получает те же `dbt` и `session`, но !!исполняется локально, процессом dbt!!, а не движком хранилища. Именно это снимает ограничение адаптера — на ClickHouse обычных Python-моделей нет, а такая работает.
+
+    Нижняя — `on_run_end`: коллбэк, который вызывается по завершении сборки. Это готовая точка интеграции: отсюда дёргают обучение, шлют метрики в трекинг или закрывают задачу в оркестраторе.
+
+    **Для MLE:** самое ценное здесь — !!локальный Python плюс коллбэки!!. Первое даёт escape hatch там, где платформа его не даёт; второе — способ соединить dbt с ML-стеком, не заводя оркестратор ради двух шагов.
+
+    **Осторожно:** проговорить статус честно. Проект !!молодой!!, Apache 2.0, поддерживается небольшой командой; это не dbt Labs и не стандарт индустрии. Локальное исполнение означает, что данные едут в процесс dbt — со всеми ограничениями по памяти из предыдущего слайда. Перед прод-внедрением проверьте README и совместимость с вашей версией dbt-core.
+
+    **Переход:** ~~«Сведём всё в один решающий слайд: когда SQL, когда Python, а когда вообще не dbt».~~

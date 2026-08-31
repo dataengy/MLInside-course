@@ -1,0 +1,13 @@
+- kind: closing
+  id: 066-spasibo-za-vnimanie
+  title: Спасибо за внимание!
+  notes: |2
+    [~0.5 мин] **Главное:** закрыть лекцию и обозначить, что дальше.
+
+    **Рассказ:** поблагодарить, напомнить два тезиса: !!dbt закрывает слой трансформаций и признаков, а не ML-пайплайн целиком!!, и !!point-in-time correctness — то, что SQL за вас не проверит!!.
+
+    Сказать, что после этого слайда в деке идут две дополнительные части. **PART 2 «DS/MLE нюансы»** — теория про признаки, которая нужна ML-инженеру, но не привязана к dbt: offline и online feature store, training/serving skew, виды утечек. **PART 3 «Advanced / Appendix»** — справочник: dbt Cloud и Fusion, Data Vault и AutomateDV, SQLMesh, Semantic Layer, стриминг, гранты, снапшоты.
+
+    Ни одна из них не входит в хронометраж — это материал для самостоятельного чтения. Вопросы.
+
+    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.1.0 · 2026-08-31

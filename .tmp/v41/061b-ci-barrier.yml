@@ -1,0 +1,53 @@
+- kind: content
+  id: 061b-ci-barrier-actions-gitlab
+  title: 'CI-барьер: GitHub Actions и GitLab CI'
+  bullets:
+  - 'CI повторяет проверки в чистом окружении, независимо от машины автора'
+  - 'Стадии: быстрый lint → dbt deps → сборка изменённого с тестами'
+  - 'Креды приходят переменными окружения, profiles.yml читает env_var()'
+  - 'Собираем в отдельную CI-схему, а не в прод — и убираем её за собой'
+  - 'Артефакты прод-прогона (manifest.json) кэшируем как вход для Slim CI'
+  - 'Зелёный пайплайн — обязательное условие merge, а не рекомендация'
+  materials:
+  - label: dbt CI best practices
+    url: https://docs.getdbt.com/best-practices/best-practice-workflows
+  - label: GitHub Actions
+    url: https://docs.github.com/actions
+  code_caption: .github/workflows/dbt-ci.yml · .gitlab-ci.yml
+  code_lang: yaml
+  code: |2
+    # ── GitHub Actions ────────────────────────────────
+    jobs:
+      dbt:
+        runs-on: ubuntu-latest
+        env:
+          CH_HOST:     ${{ secrets.CH_HOST }}
+          CH_PASSWORD: ${{ secrets.CH_PASSWORD }}
+          DBT_TARGET:  ci
+        steps:
+          - uses: actions/checkout@v4
+          - run: pip install -r requirements.txt
+          - run: dbt deps
+          - run: dbt build --target ci --select state:modified+ \
+                           --defer --state ./artifacts/prod
+
+    # ── GitLab CI ─────────────────────────────────────
+    stages: [lint, build]
+    lint:  {script: [sqlfluff lint models/, dbt compile]}
+    build: {script: [dbt deps, dbt build --target ci]}
+  notes: |2
+    [~2 мин] **Главное:** CI — это !!обязательный рубеж в чистом окружении!!. Всё, что «у меня работает», проверяется здесь ещё раз, с нуля.
+
+    **Разбор кода:** две половины делают одно и то же в разных синтаксисах, поэтому разбирать стоит структуру, а не строки.
+
+    Первое — **секреты**. Пароль и адрес хранилища приходят переменными окружения из хранилища секретов CI; в репозитории лежит только `profiles.yml` с `env_var()`. Ни одна строка кредов не коммитится.
+
+    Второе — **отдельный target `ci`**. Сборка идёт в свою схему, а не в прод. Это не формальность: без этого упавший PR оставляет мусор в продовой схеме.
+
+    Третье — **порядок**: `dbt deps` перед сборкой, всегда. Забытый `deps` — самая частая причина «в CI не работает, а локально работает».
+
+    **Для MLE:** барьер имеет смысл, только если он блокирующий. Если merge проходит при красном пайплайне, вы платите за CI и не получаете гарантии.
+
+    **Осторожно:** сборка в CI не должна занимать часы, иначе её отключат первой же спешкой. Как этого добиться — следующий слайд.
+
+    **Переход:** ~~«Как сделать барьер быстрым: собираем только изменённое».~~

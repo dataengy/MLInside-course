@@ -1,0 +1,51 @@
+- kind: content
+  id: 065-poleznye-ssylki
+  title: Полезные ссылки
+  bullets:
+  - 'dbt — docs.getdbt.com · пакеты hub.getdbt.com · Viewpoint docs.getdbt.com/community/resources/viewpoint'
+  - 'Структура проекта — docs.getdbt.com/best-practices/how-we-structure'
+  - 'Селекторы и state — docs.getdbt.com/reference/node-selection/syntax'
+  - 'Логи и события — docs.getdbt.com/reference/events-logging'
+  - 'Exposures и contracts — docs.getdbt.com/docs/build/exposures'
+  - 'Cosmos — astronomer.io/docs/learn/airflow-dbt · astronomer.github.io/astronomer-cosmos'
+  - 'Книга по Cosmos — astronomer.io/ebooks/orchestrating-dbt-with-airflow-using-cosmos'
+  - 'dmp-af — github.com/dmp-labs/dmp-af'
+  - 'Dagster + dbt — docs.dagster.io/integrations/libraries/dbt'
+  - 'OpenDBT — github.com/memiiso/opendbt · dlt — dlthub.com/docs/intro'
+  - 'Качество — github.com/dbt-labs/dbt-project-evaluator · github.com/PicnicSupermarket/dbt-score'
+  - 'AI — github.com/dbt-labs/dbt-mcp · docs.getdbt.com/docs/cloud/dbt-copilot'
+  - 'ClickHouse-адаптер — github.com/ClickHouse/dbt-clickhouse'
+  - 'Olist — kaggle.com/datasets/olistbr/brazilian-ecommerce'
+  materials:
+  - label: dbt docs
+    url: https://docs.getdbt.com/
+  - label: Cosmos
+    url: https://astronomer.github.io/astronomer-cosmos/
+  - label: dbt MCP
+    url: https://github.com/dbt-labs/dbt-mcp
+  - label: dbt-project-evaluator
+    url: https://github.com/dbt-labs/dbt-project-evaluator
+  notes: |2
+    [~1 мин] **Главное:** список проверенных материалов, все ссылки рабочие на момент подготовки лекции.
+
+    **Рассказ:** перечислить по группам, не зачитывая URL.
+
+    **dbt** — документация docs.getdbt.com, каталог пакетов hub.getdbt.com и Viewpoint, с которого всё начиналось. Отдельно стоит гайд «How we structure our dbt projects» — это лучший короткий текст про слои.
+
+    **Эксплуатация** — синтаксис селекторов, страница про логи и события, разделы про exposures и contracts. Это три места, куда возвращаются чаще всего.
+
+    **Cosmos** — официальный гайд Astronomer, документация проекта и книга «Orchestrating dbt with Apache Airflow using Cosmos». Из видео — ролик Astronomer «Get started with dbt and Airflow using Cosmos».
+
+    **dmp-af** — github.com/dmp-labs/dmp-af, README и примеры в каталоге examples. ~~Отдельного официального видеокурса найти не удалось — если знаете, поделитесь.~~
+
+    **Dagster** — раздел интеграции с dbt в официальной документации; подробнее в отдельной лекции курса.
+
+    **OpenDBT и dlt** — расширение dbt-core без форка и загрузка данных внутри моделей.
+
+    **Качество** — dbt_project_evaluator и dbt-score.
+
+    **AI** — dbt MCP (официальный сервер) и dbt Copilot.
+
+    **Осторожно:** ссылки живут своей жизнью. Перед тем как рекомендовать пакет или проект студентам, проверяйте текущий статус репозитория.
+
+    **Переход:** ~~«Спасибо. Дальше в деке — две дополнительные части».~~

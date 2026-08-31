@@ -1,0 +1,87 @@
+# v4.1 edit plan — applied by .tmp/v41_patch.py. Steps run in order.
+
+# ── шапка деки: имя версии и журнал правок ──────────────────────────────────
+- {op: header, file: header.yml}
+
+# ── замены существующих слайдов ─────────────────────────────────────────────
+- {op: replace, id: 001-dbt-dlya-full-stack-data-specialist, file: 001-title.yml}
+- {op: replace, id: 002-plan-lekcii,                         file: 002-agenda.yml}
+- {op: replace, id: 005-full-stack-data-specialist,          file: 005-roli.yml}
+- {op: replace, id: 006-pochemu-voznik-analytics-engineering, file: 006-ae.yml}
+- {op: replace, id: 008-chto-daet-dbt-inzhenerno,            file: 008-svojstva.yml}
+- {op: replace, id: 012-skvoznaya-arhitektura,               file: 012-arhitektura.yml}
+- {op: replace, id: 013-mlops-smysl-konceptov-dbt,           file: 013-mlops-smysl.yml}
+- {op: replace, id: 014-chto-takoe-dbt-kompilyaciya,         file: 014-kompilyaciya.yml}
+- {op: replace, id: 023-jinja-zachem-full-stack,             file: 023-jinja-zachem.yml}
+- {op: replace, id: 024-jinja-var-env-cikl,                  file: 024-jinja-v-dele.yml}
+- {op: replace, id: 025-makros-dlya-priznakov,               file: 025-makros.yml}
+- {op: replace, id: 026-makros-klyuchi-i-okna,               file: 026-klyuchi-okna.yml}
+- {op: replace, id: 033-docs-i-lineage-pasport-priznaka,     file: 033-docs.yml}
+- {op: replace, id: 034-quality-gate-pered-obucheniem,       file: 034-quality-gate.yml}
+- {op: replace, id: 041-point-in-time-correctness,           file: 041-pit.yml}
+- {op: replace, id: 044-dbt-ne-ml-pipeline,                  file: 044-ne-ml-pipeline.yml}
+- {op: replace, id: 046-python-modeli-v-dbt,                 file: 046-python-modeli.yml}
+- {op: replace, id: 047-opendbt,                             file: 047-opendbt.yml}
+- {op: replace, id: 048-when-sql-when-python-when-not-dbt,   file: 048-when-sql-python.yml}
+- {op: replace, id: 058-a-esli-dagster,                      file: 058-dagster.yml}
+- {op: replace, id: 061-ci-dlya-dbt,                         file: 061-precommit.yml}
+- {op: replace, id: 063-finalnyj-vizual,                     file: 063-itog.yml}
+- {op: replace, id: 064-proverte-sebya,                      file: 064-proverte-sebya.yml}
+- {op: replace, id: 065-poleznye-ssylki,                     file: 065-ssylki.yml}
+- {op: replace, id: 066-spasibo-za-vnimanie,                 file: 066-closing.yml}
+- {op: replace, id: 900-part-2-advanced-appendix,            file: 900-section-appendix.yml}
+
+# ── блок «как возник Analytics Engineering»: ELT и Viewpoint ────────────────
+- {op: insert_after, id: 006-pochemu-voznik-analytics-engineering, file: 006b-elt.yml}
+- {op: insert_after, id: 006b-elt-vmesto-etl,                      file: 006c-viewpoint.yml}
+
+# ── блок слоёв: обзор → таблица → правила → моделирование → raw/ML → Olist ──
+- {op: insert_before, id: 015-sloi-dbt-proekta-otvetstvennost, file: 015a-sloi-obzor.yml}
+- {op: insert_after,  id: 015-sloi-dbt-proekta-otvetstvennost, file: 015b-pravila-sloev.yml}
+- {op: insert_after,  id: 015b-pravila-sloev,                  file: 015c-podhody-modelirovaniya.yml}
+- {op: insert_after,  id: 015c-podhody-k-modelirovaniyu,       file: 015d-raw-i-mle-vitriny.yml}
+- {op: insert_after,  id: 015d-raw-sloj-i-mle-vitriny,         file: 015e-olist-dataset.yml}
+
+# ── lineage отдельным слайдом после docs ───────────────────────────────────
+- {op: insert_after, id: 033-docs-i-lineage-pasport-priznaka, file: 033b-lineage.yml}
+
+# ── Python-модели: pandas и Spark между общим слайдом и OpenDBT ────────────
+- {op: insert_after, id: 046-python-modeli-v-dbt, file: 046b-pandas-spark.yml}
+
+# ── CI разложен на три + поднятые из приложения команды, качество, логи, AI ─
+- {op: insert_after, id: 061-ci-dlya-dbt,                 file: 061b-ci-barrier.yml}
+- {op: insert_after, id: 061b-ci-barrier-actions-gitlab,  file: 061c-slim-ci.yml}
+- {op: insert_after, id: 061c-slim-ci,                    file: 061d-komandy.yml}
+- {op: insert_after, id: 061d-osnovnye-komandy-dbt,       file: 061e-dbt-run-selektory.yml}
+- {op: insert_after, id: 061e-dbt-run-selektory,          file: 061f-kachestvo-proekta.yml}
+- {op: insert_after, id: 061f-kachestvo-proekta,          file: 061g-logirovanie.yml}
+- {op: insert_after, id: 061g-logirovanie-v-dbt,          file: 061h-dop-vozmozhnosti.yml}
+- {op: insert_after, id: 061h-dop-poleznye-vozmozhnosti,  file: 061i-dbt-i-ai.yml}
+- {op: insert_after, id: 061i-dbt-i-ai,                   file: 061j-agentic.yml}
+
+# ── то, что уехало в основную часть, из приложения убираем ─────────────────
+- {op: remove, id: 904-osnovnye-komandy-dbt}
+- {op: remove, id: 907-medallion-i-edw-sloi}
+- {op: remove, id: 908-dbt-project-evaluator}
+- {op: remove, id: 919-dbt-i-ai}
+
+# ── PART 2 «DS/MLE нюансы» между закрытием и приложением ───────────────────
+- {op: insert_after, id: 066-spasibo-za-vnimanie, file: 950-section-dsmle.yml}
+- {op: move,         id: 045-offline-feature-table-vs-feature-store, after: 950-part-2-ds-mle-nyuansy}
+- {op: insert_after, id: 045-offline-feature-table-vs-feature-store, file: 951-skew.yml}
+- {op: insert_after, id: 951-training-serving-skew,  file: 952-utechki.yml}
+- {op: insert_after, id: 952-utechki-v-priznakah, file: 953-feature-store.yml}
+
+# ── текстовые правки в слайдах, которые целиком не заменялись ──────────────
+- op: sub
+  count: 1
+  find: "    - Зачем full-stack специалисту\n"
+  replace: "    - Зачем ML-инженеру\n"
+- op: sub
+  count: 1
+  find: "  materials:\n  - label: 🔍 картинка — dbt project layers staging intermediate marts\n    url: https://www.google.com/search?tbm=isch&q=dbt+project+structure+staging+intermediate+marts+diagram\n    highlight: true\n"
+  replace: "  materials:\n  - label: How we structure our dbt projects\n    url: https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview\n"
+- op: sub
+  count: 1
+  find: "  - label: 🔍 картинка — Olist Brazilian e-commerce ER diagram\n    url: https://www.google.com/search?tbm=isch&q=olist+brazilian+ecommerce+dataset+ER+diagram+schema\n    highlight: true\n"
+  replace: ""

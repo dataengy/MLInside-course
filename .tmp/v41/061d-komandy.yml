@@ -1,0 +1,80 @@
+- kind: table
+  id: 061d-osnovnye-komandy-dbt
+  title: Основные команды dbt и их полезные модификаторы
+  materials:
+  - label: dbt build
+    url: https://docs.getdbt.com/reference/commands/build
+  - label: dbt retry
+    url: https://docs.getdbt.com/reference/commands/retry
+  - label: выбор моделей
+    url: https://docs.getdbt.com/reference/node-selection/syntax
+  table:
+    headers:
+    - Команда
+    - Что делает
+    - Частые модификаторы
+    - Пример
+    rows:
+    - - dbt build
+      - run + test + seed + snapshot в порядке DAG — рабочая лошадка
+      - '--select · --exclude · --fail-fast · --full-refresh'
+      - dbt build --select tag:features --fail-fast
+    - - dbt run
+      - только модели, без тестов
+      - '--select · --full-refresh · --vars · --threads'
+      - dbt run -s mart_delivery_features --full-refresh
+    - - dbt test
+      - тесты данных и unit-тесты
+      - '--select · --store-failures · --severity'
+      - dbt test -s mart_delivery_features --store-failures
+    - - dbt retry
+      - повторяет ПОСЛЕДНИЙ прогон с точки падения, не с начала
+      - '--threads · --target'
+      - dbt retry
+    - - dbt compile
+      - рендерит Jinja в SQL, в базу не ходит
+      - '--select · --inline'
+      - dbt compile -s stg_orders && cat target/compiled/…
+    - - dbt source freshness
+      - проверяет, доехали ли данные в источники
+      - '--select source:olist_raw'
+      - dbt source freshness --select source:olist_raw
+    - - dbt seed
+      - грузит CSV из seeds/ как таблицы
+      - '--full-refresh · --select'
+      - dbt seed --select country_codes
+    - - dbt snapshot
+      - историзация изменений (SCD2)
+      - '--select · --threads'
+      - dbt snapshot --select customers_scd
+    - - dbt docs generate
+      - собирает сайт документации и lineage
+      - '--static · --no-compile'
+      - dbt docs generate --static
+    - - dbt ls
+      - печатает выбранные узлы графа
+      - '--select · --output json · --quiet'
+      - dbt ls -s +mart_delivery_features --quiet
+    col_ratios:
+    - 4
+    - 6
+    - 5
+    - 7
+  notes: |2
+    [~2.5 мин] **Главное:** команд немного, и запоминать надо не их, а !!модификаторы!! — почти вся работа с dbt в проде это `--select` плюс один флаг.
+
+    **Рассказ:** взять четыре строки, остальные студент прочитает.
+
+    **dbt build** — главная. Она собирает модель и тут же прогоняет её тесты, идя по графу; `--fail-fast` останавливает прогон на первом падении, что в CI экономит минуты.
+
+    **dbt retry** — недооценённая. Она повторяет !!последний прогон с той точки, где он упал!!, читая `run_results.json`, а не начинает с нуля. На ночной сборке из пятидесяти моделей, упавшей на сорок седьмой, это разница между тремя минутами и часом. Работает без аргументов — состояние берётся из `target/`.
+
+    **dbt test --store-failures** — записывает нарушившие строки в отдельную таблицу вместо того, чтобы просто сказать «упало N строк». Для отладки признаков это то, что нужно: можно посмотреть глазами, какие именно заказы сломали контракт.
+
+    **dbt compile** — первый инструмент отладки Jinja, мы им пользовались весь блок про шаблоны.
+
+    **Для MLE:** практический набор на каждый день — четыре строки: `dbt build -s <модель>+`, `dbt retry`, `dbt test -s <модель> --store-failures`, `dbt compile -s <модель>`.
+
+    **Осторожно:** `--full-refresh` на инкрементальной витрине признаков за три года — это полный пересчёт истории. Он иногда нужен, но это не «на всякий случай».
+
+    **Переход:** ~~«Отдельно стоит разобрать селекторы — это то, чем вы будете пользоваться чаще всего».~~

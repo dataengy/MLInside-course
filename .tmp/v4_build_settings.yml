@@ -1,0 +1,46 @@
+# v4_build_settings.yml — копия content/build_deck_v3-settings.yml с ОДНИМ отличием:
+# out_dir указывает не в data/generated, а в .tmp/build.
+#
+# Зачем: Stop-хук scripts/hooks/deck-publish-auto-send.sh сканирует data/generated и
+# отправляет новейшую собранную версию деки в Telegram сам, без явной команды. Черновая
+# сборка «посмотреть, как легло» не должна этого триггерить — поэтому черновики собираются
+# сюда, а в data/generated кладут только то, что действительно готово публиковать.
+#
+#   PYTHONPATH=src python3 -m preza_gen.build_deck --pptx --html \
+#     --settings .tmp/v4_build_settings.yml --content content/preza-dbt-v4-content.yml
+#
+# Написан при сборке v4 деки; в Justfile намеренно не заведён.
+
+settings:
+  template: data/source/MLinside-шаблон-презентаций.pptx
+  media_dir: data/source/media
+  out_dir: .tmp/build
+  formats_file: settings/formats.yml
+  theme:
+    accent: 2419FF
+    white: FFFFFF
+    dark: 1A1A1A
+    alt: F2F2F7
+    font: Corbel
+  layouts:
+    title: Титульный слайд
+    agenda: Title and body
+    section: Заголовок и объект
+    content: Title and body
+    table: Только заголовок
+    closing: Section header
+  image_box:
+    left: 7.35
+    top: 1.65
+    width: 5.5
+    height: 4.7
+  code_style: {font: Consolas, size: 13, min_size: 9, fg: E6EDF3, bg: 0D1117}
+  code_box:      {left: 6.95, top: 1.7, width: 5.95, height: 5.2}
+  code_box_full: {left: 0.55, top: 1.6, width: 12.3, height: 4.8}
+  generation:
+    parallel: false
+  notes_emphasis:
+    '!!…!!': жирный + подчёркнутый — самое важное
+    '**…**': жирный — термины и важное
+    __…__: подчёркнутый — следующее по важности
+    ~~…~~: курсив — второстепенное

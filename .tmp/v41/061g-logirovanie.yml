@@ -1,0 +1,57 @@
+- kind: content
+  id: 061g-logirovanie-v-dbt
+  title: '📝 Логирование в dbt'
+  bullets:
+  - 'Пишется в stdout и в файл logs/dbt.log — путь задаётся --log-path или DBT_LOG_PATH'
+  - 'Форматы text · debug · json, отдельно для консоли (--log-format) и файла (--log-format-file)'
+  - 'Уровни debug|info|warn|error|none; -d включает DEBUG в консоли'
+  - 'JSON-события несут info и data, а также node_info: имя модели, статус, материализация'
+  - 'Переменные окружения с префиксом DBT_ENV_CUSTOM_ENV_ автоматически едут в info.extra'
+  - 'SQL при отладке смотрим в target/compiled и target/run, все запросы — в logs/dbt.log'
+  - 'Чистый вывод для автоматизации: dbt ls --quiet или --log-level warn'
+  materials:
+  - label: About logs
+    url: https://docs.getdbt.com/reference/global-configs/logs
+  - label: Events and logs
+    url: https://docs.getdbt.com/reference/events-logging
+  code_caption: логи как источник данных, а не как простыня в терминале
+  code_lang: bash
+  code: |2
+    # человеку в консоль, машине в файл
+    dbt build --log-format text \
+              --log-format-file json \
+              --log-level info --log-level-file debug \
+              --log-path logs/ci
+
+    # разметить прогон, чтобы найти его в json-логах
+    export DBT_ENV_CUSTOM_ENV_run_id=$CI_PIPELINE_ID
+    export DBT_ENV_CUSTOM_ENV_triggered_by=airflow
+    # → попадёт в info.extra каждого события
+
+    # что упало и сколько шло — без чтения простыни
+    jq -r 'select(.info.name=="LogModelResult")
+           | [.data.node_info.node_name,
+              .data.status,
+              .data.node_info.node_started_at] | @tsv' \
+       logs/ci/dbt.log
+
+    # чистый список моделей для скрипта
+    dbt ls --select tag:features --quiet
+  notes: |2
+    [~2 мин] **Главное:** логи dbt — это !!структурированные события, а не текст!!. Как только вы включаете json, прогон становится данными, по которым можно строить дашборд.
+
+    **Разбор кода:** четыре блока.
+
+    Первый — разные форматы для человека и для машины. В консоль идёт читаемый `text`, в файл — `json` с уровнем `debug`. Это единственный способ одновременно нормально смотреть за сборкой и иметь полный след для разбора.
+
+    Второй — !!`DBT_ENV_CUSTOM_ENV_*`!!. Любая переменная окружения с этим префиксом автоматически попадает в `info.extra` каждого события. Отсюда получается связь между прогоном dbt и запуском в оркестраторе: положили туда id пайплайна — и любое падение теперь трассируется до конкретного DAG-рана.
+
+    Третий — `jq` по json-логу: имя модели, статус, время старта. То же самое, но без ручного чтения.
+
+    Четвёртый — про автоматизацию: у `dbt ls` с версии 1.5 уровень по умолчанию `INFO`, и в скрипт приезжает шапка. Лечится `--quiet` или `--log-level warn`.
+
+    **Для MLE:** три места, куда смотреть при разборе падения. `target/compiled/` — что получилось из шаблона. `target/run/` — что именно ушло в базу вместе с DDL. `logs/dbt.log` — все запросы и ответы движка. В таком порядке.
+
+    **Осторожно:** `--log-level debug` пишет в лог полные тексты запросов. На проде это и объём, и !!возможная утечка значений!! в логи — уровень для файла выбирают осознанно.
+
+    **Переход:** ~~«Ещё несколько возможностей, которые редко попадают в базовый рассказ, но регулярно нужны».~~

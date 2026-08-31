@@ -1,0 +1,55 @@
+- kind: content
+  id: 061h-dop-poleznye-vozmozhnosti
+  title: 'Дополнительные возможности: exposures, contracts, groups'
+  bullets:
+  - 'exposure — потребитель ВНЕ dbt: дашборд, ML-модель, сервис. Втаскивает его в граф'
+  - 'Отвечает на вопрос «кого предупредить», который иначе решается перепиской'
+  - 'Попадает в dbt docs и в селекторы: dbt ls --select +exposure:delivery_delay_model'
+  - 'contract: enforced — схема витрины фиксируется, смена типа падает на сборке'
+  - 'groups и access — модель private внутри группы, public наружу; основа dbt-mesh'
+  - 'versions — две версии витрины одновременно, пока потребители переезжают'
+  materials:
+  - label: Exposures
+    url: https://docs.getdbt.com/docs/build/exposures
+  - label: Model contracts
+    url: https://docs.getdbt.com/docs/collaborate/govern/model-contracts
+  - label: Model access
+    url: https://docs.getdbt.com/docs/collaborate/govern/model-access
+  code_caption: models/marts/_marts__exposures.yml · контракт витрины
+  code_lang: yaml
+  code: |2
+    exposures:
+      - name: delivery_delay_model
+        type: ml               # dashboard | notebook | ml | application
+        maturity: high
+        owner: {name: ML Platform, email: ml@example.com}
+        url: https://mlflow.internal/models/delivery_delay
+        description: >
+          Модель предсказания просрочки. Учится на
+          mart_delivery_features, инференс батчем ночью.
+        depends_on:
+          - ref('mart_delivery_features')
+          - ref('int_seller_delay_history')
+
+    models:
+      - name: mart_delivery_features
+        config: {contract: {enforced: true}}
+        access: public
+        columns:
+          - name: order_id
+            data_type: string
+            constraints: [{type: not_null}]
+  notes: |2
+    [~2 мин] **Главное:** !!exposure — это способ сказать графу про то, что живёт вне dbt!!. Без него граф обрывается на последней витрине, и вопрос «кто сломается» остаётся без машинного ответа.
+
+    **Разбор кода:** верхний блок — объявление обученной модели как потребителя. `type: ml` (бывают ещё dashboard, notebook, application), владелец с почтой, ссылка на реестр моделей и, главное, `depends_on` — от каких моделей она зависит.
+
+    Что это даёт практически. Во-первых, exposure появляется в `dbt docs` как узел графа, и по нему видно всю цепочку от сырых таблиц до модели. Во-вторых, работают селекторы: `dbt ls --select +exposure:delivery_delay_model` покажет всё, что нужно собрать перед обучением, а `dbt build --select mart_delivery_features+` теперь честно включает и exposure.
+
+    Нижний блок — **contract**. `enforced: true` фиксирует схему витрины: типы и ограничения проверяются на сборке, и попытка молча поменять тип колонки падает !!до того!!, как обучение получит другие данные. Для feature mart это дешёвая страховка.
+
+    **Для MLE:** три строки `access` и `groups` пригодятся, когда проектов становится больше одного: модель `private` видна только внутри своей группы, `public` — снаружи. Это основа dbt-mesh, но полезно и в одном репозитории — как явная граница «сюда можно ссылаться, сюда нельзя».
+
+    **Осторожно:** exposure — это !!объявление, а не автоматика!!. dbt не проверяет, что модель действительно читает эту витрину; вы отвечаете за то, чтобы `depends_on` соответствовал реальности. Устаревший exposure хуже отсутствующего.
+
+    **Переход:** ~~«И последнее в этом блоке — что вокруг dbt изменил AI».~~

@@ -1,0 +1,48 @@
+- kind: content
+  id: 024-jinja-var-env-cikl
+  title: 'Jinja в деле: параметры, условие, цикл — и что уехало в базу'
+  code_caption: 'слева ваш файл, ниже черты — target/compiled при --target dev'
+  code_lang: sql
+  code: |2
+    -- ИСХОДНИК: models/marts/mart_seller_orders.sql
+    {% set window = var('train_window_days', 180) %}
+    {% set raw_db = env_var('CH_RAW_DB', 'olist_raw') %}
+
+    select
+      seller_id
+      {%- for st in ['delivered', 'canceled'] %},
+      countIf(order_status = '{{ st }}') as orders_{{ st }}
+      {%- endfor %}
+    from {{ ref('int_order_level') }}
+    where order_purchase_timestamp >= now() - interval {{ window }} day
+    {% if target.name == 'dev' %}
+      limit 10000                 -- в dev не считаем всё
+    {% endif %}
+    group by seller_id
+
+    -- ────────────────────────  СКОМПИЛИРОВАНО  ────────────────────────
+
+    select
+      seller_id,
+      countIf(order_status = 'delivered') as orders_delivered,
+      countIf(order_status = 'canceled')  as orders_canceled
+    from analytics.int_order_level
+    where order_purchase_timestamp >= now() - interval 180 day
+      limit 10000
+    group by seller_id
+  notes: |2
+    [~2 мин] **Главное:** одна и та же модель по-разному собирается в dev и в проде — и это описано в коде, а не в инструкции. Ниже черты видно, !!во что именно она превратилась!!.
+
+    **Разбор кода:** четыре точки в верхней половине. `var('train_window_days', 180)` — окно обучения стало параметром: поменять его можно флагом `--vars`, не трогая SQL. `env_var('CH_RAW_DB', ...)` — то же самое, но значение приходит из окружения: адрес базы и креды в git не попадают. Цикл `for st in [...]` — два почти одинаковых агрегата пишутся один раз. `if target.name == 'dev'` — в dev-профиле модель собирается на срезе.
+
+    Дальше — !!нижняя половина, ради которой слайд и сделан!!. Цикла нет: он развернулся в два `countIf`. Условия нет: `target.name` был `dev`, значит `limit` остался. `ref` стал именем таблицы, `var` стал числом 180. **В базу уезжает обычный SQL — никакой Jinja там не существует.**
+
+    Не разбирать: `{%-` и `-%}` — это управление пробелами, скажите одной фразой «минус съедает пробел» и идите дальше.
+
+    **Для MLE:** параметризованное окно — это ровно то, что нужно для экспериментов с признаками: собрать витрину на 90 и на 365 днях, не заводя две модели.
+
+    **Пример:** `dbt build --select mart_seller_orders --vars '{train_window_days: 365}'` — и в скомпилированном SQL станет `interval 365 day`.
+
+    **Осторожно:** значения `var()` идут в SQL как текст. Не подставляйте туда пользовательский ввод.
+
+    **Переход:** ~~«А если один и тот же кусок логики нужен в пяти моделях — это уже макрос».~~
