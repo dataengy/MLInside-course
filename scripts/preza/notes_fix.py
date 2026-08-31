@@ -98,6 +98,11 @@ def _plain(text: str) -> str:
     """
     text = N.CLOCK_RE.sub("", text.strip())
     text = re.sub(r"^[ \t]*- ", "", text, flags=re.M)
+    # Регистр первой буквы буллета — тоже форматирование (см. notes.capitalize_bullet),
+    # поэтому перед сравнением он приводится к нижнему. Регистр в любом другом месте
+    # по-прежнему считается изменением текста и роняет запись.
+    text = re.sub(r"(?m)^([^0-9A-Za-zА-Яа-яЁё]*)([А-ЯЁ])",
+                  lambda m: m.group(1) + m.group(2).lower(), text)
     return re.sub(r"\s+", " ", text).strip()
 
 
