@@ -25,11 +25,17 @@
     python3 scripts/preza/notes_fix.py apply CONTENT.yml
     python3 scripts/preza/notes_fix.py apply CONTENT.yml --scope=all
     python3 scripts/preza/notes_fix.py apply CONTENT.yml --max-sentences=2 --max-chars=180
+    python3 scripts/preza/notes_fix.py check CONTENT.yml --settings=.tmp/v4_build_settings.yml
 
-``--scope``: ``stamped`` (по умолчанию) — часы только слайдам с ``[~N мин]``; ``all`` — всем,
-слайд без метки считается нулевым; ``per-part`` — как ``all``, но в каждой части (PART 2,
-PART 3) часы идут с нуля. ``--no-clock`` оставляет только структуру разделов и СНИМАЕТ
-ранее проставленные часы.
+НАСТРОЙКИ. Пороги, ``scope`` и включённость часов берутся из ``settings.notes_format`` того
+же файла настроек, которым дека собирается, — иначе ``check`` ругался бы на деку, собранную
+правильно, просто потому что у скрипта свой порог, а у билда свой. Флаги ниже перекрывают
+прочитанное; ``--settings=`` указывает другой файл настроек.
+
+``--scope``: ``stamped`` — часы только слайдам с ``[~N мин]``; ``all`` — всем, слайд без
+метки считается нулевым; ``per-part`` — как ``all``, но в каждой части (PART 2, PART 3) часы
+идут с нуля. ``--no-clock`` оставляет только структуру разделов и СНИМАЕТ ранее
+проставленные часы.
 
 Запись — блочной хирургией: файл режется по ``- kind:``, правится только значение ключа
 ``notes:``, остальные слайды остаются байт-в-байт. Перед записью результат проверяется на
@@ -53,6 +59,20 @@ from preza_gen import notes as N  # noqa: E402
 
 NOTES_KEY = "  notes:"
 INDENT = "    "
+# Пороги и scope живут в настройках сборки (`settings.notes_format`) — оттуда их берёт
+# pipeline._format_notes. Скрипт обязан читать ТЕ ЖЕ значения, иначе `check` вечно ругается
+# на деку, которая на самом деле собрана правильно: у CLI один порог, у билда другой.
+DEFAULT_SETTINGS = _ROOT / "content" / "build_deck_v3-settings.yml"
+
+
+def _defaults(settings: Path) -> dict:
+    doc = yaml.safe_load(settings.read_text(encoding="utf-8"))["settings"]["notes_format"]
+    return {
+        "clock": doc["clock"],
+        "scope": doc["scope"],
+        "max_sentences": doc["bullets_max_sentences"],
+        "max_chars": doc["bullets_max_chars"],
+    }
 
 
 def _notes_span(block: str) -> tuple[int, int] | None:
@@ -91,19 +111,29 @@ def _slide_notes(block: str) -> str:
 
 
 def _plain(text: str) -> str:
-    """Текст без форматирования — часов, буллетов и пробелов.
+    """Содержание заметки без форматирования: часов, буллетов, переносов и регистра.
 
-    Сравнение по нему ловит настоящую потерю содержания и не срабатывает на переносах,
-    которые скрипт и должен менять.
+    Регистр снимается ЦЕЛИКОМ, и это осознанно. Единственное, что скрипт делает с
+    регистром, — поднимает первую букву буллета (``notes.capitalize_bullet``); в прозе та
+    же фраза стоит в середине строки, и восстановить по ней границы будущих буллетов
+    нельзя. Поэтому любая частичная нормализация регистра асимметрична: сторона «до»
+    сохраняет заглавную в середине строки, сторона «после» — теряет её в начале буллета,
+    и страж падает на КАЖДОЙ деке, которую ещё не прогоняли через apply.
+
+    Слепота к регистру ничего не стоит: ни одно преобразование в ``preza_gen.notes`` текст
+    не переписывает — оно переносит строки и меняет регистр ровно одной буквы. Потерю
+    содержания это сравнение по-прежнему ловит.
+
+    >>> _plain("[~1 мин] **Главное:** это раз. Ни один не два.")
+    '[~1 мин] **главное:** это раз. ни один не два.'
+    >>> _plain("00:00-01:00 [~1 мин] **Главное:**\\n- Это раз.\\n- Ни один не два.")
+    '[~1 мин] **главное:** это раз. ни один не два.'
+    >>> _plain("**Главное:** раз.") == _plain("**Главное:** два.")
+    False
     """
     text = N.CLOCK_RE.sub("", text.strip())
     text = re.sub(r"^[ \t]*- ", "", text, flags=re.M)
-    # Регистр первой буквы буллета — тоже форматирование (см. notes.capitalize_bullet),
-    # поэтому перед сравнением он приводится к нижнему. Регистр в любом другом месте
-    # по-прежнему считается изменением текста и роняет запись.
-    text = re.sub(r"(?m)^([^0-9A-Za-zА-Яа-яЁё]*)([А-ЯЁ])",
-                  lambda m: m.group(1) + m.group(2).lower(), text)
-    return re.sub(r"\s+", " ", text).strip()
+    return re.sub(r"\s+", " ", text).strip().lower()
 
 
 def run(content_yml: Path, *, write: bool, scope: str, clock: bool,
@@ -177,13 +207,15 @@ def main(argv: list[str]) -> int:
     if len(args) != 2 or args[0] not in ("check", "apply"):
         print(__doc__)
         return 2
+    settings = Path(opts["--settings"]) if "--settings" in opts else DEFAULT_SETTINGS
+    d = _defaults(settings)
     return run(
         Path(args[1]),
         write=(args[0] == "apply"),
-        scope=opts.get("--scope", "stamped"),
-        clock="--no-clock" not in opts,
-        max_sentences=int(opts.get("--max-sentences", 3)),
-        max_chars=int(opts.get("--max-chars", 240)),
+        scope=opts.get("--scope", d["scope"]),
+        clock=d["clock"] and "--no-clock" not in opts,
+        max_sentences=int(opts.get("--max-sentences", d["max_sentences"])),
+        max_chars=int(opts.get("--max-chars", d["max_chars"])),
     )
 
 

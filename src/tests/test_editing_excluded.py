@@ -38,15 +38,15 @@ def test_excluded_paths_exist():
 
 def test_write_refuses_an_excluded_deck():
     with pytest.raises(click.ClickException, match="вне нашей зоны правки"):
-        edit_slides._refuse_if_excluded(REPO / AIRFLOW)
+        edit_slides.refuse_if_excluded(REPO / AIRFLOW)
 
 
 def test_write_allows_our_own_decks():
-    edit_slides._refuse_if_excluded(REPO / "content" / "preza-dagster-content.yml")
+    edit_slides.refuse_if_excluded(REPO / "content" / "preza-dagster-content.yml")
 
 
 def test_unreadable_settings_do_not_unlock_the_guard(monkeypatch, tmp_path):
     """Битые настройки должны падать, а не разрешать правку по умолчанию."""
     monkeypatch.setattr(edit_slides, "SETTINGS", tmp_path / "nope.yml")
     with pytest.raises(click.ClickException, match="не читаются настройки"):
-        edit_slides._refuse_if_excluded(REPO / AIRFLOW)
+        edit_slides.refuse_if_excluded(REPO / AIRFLOW)
