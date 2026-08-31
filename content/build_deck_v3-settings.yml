@@ -33,6 +33,17 @@ settings:
   code_box_full: {left: 0.55, top: 1.6, width: 12.3, height: 4.8}   # code-only safe area
   generation:
     parallel: false   # render requested formats concurrently (ThreadPoolExecutor)
+  # Подстрочник докладчика (см. preza_gen/notes.py). Применяется на каждой сборке и
+  # идемпотентно, поэтому синхронность контент-YAML с ним не обязательна.
+  #   clock  — ставить абсолютное время «10:00-11:30» перед меткой [~N мин]
+  #   scope  — stamped: только слайды с [~N мин] | all: всем | per-part: часы с нуля в каждой части
+  #   bullets_max_* — порог «короткого» раздела: он идёт меткой на своей строке + буллетами по
+  #                   предложениям, длинный остаётся прозой
+  notes_format:
+    clock: true
+    scope: stamped
+    bullets_max_sentences: 3
+    bullets_max_chars: 240
   notes_emphasis:
     '!!…!!': жирный + подчёркнутый — самое важное
     '**…**': жирный — термины и важное

@@ -112,6 +112,15 @@ preza-slides content *ARGS:
 preza-images cmd content *ARGS:
     cd {{_dir}} && python3 scripts/preza/images_manifest.py {{cmd}} {{content}} {{ARGS}}
 
+# Подстрочники докладчика: абсолютное время «10:00-11:30» перед меткой [~N мин] и короткие
+# разделы («Главное», «Переход»…) меткой на своей строке + буллетами по предложениям.
+# Идемпотентно: повторный apply даёт «изменено 0». Та же логика (preza_gen/notes.py) работает
+# на каждой сборке, поэтому apply нужен лишь чтобы часы были видны в самом контенте.
+# check ничего не пишет и падает при расхождении — годится для CI.
+# Пример: just preza-notes apply content/preza-dbt-v4-content.yml --scope=all
+preza-notes cmd content *ARGS:
+    cd {{_dir}} && python3 scripts/preza/notes_fix.py {{cmd}} {{content}} {{ARGS}}
+
 # Import a FOREIGN .pptx (one this repo did not generate) into a reviewable content YAML.
 # Lossy and one-way — never build from the result. Add a plan entry with `generated: false`.
 preza-import-pptx pptx out="":

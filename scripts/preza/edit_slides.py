@@ -33,7 +33,7 @@ MARKER = "- kind:"
 SETTINGS = Path(__file__).resolve().parents[2] / "settings" / "config.yml"
 
 
-def _refuse_if_excluded(path: Path) -> None:
+def refuse_if_excluded(path: Path) -> None:
     """Запрет правки деки, чей предмет ведёт другой лектор.
 
     Список — ``deck_generation.editing_excluded`` в ``settings/config.yml``. Читается
@@ -55,7 +55,7 @@ def _refuse_if_excluded(path: Path) -> None:
         )
 
 
-def _split(text: str) -> tuple[str, list[str]]:
+def split_blocks(text: str) -> tuple[str, list[str]]:
     """(шапка до `content:`, список текстовых блоков слайдов)."""
     head, sep, body = text.partition("content:\n")
     if not sep:
@@ -88,7 +88,7 @@ def _index(blocks: list[str], slide_id: str) -> int:
 
 def _write(path: Path, head: str, blocks: list[str]) -> None:
     """Записать, предварительно проверив право на правку, YAML и уникальность id."""
-    _refuse_if_excluded(path)
+    refuse_if_excluded(path)
     text = head + "".join(blocks)
     try:
         doc = yaml.safe_load(text)
@@ -107,7 +107,7 @@ def _write(path: Path, head: str, blocks: list[str]) -> None:
 @click.pass_context
 def cli(ctx: click.Context, content_path: Path) -> None:
     """Правки CONTENT_PATH по id слайда с сохранением форматирования."""
-    ctx.obj = (content_path, *_split(content_path.read_text(encoding="utf-8")))
+    ctx.obj = (content_path, *split_blocks(content_path.read_text(encoding="utf-8")))
 
 
 @cli.command("list")
@@ -167,7 +167,7 @@ def move(obj, slide_id: str, after_id: str | None, before_id: str | None) -> Non
 def insert(obj, block_file: Path, after_id: str | None, before_id: str | None) -> None:
     """Вставить слайд(ы) из файла относительно якорного id."""
     path, head, blocks = obj
-    incoming = _split("content:\n" + block_file.read_text(encoding="utf-8"))[1]
+    incoming = split_blocks("content:\n" + block_file.read_text(encoding="utf-8"))[1]
     at = _anchor(blocks, after_id, before_id)
     blocks[at:at] = incoming
     _write(path, head, blocks)
