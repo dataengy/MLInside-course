@@ -1,0 +1,48 @@
+- kind: content
+  id: 006d-istoriya-dbt
+  title: 'Как появился dbt: от ETL к слою трансформаций'
+  bullets:
+  - 'До облака: T до загрузки, отдельный движок и свой compute'
+  - 'Дешёвые облачные DWH сделали ELT дефолтом, а не экзотикой'
+  - '2016 — dbt: практики разработки ПО приходят в SQL'
+  - '2025–2026 — Rust-движок Fusion и слияние с Fivetran'
+  - 'SQLMesh — независимая альтернатива, не часть экосистемы dbt'
+  materials:
+  - label: dbt Core v2
+    url: https://docs.getdbt.com/blog/dbt-core-v2-is-here
+  - label: Fivetran + dbt Labs
+    url: https://www.getdbt.com/blog/fivetran-dbt-labs-complete-merger-to-create-the-data-infrastructure-for-trusted-ai-agents
+  - label: dbt Projects on Snowflake
+    url: https://docs.snowflake.com/en/release-notes/2025/other/2025-11-06-dbt-projects-on-snowflake-ga
+  code_lang: diagram
+  code: |2
+     до 2012   ETL · compute вне базы
+     2012–16   Redshift · BigQuery · Snowflake
+               → ELT становится дешевле ETL
+     2016      dbt · Fishtown Analytics
+     2019–22   dbt Cloud · Analytics Engineering
+               · dbt Labs · dbt Core 1.0
+     2025-05   Fusion: движок переписан на Rust
+     2025-11   dbt Projects on Snowflake GA
+     2026-06   Fivetran + dbt Labs · Core v2.0
+  notes: |2
+    [~2 мин] **Главное:** dbt появился не как «ещё один инструмент», а как !!реакция на то, что трансформации переехали внутрь хранилища и остались без инженерных практик!!.
+
+    **Рассказ:** по строкам таймлайна, коротко.
+
+    - **До облачных хранилищ** трансформации считать в базе было дорого: свой compute у ETL-движка, буква T стоит до загрузки.
+    - **2012–2016** — Redshift, BigQuery, Snowflake. Хранилище само стало дешёвым вычислителем, и __грузить сырьё как есть стало выгоднее, чем готовить его заранее__.
+    - **2016** — dbt в **Fishtown Analytics**: git, ревью, тесты и документация приходят в SQL-разработку.
+    - **2019–2022** — коммерческий dbt Cloud, термин **Analytics Engineering**, компания переименована в dbt Labs, вышел **dbt Core 1.0**.
+    - **28 мая 2025** — движок **Fusion**: переписан на Rust, разбирает SQL, а не только подставляет Jinja.
+    - **6 ноября 2025** — **dbt Projects on Snowflake** в GA: dbt-проект как объект внутри хранилища, со своим CI/CD.
+    - **13 октября 2025** объявлено слияние с **Fivetran**, **1 июня 2026** оно завершено; тогда же вышел **dbt Core v2.0** на общем с Fusion Rust-рантайме, по-прежнему под Apache 2.0.
+
+    **Практический смысл:** для вашего проекта это значит одно — !!dbt Core остаётся открытым и никуда не делся!!. Python-ветка 1.x доступна и обновляется, миграция на v2 — ваше решение, а не срок от вендора.
+
+    **Осторожно:** две вещи, которые часто путают.
+
+    - **Fusion ≠ отдельный продукт вместо Core.** Это движок, на котором построен dbt Core v2.0; проприетарной остаётся только расширенная сборка бинаря.
+    - **SQLMesh — не часть экосистемы dbt.** Это независимый движок другой команды, который умеет читать dbt-проекты. Разбор — в Part 3.
+
+    **Переход:** ~~«У всего этого был манифест, написанный ещё до первой строчки кода».~~

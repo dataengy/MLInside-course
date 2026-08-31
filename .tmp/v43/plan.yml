@@ -1,0 +1,49 @@
+# v4.4 edit plan — применяется .tmp/v41_patch.py (шаги идут по порядку).
+#
+# Что делает этот проход (§1–§5, §8 брифа; §6 и §7 закрыты в v4.3.0 инструментом
+# scripts/preza/notes_fix.py — часы в блоках НЕ пишем, их проставит `just preza-notes apply`):
+#   * intro: «dbt за 60 секунд» + таймлайн появления dbt, дубли в блоке AE/ELT сняты;
+#   * onboarding: первый проект, два конфига, shift-left;
+#   * моделирование: слои DAG ≠ модель данных; таблица паттернов переписана;
+#   * Airflow 3 + Cosmos; обобщение формулировок; правка фактических ошибок.
+
+- {op: header, file: header.yml}
+
+# ── §1 intro / history ────────────────────────────────────────────────────────
+- {op: replace,      id: 002-plan-lekcii,                        file: 002-agenda.yml}
+- {op: insert_after, id: 005-full-stack-data-specialist,         file: 006a-dbt-za-60-sekund.yml}
+- {op: replace,      id: 006-pochemu-voznik-analytics-engineering, file: 006-ae.yml}
+- {op: insert_after, id: 006b-elt-vmesto-etl,                    file: 006d-istoriya-dbt.yml}
+
+# ── §3 hands-on onboarding ────────────────────────────────────────────────────
+- {op: insert_after, id: 014-chto-takoe-dbt-kompilyaciya,        file: 014b-dbt-core-za-5-minut.yml}
+- {op: insert_after, id: 014b-dbt-core-za-5-minut,               file: 014c-proekt-ne-okruzhenie.yml}
+- {op: insert_after, id: 014c-proekt-ne-okruzhenie,              file: 014d-shift-left.yml}
+
+# ── §2 modeling ───────────────────────────────────────────────────────────────
+- {op: replace,      id: 015a-sloi-dbt-proekta-obzor,            file: 015a-kak-modelirovat.yml}
+- {op: replace,      id: 015-sloi-dbt-proekta-otvetstvennost,    file: 015-otvetstvennost.yml}
+- {op: replace,      id: 015c-podhody-k-modelirovaniyu,          file: 015c-kogda-marts-malo.yml}
+
+# ── §5 Airflow 3 + Cosmos ─────────────────────────────────────────────────────
+- {op: insert_after, id: 053-cosmos-execution-modes,             file: 053b-airflow3-cosmos.yml}
+
+# ── §3 дубли: разбор линтеров уехал на 014d ───────────────────────────────────
+- {op: replace,      id: 061-ci-dlya-dbt,                        file: 061-precommit.yml}
+
+# ── §4 обобщение формулировок ─────────────────────────────────────────────────
+- {op: sub, count: 1, find: "    - Зачем ML-инженеру", replace: "    - Зачем"}
+
+# ── §8 фактические правки ─────────────────────────────────────────────────────
+- op: sub
+  count: 1
+  find: "    - Astronomer публиковали замеры порядка сорока процентов ускорения относительно LOCAL на своих бенчмарках."
+  replace: "    - Astronomer заявляет сокращение времени прогона DAG до 80% на проектах со множеством мелких моделей — режим стабилен с Cosmos 1.15.0."
+- op: sub
+  count: 1
+  find: "      - package: calogica/dbt_expectations"
+  replace: "      - package: metaplane/dbt_expectations"
+- op: sub
+  count: 2
+  find: "version=v4.3.0 · 2026-09-01"
+  replace: "version=v4.4.0 · 2026-09-01"

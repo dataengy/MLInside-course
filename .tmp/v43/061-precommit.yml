@@ -1,0 +1,48 @@
+- kind: content
+  id: 061-ci-dlya-dbt
+  title: 'pre-commit: быстрая защита до push'
+  bullets:
+  - 'Первый рубеж — локальный: обратная связь за секунды, без ожидания CI'
+  - 'sqlfmt — форматтер в духе Black: один стиль, спорить не о чем'
+  - 'SQLFluff линтит правила поверх формата и понимает Jinja'
+  - 'dbt-checkpoint ловит структуру проекта и метаданные'
+  - 'check-model-has-tests не пускает модель без тестов — лучшее правило для feature layer'
+  - 'Хук не заменяет CI: его можно пропустить флагом --no-verify'
+  materials:
+  - label: pre-commit
+    url: https://pre-commit.com/
+  - label: SQLFluff
+    url: https://docs.sqlfluff.com/
+  - label: dbt-checkpoint
+    url: https://github.com/dbt-checkpoint/dbt-checkpoint
+  code_caption: .pre-commit-config.yaml
+  code_lang: yaml
+  code: |2
+    repos:
+      - repo: https://github.com/tconbeer/sqlfmt
+        rev: v0.23.2
+        hooks: [{id: sqlfmt}]          # сначала формат
+
+      - repo: https://github.com/sqlfluff/sqlfluff
+        rev: 3.2.5
+        hooks: [{id: sqlfluff-lint}]   # потом правила
+
+      - repo: https://github.com/dbt-checkpoint/dbt-checkpoint
+        rev: v2.0.6
+        hooks:
+          - id: dbt-compile            # шаблон рендерится?
+          - id: check-model-has-tests  # тесты обязательны
+          - id: check-model-has-description
+          - id: check-model-has-all-columns
+  notes: |2
+    [~1.5 мин] **Главное:** это тот самый локальный рубеж из блока про shift left, только теперь !!в виде конфига, который работает у всей команды!!.
+
+    **Разбор кода:** порядок хуков не случаен — сначала формат, потом правила, потом смысл. `sqlfmt` и `sqlfluff-lint` мы уже обсуждали; новое здесь — `dbt-checkpoint`.
+
+    `dbt-compile` проверяет, что шаблон рендерится и все `ref` разрешаются. Три следующих хука — про метаданные: у модели есть тесты, есть описание, все колонки описаны. Это те проверки, которых нет ни у одного линтера SQL, потому что они про dbt-проект, а не про язык.
+
+    **Практический смысл:** !!`check-model-has-tests` — то правило, ради которого стоит ставить всё остальное.!! Одна строка в конфиге превращает «мы собирались написать тесты» в «без тестов коммит не пройдёт». Для витрины признаков это дороже любого линтера.
+
+    **Осторожно:** pre-commit можно обойти — `git commit --no-verify`, и хуки не выполнятся. Поэтому он !!не заменяет CI!!, а стоит перед ним. Всё, что действительно обязательно, должно дублироваться в пайплайне.
+
+    **Переход:** ~~«Второй рубеж — обязательный, в чистом окружении».~~

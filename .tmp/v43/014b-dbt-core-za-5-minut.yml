@@ -1,0 +1,53 @@
+- kind: content
+  id: 014b-dbt-core-za-5-minut
+  title: 'dbt Core за 5 минут: от пустой папки до сборки'
+  bullets:
+  - 'Проект dbt — обычный git-репозиторий из .sql и .yml'
+  - 'dbt init создаёт каркас, dbt debug проверяет соединение'
+  - 'dbt build = run + test одной командой, в порядке DAG'
+  - 'dbt docs generate собирает сайт с описаниями и lineage'
+  - 'target/ — артефакты сборки, в git не коммитятся'
+  materials:
+  - label: dbt init
+    url: https://docs.getdbt.com/reference/commands/init
+  - label: dbt-clickhouse
+    url: https://github.com/ClickHouse/dbt-clickhouse
+  code_caption: первый прогон на ClickHouse
+  code_lang: bash
+  code: |2
+    uv venv && source .venv/bin/activate
+    uv pip install dbt-core dbt-clickhouse
+
+    dbt init olist && cd olist
+    dbt debug     # соединение и профиль живые?
+    dbt build     # run + test в порядке графа
+    dbt docs generate && dbt docs serve
+
+    # ── каркас проекта ─────────────────────
+    olist/
+    ├── dbt_project.yml   # конфигурация
+    ├── models/           # staging · int · marts
+    ├── macros/  tests/   # Jinja и свои тесты
+    ├── packages.yml      # зависимости
+    └── target/           # артефакты, не в git
+    ~/.dbt/profiles.yml   # соединение, вне репо
+  notes: |2
+    [~2 мин] **Главное:** !!dbt-проект — это обычный репозиторий с SQL и YAML!!. dbt добавляет к нему компилятор, DAG, тесты, метаданные и материализации.
+
+    **Рассказ:** порядок команд ровно такой, в каком его проходят в первый раз.
+
+    - `uv pip install dbt-core dbt-clickhouse` — движок и **адаптер** ставятся отдельно: адаптер знает диалект и умеет открывать соединение.
+    - `dbt init` задаёт вопросы и создаёт каркас проекта плюс запись в `~/.dbt/profiles.yml`.
+    - `dbt debug` — первая команда после любой правки соединения. Она отвечает на вопрос «профиль читается, хост доступен, права есть».
+    - `dbt build` — то, чем пользуются каждый день: __run и test одной командой__, в порядке графа. Модель, у которой упал тест, не пускает вниз своих потомков.
+    - `dbt docs generate && dbt docs serve` — локальный сайт с описаниями и графом зависимостей.
+
+    **Практический смысл:** каталог `target/` — рабочая папка, а не результат.
+
+    - `target/compiled/` — во что превратился ваш шаблон.
+    - `target/run/` — что реально ушло в базу вместе с DDL.
+    - `target/manifest.json` и `run_results.json` — артефакты, которые потом читают Slim CI, каталоги данных и мониторинг.
+
+    **Осторожно:** `dbt init` кладёт креды в `~/.dbt/profiles.yml` в открытом виде. Для командной работы это заменяется на `env_var()` — следующий слайд.
+
+    **Переход:** ~~«Разделим два конфига: что лежит в репозитории и что приходит из окружения».~~

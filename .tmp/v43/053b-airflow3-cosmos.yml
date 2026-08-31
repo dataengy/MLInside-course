@@ -1,0 +1,56 @@
+- kind: content
+  id: 053b-airflow3-cosmos
+  title: 'Airflow 3 + Cosmos + dbt: что изменилось'
+  bullets:
+  - 'Data-aware scheduling есть с Airflow 2.4 — тогда это был Dataset'
+  - 'В Airflow 3 Dataset переименован в Asset; смысл прежний'
+  - 'Импорт сменился: from airflow.sdk import Asset'
+  - 'Витрина как Asset — обучение стартует по её обновлению, не по cron'
+  - 'Внешнее событие — это AssetWatcher, а не расписание'
+  - 'Cosmos держит Airflow 3.0 начиная с версии 1.10.0'
+  materials:
+  - label: Asset-aware scheduling
+    url: https://airflow.apache.org/docs/apache-airflow/stable/authoring-and-scheduling/asset-scheduling.html
+  - label: Cosmos compatibility
+    url: https://astronomer.github.io/astronomer-cosmos/policy/compatibility-policy.html
+  code_caption: 'ingestion asset → dbt/Cosmos → feature asset → обучение'
+  code_lang: python
+  code: |2
+    from airflow.sdk import DAG, Asset
+    from cosmos import DbtTaskGroup
+
+    RAW  = Asset("clickhouse://olist/raw_orders")
+    FEAT = Asset("clickhouse://olist/mart_delivery")
+
+    with DAG("olist_dbt", schedule=[RAW]):
+        dbt = DbtTaskGroup(group_id="dbt_olist", ...)
+        ok = EmptyOperator(task_id="features_ready",
+                           outlets=[FEAT])
+        dbt >> ok
+
+    with DAG("train_delay", schedule=[FEAT]):
+        train()   # по данным, а не по расписанию
+  notes: |2
+    [~2 мин] **Главное:** в Airflow 3 расписание перестало быть единственным способом запустить обучение. !!Downstream-DAG подписывается на витрину!!, и Cosmos встраивается в эту цепочку.
+
+    **Рассказ:**
+
+    - Сначала — что НЕ поменялось. **Data-aware scheduling появилось не в Airflow 3, а в Airflow 2.4**, под именем `Dataset`. Идея та же: задача объявляет `outlets`, другой DAG объявляет их своим `schedule`.
+    - В **Airflow 3** это переименовано в **Asset** и заметно расширено: появился декоратор `@asset`, партиции ассетов и внешние события. Современный импорт — `from airflow.sdk import Asset`.
+    - `Asset` — надмножество старого `Dataset`: те же inlets/outlets работают, плюс новый синтаксис.
+    - Разбор кода: `RAW` — ассет ingestion, `FEAT` — витрина признаков. DAG трансформации просыпается по обновлению `RAW`, а DAG обучения — по обновлению `FEAT`.
+    - Отдельная задача с `outlets=[FEAT]` после `DbtTaskGroup` — самый переносимый способ объявить «витрина готова»: он не зависит от версии Cosmos.
+
+    **Практический смысл:** развести два разных механизма, которые звучат похоже.
+
+    - **Внутренняя зависимость по данным** внутри Airflow — это `Asset`: одна задача обновила, другая проснулась.
+    - **Внешнее событие** — сообщение в очереди, файл в объектном хранилище — это `AssetWatcher` и event-driven scheduling: Airflow слушает внешний источник и сам обновляет ассет.
+
+    **Осторожно:** несколько мест, где спотыкаются при переходе.
+
+    - !!Airflow `AssetWatcher` ≠ Cosmos `ExecutionMode.WATCHER`.!! Первое — про источник события. Второе — про то, как Cosmos исполняет dbt внутри одной задачи. Общего только слово.
+    - Первая поддержка Airflow 3.0 в Cosmos появилась в **1.10.0**; для Airflow 3.1–3.3 нужен **1.11.3+**, а плагин с dbt-документацией требует Airflow 3.1+.
+    - Airflow 3 !!ужесточил формат URI ассетов!!. DAG-и, которые были подписаны на сгенерированные Cosmos `Dataset`-URI, после апгрейда надо перепроверить: изменившийся URI молча означает «ассет никогда не обновляется».
+    - В Airflow 3 сменилась модель плагинов; свои UI-расширения вокруг dbt переписываются, а Cosmos показывает dbt docs через внешние view на FastAPI.
+
+    **Переход:** ~~«Теперь альтернативная философия — dmp-af».~~

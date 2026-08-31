@@ -21,7 +21,7 @@
 deck: content/preza-dbt-v4-content.yml
 settings: .tmp/v4_build_settings.yml
 media_dir: data/source/media
-generated: '2026-08-31'
+generated: '2026-09-01'
 images:
 - file: pic-roles-de-ae-da.png
   origin:
@@ -185,9 +185,9 @@ images:
     source: /Users/user/Pictures/MLInside (202608..)/1_IYYe23xvVfLCd7jCC83Utw.png
     url: null
   note: выбрана заказчиком под слайд про слои
-  state: placed
-  changed: '2026-08-31'
-  slide_id: 015a-sloi-dbt-proekta-obzor
+  state: manual-moved
+  changed: '2026-09-01'
+  slide_id: 015a-kak-modelirovat-dannye
   layout:
     box:
       left: 7.35
@@ -205,6 +205,7 @@ images:
       top: 3.44
       width: 5.5
       height: 3.07
+  moved_from: 015a-sloi-dbt-proekta-obzor
 - file: pic-model-layers-principles.jpg
   origin:
     kind: local
