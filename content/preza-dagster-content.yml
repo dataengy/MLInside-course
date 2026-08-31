@@ -2,7 +2,7 @@ deck:
   out_name: MLInside_Современная-оркестрация-ML-пайплайнов-Dagster
   naming: increment
   version_major: 1
-  downloads_dir: ~/Downloads
+  downloads_dir: ~/Downloads/_MLInside.2026-08
   source_deck: data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
 content:
 - kind: title

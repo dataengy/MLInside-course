@@ -6,7 +6,7 @@ deck:
   naming: increment                    # increment → _v{major}.{n} | timestamp → _{YYYYMMDD-HHMM} | fixed
   version_major: 3
   format: alina-2026-08
-  downloads_dir: ~/Downloads
+  downloads_dir: ~/Downloads/_MLInside.2026-08
   source_deck: data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
 content:
 - kind: title
