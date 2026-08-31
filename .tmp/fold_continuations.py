@@ -64,9 +64,12 @@ def main(path_str: str) -> int:
 
     changed = 0
     for i, block in enumerate(blocks):
-        head, sep, body = block.partition("  notes: |2\n")
-        if not sep:
+        # Блочный скаляр в контенте встречается в трёх видах: `|`, `|-` и `|2`. Зашитый
+        # `|2` молча пропускал заметки приложения — они как раз написаны первыми двумя.
+        m = re.search(r"^  notes: (\|[-0-9]*)\n", block, re.M)
+        if not m:
             continue
+        head, sep, body = block.partition(m.group(0))
         indent = "    "
         notes = "".join(ln[len(indent):] if ln.startswith(indent) else ln for ln in body.splitlines(keepends=True))
         folded = fold(notes)
