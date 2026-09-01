@@ -85,9 +85,30 @@ else
 fi
 
 # 5. Замок. `git worktree lock` — это заявка «каталог занят», снимать её за автора нельзя.
-if git -C "$MAIN_REPO" worktree list --porcelain | grep -A3 -F "worktree $(cd "$WT" && pwd -P)" \
-   | grep -q '^locked'; then
-  bad "worktree заблокирован (git worktree lock) — снимать замок за автора нельзя"
+#
+# Но замок и замок — разное. Claude Code пишет в `.git/worktrees/<имя>/locked` строку вида
+# «claude session <имя> (pid 36270 start …)», и живой pid от мёртвого отличается решительно:
+# у мёртвого замок просто протух и его снимает тот, кто ставил, а у живого `git worktree
+# remove` отнимет рабочий каталог у сессии посреди задачи. Раньше эту разницу знал только
+# SessionStart-хук (scripts/hooks/worktree-land-status.sh) — теперь она здесь, а хук зовёт
+# скрипт, чтобы логика жила в одном месте.
+#
+# Замок без распознаваемого pid (поставлен руками, `git worktree lock --reason …`) остаётся
+# красным без оговорок: неизвестно, чья это заявка, значит снимать её за автора тем более нельзя.
+#
+# Проверку 7 (ListAgents) это НЕ заменяет: в одном дереве может сидеть больше сессий, чем
+# держателей замка, а bash сессий не видит вовсе.
+LOCKF="$(git -C "$WT" rev-parse --path-format=absolute --git-dir)/locked"
+if [ -f "$LOCKF" ]; then
+  LOCK_PID="$(tr -d '\n' < "$LOCKF" | sed -n 's/.*pid \([0-9][0-9]*\).*/\1/p')"
+  if [ -n "$LOCK_PID" ] && kill -0 "$LOCK_PID" 2>/dev/null; then
+    bad "замок держит ЖИВАЯ сессия (pid $LOCK_PID) — удаление отнимет у неё рабочий каталог"
+  elif [ -n "$LOCK_PID" ]; then
+    bad "замок протух (pid $LOCK_PID мёртв) — снимает тот, кто ставил: git worktree unlock $WT"
+  else
+    bad "worktree заблокирован (git worktree lock) — снимать замок за автора нельзя"
+  fi
+  say "    $(tr -d '\n' < "$LOCKF")"
 else
   ok "worktree не заблокирован"
 fi
