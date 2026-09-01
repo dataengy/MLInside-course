@@ -362,6 +362,32 @@ images:
       top: 4.81
       width: 5.5
       height: 1.7
+- file: pic-airflow-dbt-rating.png
+  slide_id: 051b-korotkij-rejting-zapuska
+  state: placed
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1836
+    - 946
+    scale: 0.2876
+    placed:
+      left: 7.35
+      top: 3.68
+      width: 5.5
+      height: 2.83
 - file: image58.png
   origin:
     kind: source-deck
@@ -596,15 +622,6 @@ images:
       top: 1.81
       width: 2.96
       height: 4.7
-- file: pic-airflow-dbt-rating.png
-  slide_id: null
-  state: spare
-  origin:
-    kind: unknown
-    source: null
-    url: null
-  changed: '2026-09-01'
-  note: ''
 - file: pic-dagster-asset-graph.png
   slide_id: null
   state: spare
@@ -615,6 +632,24 @@ images:
   changed: '2026-09-01'
   note: ''
 - file: pic-dagster-asset-metadata.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dagster-dbt-checks.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dagster-dbt-to-ml.png
   slide_id: null
   state: spare
   origin:
