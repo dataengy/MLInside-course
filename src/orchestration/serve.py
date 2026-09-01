@@ -14,9 +14,8 @@ from __future__ import annotations
 
 import sys
 
-from prefect.events import DeploymentEventTrigger
-
 from prefect import serve
+from prefect.events import DeploymentEventTrigger
 
 from .config import load_orchestration
 from .flows import build_and_publish, preza_scan, seed
