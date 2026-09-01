@@ -41,6 +41,12 @@
           },
           {
             "type": "command",
+            "command": "bash scripts/hooks/worktree-land-status.sh",
+            "timeout": 10,
+            "statusMessage": "Checking worktree landing state"
+          },
+          {
+            "type": "command",
             "command": "bash scripts/hooks/course-production-status.sh",
             "timeout": 10,
             "statusMessage": "Checking course production rules"
