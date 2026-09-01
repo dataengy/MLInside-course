@@ -410,3 +410,15 @@ claude-project-bundle *ARGS:
 # Пример: just recycle .tmp/render-pdf   ·   just recycle --dup-of data/source/manual/x.pptx data/drafts/x.pptx
 recycle *ARGS:
     cd {{_dir}} && bash scripts/recycle.sh {{ARGS}}
+
+# Память Claude Code: сверить живую память с копией в .ai/memory/
+memory-check:
+    cd {{_dir}} && bash scripts/memory-sync.sh check
+
+# Память Claude Code: живая память → .ai/memory/ (перед коммитом)
+memory-push:
+    cd {{_dir}} && bash scripts/memory-sync.sh push
+
+# Память Claude Code: .ai/memory/ → живая память (на новой станции)
+memory-pull:
+    cd {{_dir}} && bash scripts/memory-sync.sh pull

@@ -1,0 +1,7 @@
+- [Semver для финальных дек](deck-versioning-semver.md) — x.y.z в имени, в работу только последняя версия
+- [Зазор до подвала деки](deck-footer-clearance.md) — visual_bottom 6.51: подвал это логотип И строка «Материалы»
+- [Слайд с картинкой и схемой](deck-slide-with-picture-and-scheme.md) — R12: картинка справа, схема слева, буллетов 3–4
+- [Реестр картинок деки](deck-images-registry.md) — снятые вручную не возвращать; собранная дека read-only
+- [Формат подстрочников деки](deck-speaker-notes-format.md) — часы 10:00-11:30 и буллеты ставит just preza-notes, не руки
+- [Корзина вместо удаления](recyclebin-instead-of-delete.md) — переносить в ../.recyclebin, удалять только точный дубль, журнал вести всегда
+- [Комментарии в presentations.yml](presentations-plan-eats-comments.md) — presentations-plan сносит #-строки, после прогона смотреть git diff
