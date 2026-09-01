@@ -4,4 +4,4 @@
 - [Реестр картинок деки](deck-images-registry.md) — снятые вручную не возвращать; собранная дека read-only
 - [Формат подстрочников деки](deck-speaker-notes-format.md) — часы 10:00-11:30 и буллеты ставит just preza-notes, не руки
 - [Корзина вместо удаления](recyclebin-instead-of-delete.md) — переносить в ../.recyclebin, удалять только точный дубль, журнал вести всегда
-- [Комментарии в presentations.yml](presentations-plan-eats-comments.md) — presentations-plan сносит #-строки, после прогона смотреть git diff
+- [Комментарии в presentations.yml](presentations-plan-eats-comments.md) — закрыто: писатели на ruamel round-trip; правило для новых — мутировать документ, не собирать заново
