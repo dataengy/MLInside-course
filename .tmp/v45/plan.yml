@@ -1,0 +1,10 @@
+# Перенос dagster-правок из ручной деки data/source/manual/…v4.2.1-man.pptx.
+#
+# В ручном файле пользователь положил на ОДИН слайд «А если мы используем Dagster?»:
+# картинку (подменил), схему Airflow/Dagster, пять буллетов и блок кода. Четыре визуала
+# на слайд генератор не ставит (R12 — картинка + одна панель), поэтому разрезано на два:
+# 058 остаётся ментальной моделью, код уезжает на 058b.
+- {op: sub, count: 1,
+   find: "  image: pic-lineage-model-monitor.png",
+   replace: "  image: image58.png"}
+- {op: insert_after, id: 058-a-esli-dagster, file: 058b-dagster-assets.yml}

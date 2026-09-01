@@ -185,7 +185,7 @@ images:
     source: /Users/user/Pictures/MLInside (202608..)/1_IYYe23xvVfLCd7jCC83Utw.png
     url: null
   note: выбрана заказчиком под слайд про слои
-  state: manual-moved
+  state: placed
   changed: '2026-09-01'
   slide_id: 015a-kak-modelirovat-dannye
   layout:
@@ -362,14 +362,14 @@ images:
       top: 4.81
       width: 5.5
       height: 1.7
-- file: pic-lineage-model-monitor.png
+- file: image58.png
   origin:
-    kind: local
-    source: /Users/user/Pictures/MLInside (202608..)/Picture16.png
+    kind: source-deck
+    source: data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
     url: null
   note: ''
   state: placed
-  changed: '2026-08-31'
+  changed: '2026-09-01'
   slide_id: 058-a-esli-dagster
   layout:
     box:
@@ -380,14 +380,14 @@ images:
     fit: contain
     anchor: bottom
     natural_px:
-    - 1350
-    - 570
-    scale: 0.3911
+    - 3288
+    - 2016
+    scale: 0.1606
     placed:
       left: 7.35
-      top: 4.19
+      top: 3.14
       width: 5.5
-      height: 2.32
+      height: 3.37
 - file: pic-dbt-run-terminal.png
   origin:
     kind: local
@@ -596,6 +596,61 @@ images:
       top: 1.81
       width: 2.96
       height: 4.7
+- file: pic-airflow-dbt-rating.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dagster-asset-graph.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dagster-asset-metadata.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dagster-run-log.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dagster-stale-graph.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-lineage-model-monitor.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture16.png
+    url: null
+  note: ''
+  state: manual-removed
+  changed: '2026-09-01'
+  slide_id: null
+  removed_from: 058-a-esli-dagster
 wanted:
 - slide_id: 040-clickhouse-specifika
   label: 🔍 картинка — ClickHouse MergeTree parts and partitions

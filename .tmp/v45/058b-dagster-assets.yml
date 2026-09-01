@@ -1,0 +1,38 @@
+- kind: content
+  id: 058b-dbt-modeli-kak-assets-dagster
+  title: dbt-модели как assets Dagster
+  bullets:
+  - 'Модели dbt импортируются как assets — по одному на модель'
+  - 'Зависимости и тесты Dagster берёт из манифеста'
+  - 'Каждый узел запускается и мониторится отдельно'
+  - 'Граф ассетов — тот же граф dbt, только в Dagster UI'
+  materials:
+  - label: dagster-dbt reference
+    url: https://docs.dagster.io/integrations/libraries/dbt/reference
+  code_caption: definitions.py
+  code_lang: python
+  code: |2
+    from pathlib import Path
+    from dagster import AssetExecutionContext
+    from dagster_dbt import (
+        DbtCliResource, DbtProject, dbt_assets)
+
+    project = DbtProject(Path("olist_dbt"))
+
+    @dbt_assets(manifest=project.manifest_path)
+    def olist(ctx: AssetExecutionContext,
+              dbt: DbtCliResource):
+        yield from dbt.cli(
+            ["build"], context=ctx).stream()
+  notes: |2
+    [~1.5 мин] **Главное:** весь dbt-проект превращается в ассеты !!одним декоратором!! — Dagster читает манифест и заводит по ассету на модель.
+
+    **Разбор кода:** четыре строки, которые стоит назвать вслух.
+
+    `DbtProject` — указатель на каталог проекта; из него Dagster берёт `manifest_path`. `@dbt_assets(manifest=...)` — тот самый декоратор: он читает манифест и объявляет ассеты. Внутри функции ровно одна команда — `dbt.cli(["build"], context=ctx).stream()`: `build` вместо `run` и `test` по отдельности, а `.stream()` отдаёт события в Dagster по мере выполнения, поэтому в интерфейсе видно, какая модель уже собралась.
+
+    **Практический смысл:** манифест обязан существовать на момент загрузки дефинишенов. В разработке это закрывает `project.prepare_if_dev()`, в проде манифест генерируют на этапе сборки образа — иначе Dagster будет перекомпилировать dbt-проект при каждой загрузке кода.
+
+    **Осторожно:** не путать `dbt_assets` (декоратор из `dagster_dbt`) с методом проекта — у `DbtProject` такого метода нет. И `DbtCliResource` не имеет `.run()` и `.test()`: всё идёт через `.cli([...])`.
+
+    **Переход:** ~~«На этом про оркестрацию всё — дальше CI/CD».~~
