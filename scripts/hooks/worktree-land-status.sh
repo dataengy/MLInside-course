@@ -35,11 +35,16 @@ AHEAD=$(git rev-list --count "origin/$DEFAULT..HEAD" 2>/dev/null) || exit 0
 BEHIND=$(git rev-list --count "HEAD..origin/$DEFAULT" 2>/dev/null) || exit 0
 DIRTY=$(git status --porcelain --untracked-files=no 2>/dev/null | wc -l | tr -d ' ')
 # Untracked считаем отдельно: именно они исчезают без следа при `git worktree remove`.
-# Артефакты сборки не в счёт — воспроизводятся. Тот же фильтр, что в scripts/worktree_land.sh;
-# core.quotePath=false обязателен, иначе кириллические имена дек экранируются в "\320\222…"
-# и фильтр по префиксу молча перестаёт совпадать.
-NEW=$(git -c core.quotePath=false status --porcelain 2>/dev/null | sed -n 's/^?? //p' \
-  | grep -vcE '^(data/(drafts|generated)/|\.tmp/(render|render-pdf|build|qa)/)' || true)
+# Перечисление — тем же способом, что проверка 3 в scripts/worktree_land.sh: `ls-files
+# --others`, а не `status --porcelain`. status сворачивает untracked-КАТАЛОГ в одну строку,
+# и счётчик врёт в меньшую сторону ровно там, где важна точность. `--exclude-standard`
+# учитывает .gitignore, так что заигнорированное (data/generated/) отсеивается само.
+# Исключение одно — .tmp/. Каталог data/drafts/ ОТСЛЕЖИВАЕМЫЙ и исключаться не должен:
+# там лежат присланные менеджером деки `*-man.pptx`, которых нет ни в одном коммите и
+# которые не пересобираются. core.quotePath=false — чтобы кириллические имена не
+# превращались в "\320\222…" и не ломали фильтр по префиксу.
+NEW=$(git -c core.quotePath=false ls-files --others --exclude-standard 2>/dev/null \
+  | grep -vcE '^\.tmp/' || true)
 NEW=${NEW:-0}
 
 WT=$(pwd -P)
