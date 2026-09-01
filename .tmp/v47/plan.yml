@@ -1,0 +1,31 @@
+# Перенос правок из снимка 19:37 ручной деки v4.7.0+man (корзина).
+# Шесть изменений; перестановка вступления сделана двумя move.
+- {op: sub, count: 1,
+   find: "  id: 001-dbt-dlya-full-stack-data-specialist\n  title: Трансформация данных и витрины (dbt)",
+   replace: "  id: 001-dbt-dlya-full-stack-data-specialist\n  title: Трансформация данных и витрины (dbt)\n  image: pic-dbt-logo.png"}
+
+# вступление: было AE → 60 секунд → ELT → история → Viewpoint
+# стало     ELT → история → 60 секунд → Viewpoint → AE
+- {op: move, id: 006a-dbt-za-60-sekund,                 after: 006d-istoriya-dbt}
+- {op: move, id: 006-pochemu-voznik-analytics-engineering, after: 006c-dbt-viewpoint}
+
+# AE: буллеты заменены формулировкой автора
+- op: sub
+  count: 1
+  find: "  - 'DE приносит данные в хранилище: E и L'\n  - Analytics Engineer отвечает за T\n  - Аналитик и DS — поверх готового слоя\n  - 'Формула: ELT + практики разработки ПО'"
+  replace: "  - 'Упрощённое разделение ответственности:'\n  - 'Data Engineering — E и L: доставка в хранилище'\n  - 'Analytics Engineering — T, модель данных, качество'\n  - 'Аналитика, BI, DS и MLE — поверх готового слоя'"
+
+# ELT-слайд получает схему, которую автор нарисовал под эту деку
+- {op: sub, count: 1, find: "  image: pic-ideal-data-architecture.png", replace: "  image: pic-elt-dbt-flow.png"}
+
+# сквозная архитектура: уточнённый буллет и схема границ вместо стокового фото платформы
+- {op: sub, count: 1,
+   find: "  - Ingestion остаётся снаружи — dbt не грузит",
+   replace: "  - 'Ingestion остаётся снаружи: dbt не грузит данные в DWH'"}
+- {op: sub, count: 1, find: "  image: pic-data-platform-arch.jpg", replace: "  image: pic-dbt-zone-boundary.png"}
+
+# новый слайд с полным каркасом проекта
+- {op: insert_after, id: 014b-dbt-core-za-5-minut, file: 014b2-struktura.yml}
+
+# Dagster: более лёгкий кроп того же снимка UI
+- {op: sub, count: 1, find: "  image: image58.png", replace: "  image: pic-dagster-dbt-assets-job.png"}

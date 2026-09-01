@@ -75,14 +75,14 @@ images:
       top: 4.48
       width: 5.5
       height: 2.03
-- file: pic-ideal-data-architecture.png
+- file: pic-elt-dbt-flow.png
   origin:
-    kind: local
-    source: /Users/user/Pictures/MLInside (202608..)/ideal-data-stack-architecture-whats-your-view-v0-q5mn1rnwnhna1.webp
+    kind: unknown
+    source: null
     url: null
-  note: 'webp перекодирован в png: python-pptx кладёт байты как есть, PowerPoint webp не рисует'
+  note: ''
   state: placed
-  changed: '2026-08-31'
+  changed: '2026-09-01'
   slide_id: 006b-elt-vmesto-etl
   layout:
     box:
@@ -93,14 +93,14 @@ images:
     fit: contain
     anchor: bottom
     natural_px:
-    - 958
-    - 637
-    scale: 0.5511
+    - 2023
+    - 777
+    scale: 0.261
     placed:
       left: 7.35
-      top: 2.85
+      top: 4.4
       width: 5.5
-      height: 3.66
+      height: 2.11
 - file: pic-elt-roles-split.jpg
   origin:
     kind: local
@@ -153,14 +153,14 @@ images:
       top: 4.24
       width: 5.5
       height: 2.27
-- file: pic-data-platform-arch.jpg
+- file: pic-dbt-zone-boundary.png
   origin:
-    kind: local
-    source: /Users/user/Pictures/MLInside (202608..)/Picture1.jpg
+    kind: unknown
+    source: null
     url: null
   note: ''
   state: placed
-  changed: '2026-08-31'
+  changed: '2026-09-01'
   slide_id: 012-skvoznaya-arhitektura
   layout:
     box:
@@ -171,14 +171,14 @@ images:
     fit: contain
     anchor: bottom
     natural_px:
-    - 2196
-    - 1372
-    scale: 0.2404
+    - 2400
+    - 700
+    scale: 0.22
     placed:
       left: 7.35
-      top: 3.07
+      top: 4.91
       width: 5.5
-      height: 3.44
+      height: 1.6
 - file: pic-dbt-layers-flow.png
   origin:
     kind: local
@@ -388,10 +388,10 @@ images:
       top: 3.68
       width: 5.5
       height: 2.83
-- file: image58.png
+- file: pic-dagster-dbt-assets-job.png
   origin:
-    kind: source-deck
-    source: data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
+    kind: unknown
+    source: null
     url: null
   note: ''
   state: placed
@@ -406,14 +406,14 @@ images:
     fit: contain
     anchor: bottom
     natural_px:
-    - 3288
-    - 2016
-    scale: 0.1606
+    - 1644
+    - 1010
+    scale: 0.3212
     placed:
       left: 7.35
-      top: 3.14
+      top: 3.13
       width: 5.5
-      height: 3.37
+      height: 3.38
 - file: pic-dbt-run-terminal.png
   origin:
     kind: local
@@ -622,6 +622,25 @@ images:
       top: 1.81
       width: 2.96
       height: 4.7
+- file: image58.png
+  origin:
+    kind: source-deck
+    source: data/source/NEW_ВШЭ_Семинар9-Практикум-по-dbt.pptx
+    url: null
+  note: ''
+  state: manual-removed
+  changed: '2026-09-01'
+  slide_id: null
+  removed_from: 058-a-esli-dagster
+- file: pic-airflow3-vs-dagster.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
 - file: pic-dagster-asset-graph.png
   slide_id: null
   state: spare
@@ -658,6 +677,15 @@ images:
     url: null
   changed: '2026-09-01'
   note: ''
+- file: pic-dagster-mlflow-link.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
 - file: pic-dagster-run-log.png
   slide_id: null
   state: spare
@@ -676,6 +704,36 @@ images:
     url: null
   changed: '2026-09-01'
   note: ''
+- file: pic-data-platform-arch.jpg
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/Picture1.jpg
+    url: null
+  note: ''
+  state: manual-removed
+  changed: '2026-09-01'
+  slide_id: null
+  removed_from: 012-skvoznaya-arhitektura
+- file: pic-dbt-logo.png
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  note: ''
+  state: spare
+  changed: '2026-09-01'
+  slide_id: null
+  removed_from: 001-dbt-dlya-full-stack-data-specialist
+- file: pic-ideal-data-architecture.png
+  origin:
+    kind: local
+    source: /Users/user/Pictures/MLInside (202608..)/ideal-data-stack-architecture-whats-your-view-v0-q5mn1rnwnhna1.webp
+    url: null
+  note: 'webp перекодирован в png: python-pptx кладёт байты как есть, PowerPoint webp не рисует'
+  state: manual-removed
+  changed: '2026-09-01'
+  slide_id: null
+  removed_from: 006b-elt-vmesto-etl
 - file: pic-lineage-model-monitor.png
   origin:
     kind: local
