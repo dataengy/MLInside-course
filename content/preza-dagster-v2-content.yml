@@ -4322,14 +4322,11 @@ content:
 - kind: content
   id: 920-a14-shag-4-materialize
   title: 'Шаг 4: материализовать'
+  image: pic-dagster-run-log.png
   bullets:
   - 'В интерфейсе: выделить ассеты и нажать Materialize'
   - 'Из CLI: та же операция одной командой'
   - Dagster сам выстроит порядок по графу
-  materials:
-  - label: '🔍 Снять: Materialize в интерфейсе и журнал запуска с событиями по ассетам'
-    url: https://docs.dagster.io/guides/build/assets
-    highlight: true
   code_lang: bash
   code: |2
     # весь граф
@@ -4382,14 +4379,10 @@ content:
 - kind: content
   id: 921-a14-shag-5-asset-graph
   title: 'Шаг 5: посмотреть asset graph'
+  image: pic-dagster-asset-graph.png
   bullets:
-  - Граф — это не картинка запуска, а карта того, что существует
-  - У каждого узла свой статус, своя история и свои метаданные
-  - Отсюда начинается любая операция — запуск, разбор, поиск
-  materials:
-  - label: '🔍 Снять: Asset Graph из трёх узлов со статусами'
-    url: https://docs.dagster.io/guides/build/assets
-    highlight: true
+  - Граф — карта того, что существует, а не картинка запуска
+  - У узла свой статус, история и метаданные
   code_lang: diagram
   code: |2
      ЧТО ВИДНО НА ГРАФЕ
@@ -4450,14 +4443,11 @@ content:
 - kind: content
   id: 922-a14-shag-6-metadannye
   title: 'Шаг 6: добавить метаданные'
+  image: pic-dagster-asset-metadata.png
   bullets:
-  - К каждой материализации прикрепляются произвольные метаданные
-  - Число строк, метрика модели, превью, ссылка — что угодно
-  - Метаданные видны в истории и строят графики по времени
+  - К материализации крепятся любые метаданные
+  - Числовые ложатся на график по времени
   materials:
-  - label: '🔍 Снять: карточка ассета с метаданными и графиком метрики по времени'
-    url: https://docs.dagster.io/guides/build/assets/metadata-and-tags
-    highlight: true
   - label: Dagster — Asset metadata
     url: https://docs.dagster.io/guides/build/assets/metadata-and-tags
   code_lang: python
@@ -4523,14 +4513,10 @@ content:
 - kind: content
   id: 923-a14-shag-7-selective-recomputation
   title: 'Шаг 7: поменяли upstream — пересчитываем только нужное'
+  image: pic-dagster-stale-graph.png
   bullets:
-  - Изменился ассет наверху — всё, что ниже, помечается устаревшим
-  - Селекция по графу вместо перезапуска всего пайплайна
-  - Это и есть ответ на вопрос из начала лекции
-  materials:
-  - label: '🔍 Снять: устаревшие узлы после правки upstream'
-    url: https://docs.dagster.io/guides/build/assets/asset-selection-syntax/reference
-    highlight: true
+  - Изменился ассет наверху — всё ниже устарело
+  - Селекция по графу вместо перезапуска всего
   code_lang: bash
   code: |2
     # изменили feature_table
