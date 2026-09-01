@@ -15,7 +15,8 @@
 #            A16 (MLflow-связка и детали lifecycle).
 #          · Подстрочник каждого демо-слайда несёт маркеры DEMO START / DEMO END, состояние
 #            «до демо», пронумерованные действия с ожидаемым результатом, ссылку на запасные
-#            слайды и явный план возврата к слайдам. Полный сценарий — docs/dagster-demo-runbook.md.
+#            слайды и явный план возврата к слайдам. Полный сценарий и сам демо-проект —
+#            сабмодуль data/code/dagster_demo (dataengy/mlinside-dagster-demo), docs/RUNBOOK.md.
 #          · Живого демо Airflow нет намеренно (низкий teaching ROI, слишком много контура):
 #            вместо него слайд 049 «Один пайплайн в трёх интерфейсах» — один склеенный кадр 3:1
 #            из скриншотов ОДНОГО логического пайплайна в Airflow 2, Airflow 3 и Dagster.
@@ -75,7 +76,7 @@
 #   DEMO 3 (042)  … → trained_model → evaluation → registered_model
 # Принцип демо: НЕ демонстрировать набор текста — демонстрировать изменение состояния системы
 # и семантику графа. Сценарий, состояние «до», expected result и pre-flight — в
-# docs/dagster-demo-runbook.md; каждому демо соответствует запасной раздел приложения.
+# data/code/dagster_demo/docs/RUNBOOK.md; каждому демо соответствует запасной раздел приложения.
 #
 # Сквозная схема деки повторяется и обрастает деталями на 008 → 026 → 030 → 042 → 055–056:
 #   raw → dbt staging → dbt feature mart → training dataset → train → evaluate → model
@@ -4935,15 +4936,11 @@ content:
 - kind: content
   id: 931-a16-mlflow-v-metadannyh-asseta
   title: 'MLflow в метаданных ассета: одна ссылка склеивает два мира'
+  image: pic-dagster-mlflow-link.png
   bullets:
-  - Обучение внутри ассета открывает прогон MLflow
-  - Идентификатор прогона и ссылка на модель уезжают в метаданные
-  - С карточки ассета — прямой переход в эксперимент
-  - Регистрация версии тоже фиксируется в метаданных
+  - Обучение в ассете открывает прогон MLflow
+  - Run id и ссылка на модель — в метаданные
   materials:
-  - label: '🔍 Снять: метаданные с mlflow_run_id и model_uri рядом с тем же run в MLflow'
-    url: https://mlflow.org/docs/latest/ml/tracking/
-    highlight: true
   - label: MLflow — Tracking
     url: https://mlflow.org/docs/latest/ml/tracking/
   code_lang: python
@@ -4954,15 +4951,10 @@ content:
             clf, roc = fit(preprocessing)
             mlflow.log_metric("roc_auc", roc)
             info = mlflow.sklearn.log_model(
-                clf, name="model",
-            )
-            mv = mlflow.register_model(
-                info.model_uri, "olist_delay",
-            )
+                clf, name="model")
         return dg.MaterializeResult(metadata={
             "mlflow_run_id": run.info.run_id,
             "model_uri": info.model_uri,
-            "model_version": mv.version,
             "roc_auc": roc,
         })
   notes: |2
