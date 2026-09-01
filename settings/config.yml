@@ -79,7 +79,10 @@ planning:
 # Bounds enforced by the skill's validate_content.py before every build.
 deck_generation:
   slides_min: 20
-  slides_max: 76                  # 2026-08-26: 72→76 — Jinja вглубь: циклы/условия, контекст и отладка через compile, диспетчеризация макросов
+  slides_max: 90                  # 2026-09-01: 76→90 — Dagster v2: Quick Start, блок dbt и ML lifecycle;
+                                  #             справочник сущностей ушёл в приложение 9xx (11 слайдов);
+                                  #             сравнение с Airflow разбито надвое — 12 строк не влезали над подвалом
+                                  # 2026-08-26: 72→76 — Jinja вглубь: циклы/условия, контекст и отладка через compile, диспетчеризация макросов
                                   # 2026-08-25: 64→72 — моделирование (ER, medallion/EDW, project_evaluator, Data Vault), MV в ClickHouse, микробатчинг, стриминг, права доступа
                                   # 2026-08-25: 58→64 — тулинг (VS Code/IDE), Fusion+Core v2, ещё пакеты, пакеты в CI, slim CI, State/Wizard; SQLMesh сжат с 3 слайдов до 2
                                   # 2026-08-24: 55→58 — блок про dbt-пакеты (DQ, рефакторинг, версии) + переезд двух SQLMesh-слайдов из Dagster-деки
@@ -97,7 +100,8 @@ deck_generation:
     - content/preza-apache-airflow-content.yml   # Apache Airflow — предмет Влада Бояджи
   decks:
     - content/preza-dbt-v3-content.yml
-    - content/preza-dagster-content.yml
+    - content/preza-dagster-content.yml        # v1.4 — предыдущая редакция, оставлена для сверки
+    - content/preza-dagster-v2-content.yml     # актуальная дека лекции 6
     - content/preza-prefect-content.yml
     - content/preza-cicd-observability-content.yml
     - content/preza-apache-airflow-content.yml

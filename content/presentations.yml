@@ -152,31 +152,47 @@ presentations:
   - 'Изоляция кода: Использование фабрик ресурсов, локальное тестирование пайплайнов без развертывания
     инфраструктуры.'
   - 'Версионирование данных: Отслеживание происхождения (lineage) датасетов и версий моделей.'
-  content: content/preza-dagster-content.yml
+  content: content/preza-dagster-v2-content.yml
   out_name: MLInside_Современная-оркестрация-ML-пайплайнов-Dagster
-  slides: 49
+  slides: 86
+  visuals: code-tables
+  generated: true
   homework:
     repo: https://github.com/hnkovr/mlinside-hw-olist
     spec: homework/mlinside-hw-olist/docs/HW2-dagster.md
     slides:
-    - 047-domashnee-zadanie
-    - 048-dz-orkestriruem-dbt-proekt-v
-    - 049-dz-kriterii-ocenki
+    - 071-domashnee-zadanie
+    - 072-dz-orkestriruem-dbt-proekt-v-dagster
+    - 073-dz-kriterii-ocenki
   recording:
     lecture_n: 6
     blocks:
-    - title: 'Контекст: история и настоящее'
+    - title: 'Проблема, Dagster и ассет'
       from: 001-sovremennaya-orkestraciya-ml
-      to: 007-dagster-segodnya
-    - title: Архитектура и сущности
-      from: 008-arhitektura-i-suschnosti
-      to: 022-dg-cli-i-components
-    - title: Dev/prod режимы и интеграция с dbt
-      from: 023-dev-i-prod-rezhimy
-      to: 032-airflow-cosmos-protiv-dagster
-    - title: Загрузка данных, CLI/MCP, рынок и будущее + ДЗ
-      from: 035-zagruzka-dannyh-cli-i-mcp
-      to: 050-spasibo-za-vnimanie
+      to: 010-asset-protiv-task
+    - title: Quick Start
+      from: 011-quick-start
+      to: 020-chek-list-povtorit-doma
+    - title: Dagster + dbt
+      from: 021-dagster-i-dbt
+      to: 032-multi-dbt-i-dbt-mesh
+    - title: ML lifecycle в Dagster
+      from: 033-ml-lifecycle-kak-asset-graph
+      to: 044-granica-lifecycle-protiv-ispolneniya
+    - title: MLflow и production-паттерны
+      from: 045-dagster-i-mlflow
+      to: 053-avtomatizaciya-chto-vybrat
+    - title: Airflow и оркестраторы рядом
+      from: 054-dagster-protiv-airflow
+      to: 063-odin-orkestrator-na-granicu-otvetstvennosti
+    - title: Архитектуры, решение и ДЗ
+      from: 064-referens-arhitektury
+      to: 074-spasibo-za-vnimanie
+    # Приложение записывать не надо — блок заведён только затем, чтобы план покрывал
+    # деку целиком (src/course/blocks.py требует покрытия без дыр).
+    - title: 'Приложение — в запись не идёт'
+      from: 900-prilozhenie
+      to: 910-istoriya-i-persony
   published:
     version: '1.4'
     slides: 49

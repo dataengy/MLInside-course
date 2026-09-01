@@ -1,0 +1,64 @@
+# dagster_v2_build_settings.yml — копия content/build_deck_v3-settings.yml с ОДНИМ отличием:
+# out_dir указывает не в data/generated, а в .tmp/build.
+#
+# Зачем: Stop-хук scripts/hooks/deck-publish-auto-send.sh сканирует data/generated и
+# отправляет новейшую собранную версию деки в Telegram сам, без явной команды. Черновая
+# сборка «посмотреть, как легло» не должна этого триггерить — поэтому черновики собираются
+# сюда, а в data/generated кладут только то, что действительно готово публиковать.
+#
+#   PYTHONPATH=src python3 -m preza_gen.build_deck --pptx --html \
+#     --settings .tmp/dagster_v2_build_settings.yml --content content/preza-dagster-v2-content.yml
+#
+# Написан при сборке Dagster v2 деки; в Justfile намеренно не заведён (как и v4-близнец).
+
+settings:
+  template: data/source/MLinside-шаблон-презентаций.pptx
+  media_dir: null
+  out_dir: .tmp/build
+  formats_file: settings/formats.yml
+  theme:
+    accent: 2419FF
+    white: FFFFFF
+    dark: 1A1A1A
+    alt: F2F2F7
+    font: Corbel
+  layouts:
+    title: Титульный слайд
+    agenda: Title and body
+    section: Заголовок и объект
+    content: Title and body
+    table: Только заголовок
+    closing: Section header
+  image_box:
+    left: 7.35
+    top: 1.65
+    width: 5.5
+    height: 5.0
+  # Code panels — dark monospace box (GitHub-dark palette). The renderer fits the height to
+  # each snippet; code_box_full is only its maximum safe area, above the footer/logo.
+  # size = requested max; long snippets auto-shrink toward min_size so wrapped text never
+  # overflows the panel (see renderers/pptx.py:_fit_code_size).
+  code_style: {font: Consolas, size: 13, min_size: 9, fg: E6EDF3, bg: 0D1117}
+  code_box:      {left: 6.95, top: 1.7, width: 5.95, height: 5.2}   # beside bullets
+  code_box_full: {left: 0.55, top: 1.6, width: 12.3, height: 4.8}   # code-only safe area
+  generation:
+    parallel: false   # render requested formats concurrently (ThreadPoolExecutor)
+  # Подстрочник докладчика (см. preza_gen/notes.py). Применяется на каждой сборке и
+  # идемпотентно, поэтому синхронность контент-YAML с ним не обязательна.
+  #   clock  — ставить абсолютное время «10:00-11:30» перед меткой [~N мин]
+  #   scope  — stamped: только слайды с [~N мин] | all: всем | per-part: часы с нуля в каждой части
+  #   bullets_max_* — порог «короткого» раздела: он идёт меткой на своей строке + буллетами по
+  #                   предложениям, длинный остаётся прозой. Здесь порог снят намеренно:
+  #                   лектор читает подстрочник с экрана, и абзац в пять предложений он
+  #                   теряет глазами, а список — нет. Вернуть прозу длинным разделам —
+  #                   поставить сюда обратно 3 и 240.
+  notes_format:
+    clock: true
+    scope: main
+    bullets_max_sentences: 999
+    bullets_max_chars: 99999
+  notes_emphasis:
+    '!!…!!': жирный + подчёркнутый — самое важное
+    '**…**': жирный — термины и важное
+    __…__: подчёркнутый — следующее по важности
+    ~~…~~: курсив — второстепенное
