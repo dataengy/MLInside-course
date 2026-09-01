@@ -1,8 +1,10 @@
 """preza_merge.apply — turn accepted decisions into a profile, a deck switch and a build.
 
-Two writes, both deliberately narrow:
-  * settings/formats.yml is REWRITTEN wholesale — it is a generated file with no prose to
-    lose, which is exactly why profiles do not live in the comment-rich deck settings;
+Two writes, обе намеренно узкие:
+  * settings/formats.yml обновляется ЧЕРЕЗ ROUND-TRIP: профиль правится на месте, а
+    комментарии и порядок ключей остаются. Раньше файл переписывался целиком, а шапка
+    объявляла это правилом («keep prose out of it») — то есть инструмент запрещал файлу
+    иметь объяснения, потому что сам не умел иначе. Умеет;
   * the deck's content yaml gets a SURGICAL one-line edit, because it is hand-authored and
     a yaml round-trip would strip its comments and reflow every block scalar.
 """
@@ -12,7 +14,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-import yaml
+from schedule.settings import dump_roundtrip, load_roundtrip
 
 from .report import accepted_keys, undecided
 from .rules import MergeConfig
@@ -20,15 +22,27 @@ from .rules import MergeConfig
 _HEADER = """# formats.yml — named FORMATTING profiles for preza_gen. Referenced from a deck settings
 # yaml via `settings.formats_file`; a deck picks one with `deck.format`.
 #
-# GENERATED-AND-EDITED: `just preza-merge-apply` rewrites this whole file, so keep prose
-# out of it — durable explanation lives in docs/preza-merge-lane.md.
+# `just preza-merge-apply` обновляет ОДИН профиль и не трогает остальной файл, включая
+# ваши комментарии. Объяснения профилей держите прямо здесь, рядом с числами;
+# развёрнутый разбор лейна — docs/preza-merge-lane.md.
 """
 
 
 def write_profile(formats_path: Path, name: str, base_profile: str, keys: dict) -> None:
-    """Upsert profile ``name`` = ``base_profile`` + ``keys``. Other profiles survive."""
+    """Upsert profile ``name`` = ``base_profile`` + ``keys``. Остальной файл не трогается.
+
+    Round-trip (ruamel), а не ``safe_load`` + ``safe_dump``: последняя пара молча сносит
+    комментарии, оставляя валидный YAML и дифф, похожий на безобидное переформатирование.
+    Профиль вёрстки без объяснения, почему у него именно такие числа, через месяц читается
+    как случайный набор.
+
+    Профиль обновляется ПО КЛЮЧАМ внутри существующей мапы, а не подменяется новым
+    объектом: комментарии в ruamel живут на самих CommentedMap, и присваивание выбросило бы
+    их вместе со старым объектом. Тот же приём и по той же причине применён в
+    ``publisher.plan_writer``.
+    """
     path = Path(formats_path)
-    doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+    doc = load_roundtrip(path)
     profiles = doc["formats"]
     if base_profile not in profiles:
         raise KeyError(f"base profile {base_profile!r} not in {path}")
@@ -37,11 +51,16 @@ def write_profile(formats_path: Path, name: str, base_profile: str, keys: dict) 
     if unknown:
         raise KeyError(f"unknown profile keys {sorted(unknown)} — not in {base_profile!r}")
     merged.update(keys)
-    profiles[name] = merged
-    path.write_text(
-        _HEADER + yaml.safe_dump(doc, allow_unicode=True, sort_keys=False, width=100),
-        encoding="utf-8",
-    )
+
+    current = profiles.get(name)
+    if hasattr(current, "keys"):
+        for key in [k for k in current if k not in merged]:
+            del current[key]
+        for key, value in merged.items():
+            current[key] = value
+    else:
+        profiles[name] = merged
+    dump_roundtrip(path, doc, _HEADER)
 
 
 def set_deck_format(content_path: Path, profile: str) -> bool:

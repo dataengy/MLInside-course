@@ -68,6 +68,38 @@ LABELS: dict[str, list[str | None]] = {
 }
 
 
+def already_labelled(notes: str, plan: list[str | None]) -> bool:
+    """Заметка уже размечена этой картой — значит миграция по ней прошла.
+
+    Карта описывает состояние ДО разметки: по ярлыку на абзац, где ``None`` — абзац,
+    продолжающий предыдущий раздел. После разметки такие абзацы сворачиваются в свой
+    раздел (`fold_continuations.py`, а затем и `notes_fix.py`), и число абзацев падает
+    ровно на число ``None``. Поэтому «абзацев меньше, чем ярлыков» — не рассогласование,
+    а нормальный вид уже сделанной работы, и отличается он от настоящей поломки тем, что
+    КАЖДЫЙ оставшийся абзац несёт метку.
+
+    Без этой проверки скрипт падал на собственном результате: одноразовая миграция,
+    выполненная однажды, при повторном запуске выглядела как сломанная карта.
+
+    Признак — «у КАЖДОГО абзаца есть метка», а не совпадение числа абзацев с картой.
+    Число сверять нельзя: после миграции заметки живут дальше и разделы в них дробятся
+    (у `997-ssylki-na-poisk-kartinok` карта помнит один раздел, а в заметке их уже три).
+    Ужесточение до равенства оставило бы скрипт падающим ровно на тех слайдах, которые
+    успели развиться.
+
+    >>> already_labelled("**Главное:** раз.\\n\\n**Разбор:** два.", ["Главное", "Разбор", None])
+    True
+    >>> already_labelled("**Главное:** раз.\\n\\n**Новый:** два.", ["Главное", None])
+    True
+    >>> already_labelled("раз.\\n\\nдва.", ["Главное", "Разбор", None])
+    False
+    >>> already_labelled("**Главное:** раз.\\n\\nбез метки.", ["Главное", "Разбор"])
+    False
+    """
+    paras = re.split(r"\n\s*\n", notes.strip())
+    return bool(paras) and all(N._LABEL_RE.match(p) for p in paras)
+
+
 def label_notes(notes: str, plan: list[str | None]) -> str:
     paras = re.split(r"\n\s*\n", notes.strip())
     if len(paras) != len(plan):
@@ -88,7 +120,7 @@ def main(path_str: str) -> int:
     bounds = starts + [len(lines)]
     blocks = ["".join(lines[a:b]) for a, b in zip(bounds, bounds[1:])]
 
-    done = 0
+    done = skipped = 0
     for i, block in enumerate(blocks):
         sid = re.search(r"^  id:\s*(\S+)", block, re.M).group(1)
         plan = LABELS.get(sid)
@@ -102,6 +134,9 @@ def main(path_str: str) -> int:
         ind = "    "
         notes = "".join(ln[len(ind):] if ln.startswith(ind) else ln
                         for ln in body.splitlines(keepends=True))
+        if already_labelled(notes, plan):
+            skipped += 1
+            continue
         new = label_notes(notes, plan)
         # Правка обязана быть ровно «приписать ярлык в начало абзаца»: сверяем поабзацно,
         # что новый текст либо совпал со старым, либо отличается только этим префиксом.
@@ -118,7 +153,7 @@ def main(path_str: str) -> int:
     import yaml
     yaml.safe_load(out)
     path.write_text(out, encoding="utf-8")
-    print(f"{path}: метки расставлены на {done} слайдах")
+    print(f"{path}: метки расставлены на {done} слайдах, уже размечено {skipped}")
     return 0
 
 

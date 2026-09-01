@@ -55,6 +55,38 @@ just -f .tmp/Justfile extract-source         # source materials/URL blocks
 just -f .tmp/Justfile clean                  # drop generated PNG/pptx artifacts
 ```
 
+### v4-деки: рецепты, заведённые задним числом
+
+Скрипты ниже писались по ходу переработки v4-деки и до 2026-09-01 звались только руками —
+не потому, что одноразовые, а потому что их никто не завёл. Контент берут параметром
+(по умолчанию `V4`), поэтому переживают смену версии деки.
+
+```bash
+just -f .tmp/Justfile v4-wraps               # переносы в код-панелях, худший случай — снимите БАЗУ до правок
+just -f .tmp/Justfile v4-slots               # какие слайды примут картинку, не испортив код
+just -f .tmp/Justfile v4-timing-chain        # цепочка часов: стыки и отсутствие часов после closing
+just -f .tmp/Justfile v4-labels              # карта меток в заметках приложений
+just -f .tmp/Justfile v4-patch-code 037-x < new.sql   # заменить code: одного слайда
+just -f .tmp/Justfile v4-apply-plan .tmp/v43/plan.yml # блочный патчер по плану
+just -f .tmp/Justfile v4-diagrams            # ASCII-схемы для code_lang: diagram
+just -f .tmp/Justfile publish-probe          # read-only проверка доступов перед публикацией
+```
+
+`v4-timing` и `v4-timing-chain` — разные проверки, нужны обе: первая считает СУММУ меток
+`[~N мин]`, вторая — что часы у слайдов сходятся встык и не идут после закрывающего слайда.
+
+**Известно сломано:** `v4-labels` падает с «карта не совпала» — скрипт писался до того, как
+в заметках появилась метка `TAKEAWAY TO REPEAT`, и его карта ярлыков не знает о ней. Чинится
+добавлением метки в карту внутри `label_appendix_notes.py`.
+
+**Настоящие одноразовые** (рецептов намеренно нет, зовите руками, если понадобится
+повторить ту же операцию): `seed_image_origins.py`, `v41_new_timing.py`,
+`v41_trim_split.py`, `v41_trim_split2.py`, `fold_continuations.py`.
+
+Все рецепты используют `PY := ".venv/bin/python"`. В свежем worktree venv нет — либо
+`just -f .tmp/Justfile v4-venv`, либо разово указать чужой интерпретатор:
+`just -f .tmp/Justfile --set PY /путь/к/.venv/bin/python <рецепт>`.
+
 ## Git
 Scripts + docs are tracked; generated artifacts (`.tmp/render/`, `.tmp/render-pdf/`, `.tmp/media/`,
 `*.png`, `*.pptx`) are git-ignored (see repo `.gitignore`).
