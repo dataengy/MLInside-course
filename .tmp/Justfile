@@ -163,6 +163,7 @@ git-as account +args:
 #   just -f .tmp/Justfile without git-lfs just repo-doctor
 without bin +cmd:
     #!/usr/bin/env bash
+    cd {{_root}}   # иначе команда стартует из .tmp/ и относительные пути врут
     fake="$(mktemp -d)"
     for f in /opt/homebrew/bin/*; do
       b="$(basename "$f")"
