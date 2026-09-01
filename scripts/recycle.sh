@@ -54,6 +54,29 @@ mkdir -p "$BIN"
 [ -f "$LOG" ] || printf 'ts_utc,action,path_from,repo,sha256,size_bytes,kept_at,reason,actor\n' > "$LOG"
 
 sha_of()  { shasum -a 256 "$1" 2>/dev/null | cut -d' ' -f1; }
+
+# Слепок содержимого для сверки дублей: обычный файл — его sha256; каталог — sha256 от
+# перечня «относительный путь + sha256» по всем файлам внутри, отсортированного.
+# Пустая строка НЕ возвращается никогда: пустая с обеих сторон означала бы «совпало»
+# и разрешала удаление без сверки — так каталог однажды и удалился бы вслепую.
+digest_of() {
+  local p="$1"
+  if [ -f "$p" ] && [ ! -L "$p" ]; then
+    sha_of "$p"
+  elif [ -d "$p" ] && [ ! -L "$p" ]; then
+    # непростые типы внутри (симлинк, сокет, fifo) делают сверку неполной — отказ
+    if find "$p" \! -type f \! -type d -print -quit 2>/dev/null | grep -q .; then
+      echo "MIXED"
+      return 0
+    fi
+    ( cd "$p" 2>/dev/null || exit 1
+      find . -type f -print0 2>/dev/null | LC_ALL=C sort -z | while IFS= read -r -d '' f; do
+        printf '%s  %s\n' "$(shasum -a 256 "$f" 2>/dev/null | cut -d' ' -f1)" "$f"
+      done ) | shasum -a 256 | cut -d' ' -f1
+  else
+    echo ""   # симлинк, устройство, отсутствие — сверка невозможна
+  fi
+}
 size_of() { stat -f %z "$1" 2>/dev/null || stat -c %s "$1" 2>/dev/null; }
 dev_of()  { stat -f %d "$1" 2>/dev/null || stat -c %d "$1" 2>/dev/null; }
 
@@ -88,10 +111,19 @@ for target in "$@"; do
        [ "$target" -ef "$DUP_OF" ]; then
       die "--dup-of указывает на сам удаляемый файл ($target) — это не сверка, а её видимость; укажите ДРУГУЮ копию"
     fi
-    other=$(sha_of "$DUP_OF")
-    [ "$sha" = "$other" ] || die "не дубль: $target ($sha) ≠ $DUP_OF ($other) — переносите, а не удаляйте"
+    # Сверять можно только однотипное: файл с файлом, каталог с каталогом.
+    if { [ -d "$target" ] && [ ! -d "$DUP_OF" ]; } || { [ ! -d "$target" ] && [ -d "$DUP_OF" ]; }; then
+      die "разные типы: $target и $DUP_OF (файл против каталога) — сверка невозможна, переносите"
+    fi
+    mine=$(digest_of "$target"); other=$(digest_of "$DUP_OF")
+    # ПУСТОЙ слепок раньше означал молчаливое «совпало»: shasum на каталоге ничего не
+    # печатает, обе стороны выходили пустыми, и каталог удалялся без единой сверки.
+    [ -n "$mine" ]  || die "не удалось посчитать содержимое $target (симлинк? устройство?) — сверка невозможна, переносите"
+    [ -n "$other" ] || die "не удалось посчитать содержимое $DUP_OF — сверка невозможна, переносите"
+    [ "$mine" != "MIXED" ] && [ "$other" != "MIXED" ] || die "внутри есть не только обычные файлы (симлинк/сокет/fifo) — сверка была бы неполной, переносите"
+    [ "$mine" = "$other" ] || die "не дубль: $target ($mine) ≠ $DUP_OF ($other) — переносите, а не удаляйте"
     if [ "$DRY" = 1 ]; then echo "[dry] удалить как дубль: $target (копия $DUP_OF)"; continue; fi
-    log_row deleted-duplicate "$target" "$repo" "$sha" "$size" "$DUP_OF" "точный дубль по sha256"
+    log_row deleted-duplicate "$target" "$repo" "$mine" "$size" "$DUP_OF" "$([ -d "$target" ] && echo 'точный дубль каталога: совпал слепок «путь+sha256» по всем файлам' || echo 'точный дубль по sha256')"
     rm -rf -- "$target"
     echo "удалён как дубль: $target → копия остаётся в $DUP_OF (запись в $LOG)"
     continue
