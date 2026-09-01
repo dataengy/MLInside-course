@@ -21,7 +21,7 @@ import notes_fix  # noqa: E402
 
 PROSE = "[~1 мин] **Главное:** это не конкурс подходов. Ни один из них не требование dbt."
 BULLETS = (
-    "00:00-01:00 [~1 мин] **Главное:**\n"
+    "[00:00–01:00 · ~1 мин] **Главное:**\n"
     "- Это не конкурс подходов.\n"
     "- Ни один из них не требование dbt."
 )
@@ -65,7 +65,7 @@ def test_apply_processes_a_deck_whose_notes_are_still_prose(tmp_path):
     assert first.returncode == 0, first.stdout + first.stderr
 
     notes = yaml.safe_load(path.read_text(encoding="utf-8"))["content"][0]["notes"]
-    assert notes.startswith("00:00-01:00 [~1 мин] **Главное:**\n- Это не конкурс подходов.")
+    assert notes.startswith("[00:00–01:00 · ~1 мин] **Главное:**\n- Это не конкурс подходов.")
 
     second = _run(path, "check")
     assert second.returncode == 0, "второй прогон обязан сказать «совпадает»"

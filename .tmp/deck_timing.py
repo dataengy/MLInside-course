@@ -19,7 +19,7 @@ import sys
 import yaml
 
 APPENDIX_PREFIX = "900-"
-STAMP = re.compile(r"\[~([\d.]+)\s*мин")
+STAMP = re.compile(r"[\[·][ \t]*~([\d.]+)[ \t]*мин")  # см. preza_gen.notes.DURATION_RE
 
 
 def main(path: str) -> int:

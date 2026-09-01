@@ -9,8 +9,10 @@
 from __future__ import annotations
 import re, sys, yaml
 
-STAMP = re.compile(r"^\d{2,3}:\d{2}-\d{2,3}:\d{2}")   # регулярка из брифа, буквально
-PARTS = re.compile(r"^(\d{2,3}):(\d{2})-(\d{2,3}):(\d{2})")
+# Шапка `[MM:SS–MM:SS · ~N мин]`. Прежний голый формат (`MM:SS-MM:SS`) тоже принимается:
+# проверка должна работать и на деке, ещё не прогнанной через новый `preza-notes apply`.
+STAMP = re.compile(r"^\[?(\d{2,3}):(\d{2})[–-](\d{2,3}):(\d{2})")
+PARTS = STAMP
 CLOSING_KIND = "closing"
 
 
