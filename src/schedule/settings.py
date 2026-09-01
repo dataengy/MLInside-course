@@ -10,6 +10,7 @@ Two sources, both non-secret:
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -117,7 +118,84 @@ def out_path(settings: dict, key: str) -> Path:
 
 
 def dump_yaml(path: Path, data: Any, header: str = "") -> None:
-    """Write YAML with Cyrillic kept readable and key order preserved."""
+    """Write YAML with Cyrillic kept readable and key order preserved.
+
+    ВНИМАНИЕ: комментарии НЕ переживают этот путь — ``safe_dump`` их не знает.
+    Для файлов, которые человек читает и комментирует (``content/presentations.yml``),
+    берите :func:`load_roundtrip` / :func:`dump_roundtrip`.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     body = yaml.safe_dump(data, allow_unicode=True, sort_keys=False, width=100)
     path.write_text(f"{header}{body}" if header else body, encoding="utf-8")
+
+
+# ── round-trip: файлы, где комментарии — часть содержимого ────────────────────
+#
+# ЗАЧЕМ. content/presentations.yml правят и машины, и руки. Комментарии в нём несут то,
+# чего нет в данных: почему блок записи нарезан именно так, что за блок demos, почему
+# приложение разбито на три части. Пара safe_load + safe_dump сносит их молча — файл
+# остаётся валидным, диff выглядит как «переформатирование», и пояснение исчезает.
+# Так уже случалось: 2026-09-01 один прогон publisher снёс 19 строк комментариев.
+#
+# ruamel в round-trip-режиме держит комментарии, порядок ключей и стиль скаляров,
+# если МУТИРОВАТЬ загруженный документ, а не собирать новый: комментарии живут на
+# самих объектах (CommentedMap/CommentedSeq), и подмена объекта их теряет.
+
+
+def _rt() -> Any:
+    """YAML-процессор round-trip с настройками под этот репозиторий.
+
+    Настройки подобраны так, чтобы выдача совпадала с прежней (``safe_dump``) и первая же
+    запись не давала диff из одного переформатирования: та же ширина, тот же отступ и
+    ``null`` вместо пустого значения (ruamel по умолчанию печатает ``None`` пустотой).
+    """
+    from ruamel.yaml import YAML
+    from ruamel.yaml.representer import RoundTripRepresenter
+
+    class _Representer(RoundTripRepresenter):
+        pass
+
+    _Representer.add_representer(
+        type(None),
+        lambda self, _: self.represent_scalar("tag:yaml.org,2002:null", "null"),
+    )
+
+    y = YAML()  # round-trip по умолчанию
+    y.Representer = _Representer
+    y.preserve_quotes = True
+    y.width = 100
+    y.allow_unicode = True
+    y.indent(mapping=2, sequence=2, offset=0)  # как выгружал safe_dump
+    return y
+
+
+def load_roundtrip(path: Path) -> Any:
+    """Прочитать YAML, сохранив комментарии и стиль. Нет файла → ``{}``."""
+    if not path.exists():
+        return {}
+    return _rt().load(path.read_text(encoding="utf-8")) or {}
+
+
+def dump_roundtrip(path: Path, data: Any, header: str = "") -> None:
+    """Записать документ, полученный из :func:`load_roundtrip`, не потеряв комментарии.
+
+    ``header`` дописывается сверху ОДИН раз: шапка файла — не часть документа, она
+    канонична и обновляется в коде. Поэтому ведущий комментарий, который ruamel
+    подобрал при чтении, снимается — иначе шапка удваивалась бы с каждой записью.
+    Запись атомарная: у файла два писателя (schedule и publisher).
+    """
+    import io
+
+    if header and getattr(data, "ca", None) is not None:
+        data.ca.comment = None
+
+    buf = io.StringIO()
+    _rt().dump(data, buf)
+    # Перенос длинного простого скаляра ruamel ставит ПОСЛЕ пробела, и тот остаётся в конце
+    # строки. Смысла он не несёт, а диff и линтеры от него шумят.
+    body = "".join(f"{ln.rstrip()}\n" for ln in buf.getvalue().splitlines())
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(f"{header}{body}" if header else body, encoding="utf-8")
+    os.replace(tmp, path)

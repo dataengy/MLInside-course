@@ -11,6 +11,7 @@ dependencies = [
     "click>=8.1",
     "pypdf>=4",          # librarian: pdf docprops
     "python-docx>=1.1",  # librarian: docx docprops
+    "ruamel-yaml>=0.18",  # round-trip YAML: content/presentations.yml несёт комментарии
 ]
 
 [project.optional-dependencies]

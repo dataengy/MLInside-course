@@ -137,7 +137,10 @@ def plan(tab_name: str | None, dry: bool) -> None:
         )
 
     plan_path = cfg.out_path(s, "plan")
-    existing = (_load_yaml(plan_path).get("presentations")) or []
+    # Round-trip: записи плана несут комментарии, которых нет в данных. upsert правит
+    # записи НА МЕСТЕ, поэтому загруженные CommentedMap доносят их до записи.
+    plan_doc = cfg.load_roundtrip(plan_path) or {}
+    existing = plan_doc.get("presentations") or []
     merged, changes = mapper.upsert(existing, incoming)
 
     # Refresh the deck-derived fields for entries already mapped to a content file.
@@ -148,15 +151,18 @@ def plan(tab_name: str | None, dry: bool) -> None:
                 continue
             entry[k] = v
 
-    doc = {
-        "source": {
-            "gsheet": raw.get("spreadsheet", {}).get("url", s["spreadsheet"]["url"]),
-            "tab": tab["title"],
-            "fetched_at": raw.get("fetched_at"),
-            "raw": s["outputs"]["raw"],
-        },
-        "presentations": merged,
-    }
+    # Обновляем ЗАГРУЖЕННЫЙ документ по ключам, а не собираем новый: комментарии в ruamel
+    # живут на самих объектах, и подмена мапы выбросила бы их вместе со старой.
+    source = plan_doc.get("source")
+    if not hasattr(source, "keys"):
+        source = {}
+        plan_doc["source"] = source
+    source["gsheet"] = raw.get("spreadsheet", {}).get("url", s["spreadsheet"]["url"])
+    source["tab"] = tab["title"]
+    source["fetched_at"] = raw.get("fetched_at")
+    source["raw"] = s["outputs"]["raw"]
+    plan_doc["presentations"] = merged
+    doc = plan_doc
 
     summary = (
         f"{len(merged)} presentation(s) · +{len(changes['added'])} added "
@@ -170,7 +176,7 @@ def plan(tab_name: str | None, dry: bool) -> None:
         click.echo(f"[dry] {summary}", err=True)
         return
 
-    cfg.dump_yaml(plan_path, doc, PLAN_HEADER)
+    cfg.dump_roundtrip(plan_path, doc, PLAN_HEADER)
     click.echo(f"✔ {plan_path.relative_to(REPO_ROOT)} — {summary}")
 
 
