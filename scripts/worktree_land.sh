@@ -129,7 +129,11 @@ fi
 # Сверка по пути объявляла бы такой оригинал пропажей вечно, и проверка превратилась бы в
 # шум, который перестают читать.
 MANUAL="$(cd "$WT" && find . -name '*man*.pptx' -not -name '~$*' 2>/dev/null | sed 's|^\./||')"
-TRACKED_NAMES="$(git -C "$WT" ls-files | sed 's|.*/||')"
+# core.quotePath=false здесь по той же причине, что и в проверке 3, и грабли те же: без него
+# ls-files отдаёт кириллическое имя как "MLInside_\320\222…", find — как UTF-8, и сравнение
+# по имени не совпадает НИКОГДА. Сломано это было бы молча: проверка просто ругалась бы на
+# уже закоммиченные файлы.
+TRACKED_NAMES="$(git -C "$WT" -c core.quotePath=false ls-files | sed 's|.*/||')"
 MANUAL_LOOSE=""
 while IFS= read -r f; do
   [ -z "$f" ] && continue
