@@ -16,10 +16,10 @@ package (`src/preza_gen/`); safe to delete. Run via the local Justfile from the 
 | `extract_source.py` | Per-slide text + URLs / "Доп материалы" blocks from a source deck. |
 | `probe_google_access.py` | Read-only gate check for the publish pipeline, per credential lane: Drive account + free space + folder, sheet read/`canEdit`, and a rehearsal of the sheet write (tab, topic column, which columns append where, deck → row). Re-run after changing sharing, Drive quota or the consent. |
 
-## Скрипты v4-деки (ad-hoc, в Justfile не заведены)
+## Скрипты v4-деки
 
-Написаны при переработке dbt-деки в `v4.01`. Лежат здесь «на всякий случай» — под
-переиспользование специально не приспособлены, но каждый самодостаточен и с шапкой.
+Написаны при переработке dbt-деки в `v4.0.1`. Под переиспользование специально не
+приспособлены — каждый самодостаточен и с шапкой-объяснением внутри.
 
 | Script | What it does |
 |--------|--------------|
