@@ -373,3 +373,11 @@ secrets-hide:
 # Decrypt .env.secrets.secret → settings/.env.secrets
 secrets-reveal:
     cd {{_dir}} && bash scripts/secrets-sync.sh reveal
+
+# Посадка ветки worktree в main + удаление ветки и каталога — с семью проверками.
+# По умолчанию ТОЛЬКО проверяет: `git worktree remove` уничтожает untracked-файлы без следа,
+# а в одном worktree здесь обычно работают несколько сессий сразу. Удаление требует явного
+# --force-remove. Живые сессии bash не видит — проверьте ListAgents (скилл worktree-land).
+# Пример: just worktree-land check   ·   just worktree-land remove . --force-remove
+worktree-land cmd="check" *ARGS:
+    cd {{_dir}} && bash scripts/worktree_land.sh {{cmd}} {{ARGS}}
