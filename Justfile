@@ -328,6 +328,18 @@ update *ARGS:
 repo-doctor:
     cd {{_dir}} && bash scripts/repo-update.sh doctor
 
+# ── cross-account repo sharing (docs in scripts/repo-share.sh header) ────────
+# Both hnkovr and dataengy admin on the umbrella repo + every hnkovr/* submodule,
+# so whichever identity the keychain hands git can always clone and push.
+
+# Read-only: access matrix for every submodule + related repo, per account
+repo-share-doctor:
+    cd {{_dir}} && bash scripts/repo-share.sh doctor
+
+# Invite + accept whatever the matrix is missing. Idempotent.
+repo-share:
+    cd {{_dir}} && bash scripts/repo-share.sh sync
+
 test:
     cd {{_dir}} && python3 -m pytest
 

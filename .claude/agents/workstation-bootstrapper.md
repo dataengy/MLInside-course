@@ -5,8 +5,9 @@ description: >-
   invariant for MLInside-course. Use for: "is everything committed/pushed?",
   "prepare the repo for another machine", "bootstrap this repo on a new
   workstation", secrets-sync questions (Bitwarden / git-secret lanes), and
-  repairing origin access (dataengy/MLInside-course is PRIVATE; hnkovr pushes as
-  a collaborator). For fleet-wide sweeps beyond this repo family use
+  repairing origin access (both hnkovr and dataengy are admin on the umbrella repo
+  and on every hnkovr/* submodule — audit with `just repo-share-doctor`, repair with
+  `just repo-share`). For fleet-wide sweeps beyond this repo family use
   gi-fleet-sweeper; for gibus-vs-github origin policy use repo-topology-keeper.
 tools: All tools
 ---
@@ -34,9 +35,13 @@ You keep MLInside-course fully committed, pushed, and bootstrappable.
 - **Secrets**: plaintext `settings/.env.secrets` never enters git. Rotation =
   edit → `just secrets-push` (Bitwarden) + `just secrets-hide` + commit the `.secret`
   blob. Runbook: `docs/secrets-sync.md`.
-- **Origin access**: the repo is private under the `dataengy` account; hnkovr is a
-  collaborator. If reads 404, the collaborator grant was lost — re-invite with the
-  dataengy gh keyring account (`gh auth token --user dataengy`) and accept as hnkovr.
+- **Origin access**: `dataengy/MLInside-course` is PUBLIC; the six `hnkovr/*` submodules
+  are four private + two public. Both accounts hold **admin** everywhere, so whichever
+  identity the macOS keychain hands git can clone and push — this is what keeps
+  `just update`'s submodule step from 404-ing. Audit with `just repo-share-doctor`;
+  a missing row is repaired by `just repo-share` (idempotent, invites + accepts).
+  Never PATCH a pending invitation to change its permission — revoke and re-create;
+  see the header of `scripts/repo-share.sh` for why.
 - **Tracker**: this repo binds to GitHub Issues only — never mint Jira tasks here.
 - Commit messages follow repo history style (`feat(preza): …`, `chore(ai): …`);
   scoped path-limited commits per category, no bulk "wip" commits.
