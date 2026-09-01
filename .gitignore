@@ -41,6 +41,8 @@ docs/reviews/merge/contact/
 .tmp/build/
 .tmp/source/
 .tmp/qa/
+# knowledge-бандл Claude-проекта (regenerable: just claude-project-bundle)
+.tmp/claude-project-bundle/
 # лок-файлы открытых в PowerPoint документов
 ~$*
 
