@@ -342,17 +342,20 @@ repo-share-doctor:
 repo-share:
     cd {{_dir}} && bash scripts/repo-share.sh sync
 
+# Все четыре идут через `uv run --extra dev`: голые ruff/ty/python3 есть в PATH только
+# при активированном venv, и без него рецепты падали с `command not found` (ruff) и
+# `ModuleNotFoundError: yaml` (pytest). Остальной Justfile давно живёт на `uv run`.
 test:
-    cd {{_dir}} && python3 -m pytest
+    cd {{_dir}} && uv run --extra dev python -m pytest
 
 lint:
-    cd {{_dir}} && ruff check src
+    cd {{_dir}} && uv run --extra dev ruff check src
 
 fmt:
-    cd {{_dir}} && ruff format src && ruff check --fix src
+    cd {{_dir}} && uv run --extra dev ruff format src && uv run --extra dev ruff check --fix src
 
 typecheck:
-    cd {{_dir}} && ty check src
+    cd {{_dir}} && uv run --extra dev ty check src
 
 # lint + typecheck + tests
 check: lint typecheck test
