@@ -1,5 +1,11 @@
 # preza-dbt-v4-content.yml — WHAT deck: «Трансформация данных и витрины (dbt)».
 #
+# v4.9.0 — слайд «Data Mesh в dbt: домены и контракты» сразу за слайдом про exposures,
+#   contracts и groups. Отвечает на вопрос, во что groups/access вырастают, когда доменов
+#   становится несколько: соответствие идей Data Mesh механизмам dbt, YAML границы домена
+#   (group + access: public/private + contract: enforced) и цепочка сквозного примера
+#   commerce.orders_public → ml-platform.mart_delivery_features → delivery_delay_model.
+#
 # v4.8.0 — один слайд в PART 3, следом за «ещё четыре подхода»: «Нужен ли отдельный
 #   оркестратор в modern data stack?». Тренд сближения transformation engines, платформ
 #   данных и оркестрации: SQLMesh и Bruin несут свой scheduler, Databricks — Lakeflow Jobs,
@@ -71,7 +77,7 @@
 # осторожно / переход, и оценку хронометража [~N мин].
 
 deck:
-  out_name: MLInside_Введение-в-dbt_v4.8.0   # semver в имени → naming: fixed
+  out_name: MLInside_Введение-в-dbt_v4.9.0   # semver в имени → naming: fixed
   naming: fixed
   version_major: 4
   format: alina-2026-08
@@ -95,7 +101,7 @@ content:
     **Переход:**
     - ~~«Посмотрим план, а потом сразу разберёмся, почему подготовка данных перестала быть чужой зоной ответственности».~~
 
-    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.6.1 · 2026-09-01
+    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.9.0 · 2026-09-01
 - kind: agenda
   id: 002-plan-lekcii
   title: План лекции
@@ -3944,6 +3950,78 @@ content:
     - Устаревший exposure хуже отсутствующего.
 
     **Переход:**
+    - ~~«Groups и access мы только назвали — посмотрим, во что они вырастают, когда доменов становится несколько».~~
+- kind: content
+  id: 061h2-data-mesh-domeny-i-kontrakty
+  title: 'Data Mesh в dbt: домены и контракты'
+  bullets:
+  - 'Mesh — не новая модель данных, а разделение dbt-ландшафта по доменам при одном графе'
+  - 'domain ownership → groups и отдельные проекты; интерфейс дата-продукта → access: public'
+  - 'Внутренние модели → access: private/protected; договор доменов → contract: enforced'
+  - 'Зависимости → ref() и project dependencies; discoverability → docs, lineage, metadata'
+  - 'Controlled evolution → model versions; потребители вне dbt → exposures'
+  - 'Внутри домена реализация свободна, наружу — стабильный public interface'
+  - 'Итог: decentralized ownership + explicit contracts + one dependency graph'
+  materials:
+  - label: Model access
+    url: https://docs.getdbt.com/docs/collaborate/govern/model-access
+  - label: Project dependencies
+    url: https://docs.getdbt.com/docs/collaborate/govern/project-dependencies
+  - label: Model versions
+    url: https://docs.getdbt.com/docs/collaborate/govern/model-versions
+  code_caption: models/_domains.yml · граница домена как код
+  code_lang: yaml
+  code: |2
+    # DOMAIN commerce                 │ DOMAIN ml-platform
+    # stg_* → int_*  (private)        │ int_features (private)
+    #          ↘ orders_public ──ref()──→ mart_delivery_features
+    #            public + contract    │      ↓ exposure: delivery_delay_model
+
+    groups:
+      - name: commerce
+        owner: {name: Commerce Data}
+
+    models:
+      - name: orders_public          # интерфейс домена наружу
+        group: commerce
+        access: public
+        config: {contract: {enforced: true}}
+
+      - name: int_orders_internal    # реализация; наружу не видна
+        group: commerce
+        access: private
+
+    # Mesh ≠ папки marts по доменам · ≠ один гигантский repo · ≠ микросервисность
+  notes: |2
+    [126:54–128:54 · ~2 мин] **Главное:**
+    - !!dbt Mesh — это не отдельная модель данных, а способ разделить большой dbt-ландшафт между доменными командами, сохранив единый dependency graph и контракты между ними!!.
+
+    **Рассказ:**
+    - Классический Data Mesh шире dbt: это ещё и организационная модель, ownership, governance и platform capabilities. dbt закрывает ровно один слой этой картины — !!transformation / analytics layer!!.
+    - Зато закрывает машинно.
+    - Связка `groups + access + contracts + versions + cross-project refs` превращает границу между командами из договорённости в проверяемый интерфейс: нарушение ловится на сборке, а не на созвоне.
+    - Прочитать соответствие по буллетам сверху вниз: слева идея Mesh, справа механизм dbt.
+
+    **Разбор кода:**
+    - Схема сверху — два домена и одна стрелка между ними.
+    - Внутри `commerce` живут `stg_*` и `int_*`, они `private`; наружу опубликована ровно одна модель `orders_public` с `access: public` и `contract: enforced`.
+    - Домен `ml-platform` ссылается на неё через `ref()` и строит свою витрину признаков, а её потребитель — обученная модель — объявлен exposure со вчерашнего слайда.
+    - Ниже тот же контур в YAML: `groups` с владельцем, публичная модель с контрактом и внутренняя модель, закрытая `access: private`.
+    - Это два десятка строк, но именно они делают границу домена частью кода.
+
+    **Практический смысл:**
+    - Правило одно: !!внутри домена команда свободна менять реализацию; наружу она обязана сохранять стабильный public interface!!.
+    - В нашем примере это значит, что ML-команда цепляется за `commerce.orders_public`, а не за `stg_*` и `int_*` домена Commerce: `commerce.orders_public → ml-platform.mart_delivery_features → delivery_delay_model`.
+    - Переименовали внутреннюю модель у себя — никто не сломался.
+    - Меняете публичную — это смена версии, а не тихий коммит.
+
+    **Осторожно:**
+    - Data Mesh ≠ папки `marts` по доменам, ≠ один гигантский dbt repo и ≠ обязательная микросервисность.
+    - Выигрыш появляется, когда доменов реально несколько и они относительно автономны; для маленького проекта один репозиторий проще и дешевле.
+    - И не путать !!dbt Mesh как архитектурный паттерн!! с конкретными коммерческими возможностями dbt Cloud: `groups`, `access`, `contracts` и `versions` есть в dbt Core.
+    - Продолжение предыдущего слайда: `groups` и `access` полезны не сами по себе, а когда появляются настоящие организационные границы.
+
+    **Переход:**
     - ~~«А теперь вернёмся к нашей витрине и посмотрим, что в ней получилось».~~
 - kind: table
   id: 062-priznaki-mart-delivery-features
@@ -3983,7 +4061,7 @@ content:
     - 5
     - 6
   notes: |2
-    [126:54–128:24 · ~1.5 мин] **Главное:**
+    [128:54–130:24 · ~1.5 мин] **Главное:**
     - Итоговая витрина одной таблицей — и у каждого признака есть своя ловушка.
 
     **Рассказ:**
@@ -4034,7 +4112,7 @@ content:
      3. Point-in-time correctness SQL за вас не проверит
      4. Граница dbt проходит по training dataset
   notes: |2
-    [128:24–129:54 · ~1.5 мин] **Главное:**
+    [130:24–131:54 · ~1.5 мин] **Главное:**
     - Финальный тезис лекции, произнести его вслух целиком.
 
     **Рассказ:**
@@ -4064,7 +4142,7 @@ content:
   - Почему feature mart ≠ online feature store
   - Как изменение SQL-признака становится изменением ML-системы
   notes: |2
-    [129:54–131:24 · ~1.5 мин] **Главное:**
+    [131:54–133:24 · ~1.5 мин] **Главное:**
     - !!Первые четыре вопроса — это дословно четыре учебных результата занятия!!: перенос логики в SQL/dbt, слои, контракт и quality gate, инкремент.
     - Остальные шесть проверяют, что вокруг них выстроилось.
 
@@ -4103,7 +4181,7 @@ content:
   - label: dbt-project-evaluator
     url: https://github.com/dbt-labs/dbt-project-evaluator
   notes: |2
-    [131:24–132:24 · ~1 мин] **Главное:**
+    [133:24–134:24 · ~1 мин] **Главное:**
     - Список проверенных материалов, все ссылки рабочие на момент подготовки лекции.
 
     **Рассказ:**
@@ -4130,7 +4208,7 @@ content:
   id: 066-spasibo-za-vnimanie
   title: Спасибо за внимание!
   notes: |2
-    [132:24–132:54 · ~0.5 мин] **Главное:**
+    [134:24–134:54 · ~0.5 мин] **Главное:**
     - Закрыть лекцию и обозначить, что дальше.
 
     **Рассказ:**
@@ -4141,7 +4219,7 @@ content:
     - Ни одна из них не входит в хронометраж — это материал для самостоятельного чтения.
     - Вопросы.
 
-    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.6.1 · 2026-09-01
+    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.9.0 · 2026-09-01
 - kind: section
   id: 950-part-2-ds-mle-nyuansy
   title: PART 2 · DS/MLE НЮАНСЫ
