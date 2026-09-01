@@ -2,13 +2,17 @@
 # scripts/repo-share.sh — keep every repo of the course family reachable from BOTH
 # GitHub identities the course is worked from.
 #
-# Why this exists. The course spans one public umbrella repo (dataengy/MLInside-course)
-# and six submodules owned by the other account (hnkovr/*), four of them private. Whichever
-# identity a given workstation's credential helper hands to git decides whether a
-# `git submodule update` succeeds — see note 2 in scripts/repo-update.sh. Rather than
-# fight the keychain per machine, we make BOTH accounts admin on BOTH sides, once.
+# Why this exists. The course spans one umbrella repo and seven submodules, several of them
+# private. Whichever identity a given workstation's credential helper hands to git decides
+# whether a `git submodule update` succeeds — see note 2 in scripts/repo-update.sh. Rather
+# than fight the keychain per machine, we make BOTH accounts admin on BOTH sides, once.
 #
-# Two facts this script encodes, both learned the hard way:
+# 2026-09-01: every submodule now lives under dataengy (they used to be hnkovr/*), so the
+# repo list is one-sided by owner but the access requirement is unchanged — both accounts
+# admin everywhere. The list is still derived from .gitmodules, so the move needed no edit
+# here beyond this note.
+#
+# Three facts this script encodes, all learned the hard way:
 #
 #   1. `PUT /repos/{o}/{r}/collaborators/{u}` is NOT idempotent w.r.t. permission when a
 #      pending invitation already exists. It returns the EXISTING invite untouched, still
@@ -20,6 +24,17 @@
 #   2. `gh auth switch` does not help here — it flips the active account globally and
 #      races with anything else using gh. We read each account's token explicitly with
 #      `gh auth token --user <acct>` and scope it to one command via GH_TOKEN.
+#
+#   3. The same PUT does not UPGRADE an EXISTING collaborator either. It returns 204,
+#      leaves the old permission, creates no invitation — success is indistinguishable
+#      from a no-op. Only remove-then-invite moves someone up. This bites right after
+#      `POST /repos/{o}/{r}/transfer`: GitHub keeps the PREVIOUS owner as a collaborator
+#      at `write`, and every `permission=admin` PUT after that silently does nothing.
+#      (Observed 2026-09-01 on all six repos moved hnkovr → dataengy.)
+#
+# Not a limitation, despite appearances: admin for a collaborator IS available on repos
+# owned by a personal account. Only the named roles beyond it (maintain, triage) are
+# organization-only. If a repo shows `write` after a grant, it is fact 3, not a ceiling.
 #
 # The repo list is derived from .gitmodules, so adding a submodule automatically brings it
 # into scope. EXTRA_REPOS covers repos related by hand rather than by gitlink.
@@ -93,7 +108,7 @@ pending_invite() {
 
 # grant <repo> <user> — bring <user> to $PERMISSION on <repo>, inviting and accepting.
 grant() {
-    local repo=$1 user=$2 owner=${1%%/*} invite id perm
+    local repo=$1 user=$2 owner=${1%%/*} invite id perm have
     invite=$(pending_invite "$user" "$repo")
     if [[ -n $invite ]]; then
         read -r id perm <<<"$invite"
@@ -104,6 +119,17 @@ grant() {
             log "$repo: revoking stale $perm invite for $user"
             gh_as "$owner" api -X DELETE "repos/$repo/invitations/$id" --silent
             invite=""
+        fi
+    else
+        # Fact 3: PUT does not UPGRADE an EXISTING collaborator. It returns 204 and leaves
+        # the old permission in place — no invite is created, nothing changes, and the
+        # caller sees success. The only way up is to remove the collaborator and invite
+        # again. Hit right after a repo transfer: GitHub keeps the previous owner as a
+        # collaborator at `write`, and every PUT with permission=admin silently no-ops.
+        have=$(access_of "$user" "$repo")
+        if [[ $have != none && $have != "$PERMISSION" ]]; then
+            log "$repo: $user stuck at $have — removing to re-invite at $PERMISSION"
+            gh_as "$owner" api -X DELETE "repos/$repo/collaborators/$user" --silent
         fi
     fi
     if [[ -z $invite ]]; then
@@ -160,7 +186,7 @@ cmd_sync() {
 }
 
 usage() {
-    sed -n '2,28p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,44p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
 }
 
 case "${1:-doctor}" in
