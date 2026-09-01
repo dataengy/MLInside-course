@@ -154,45 +154,48 @@ presentations:
   - 'Версионирование данных: Отслеживание происхождения (lineage) датасетов и версий моделей.'
   content: content/preza-dagster-v2-content.yml
   out_name: MLInside_Современная-оркестрация-ML-пайплайнов-Dagster
-  slides: 86
+  slides: 105
   visuals: code-tables
   generated: true
   homework:
     repo: https://github.com/hnkovr/mlinside-hw-olist
     spec: homework/mlinside-hw-olist/docs/HW2-dagster.md
     slides:
-    - 071-domashnee-zadanie
-    - 072-dz-orkestriruem-dbt-proekt-v-dagster
-    - 073-dz-kriterii-ocenki
+    - 083-domashnee-zadanie
+    - 084-dz-orkestriruem-dbt-proekt
+    - 085-dz-kriterii-ocenki
   recording:
     lecture_n: 6
     blocks:
     - title: 'Проблема, Dagster и ассет'
       from: 001-sovremennaya-orkestraciya-ml
-      to: 010-asset-protiv-task
+      to: 011-asset-protiv-task
     - title: Quick Start
-      from: 011-quick-start
-      to: 020-chek-list-povtorit-doma
+      from: 012-quick-start
+      to: 022-shag-9-itog-quick-start
     - title: Dagster + dbt
-      from: 021-dagster-i-dbt
-      to: 032-multi-dbt-i-dbt-mesh
+      from: 023-dagster-i-dbt
+      to: 035-level-4-multi-dbt
     - title: ML lifecycle в Dagster
-      from: 033-ml-lifecycle-kak-asset-graph
-      to: 044-granica-lifecycle-protiv-ispolneniya
-    - title: MLflow и production-паттерны
-      from: 045-dagster-i-mlflow
-      to: 053-avtomatizaciya-chto-vybrat
-    - title: Airflow и оркестраторы рядом
-      from: 054-dagster-protiv-airflow
-      to: 063-odin-orkestrator-na-granicu-otvetstvennosti
-    - title: Архитектуры, решение и ДЗ
-      from: 064-referens-arhitektury
-      to: 074-spasibo-za-vnimanie
+      from: 036-ml-lifecycle-kak-asset-graph
+      to: 049-granica-lifecycle-protiv-ispolneniya
+    - title: MLflow и паттерны переобучения
+      from: 050-dagster-i-mlflow
+      to: 059-avtomatizaciya-chto-vybrat
+    - title: 'Airflow 2.x, Airflow 3.x и Dagster'
+      from: 060-airflow-i-dagster
+      to: 067-sbalansirovannyj-vyvod
+    - title: Соседи и референс-архитектуры
+      from: 068-orkestratory-ryadom
+      to: 078-d-korporativnoe-sosuschestvovanie
+    - title: 'Решение, эксплуатация и ДЗ'
+      from: 079-kogda-nuzhen-i-kogda-net
+      to: 086-spasibo-za-vnimanie
     # Приложение записывать не надо — блок заведён только затем, чтобы план покрывал
     # деку целиком (src/course/blocks.py требует покрытия без дыр).
     - title: 'Приложение — в запись не идёт'
       from: 900-prilozhenie
-      to: 910-istoriya-i-persony
+      to: 918-istoriya-i-persony
   published:
     version: '1.4'
     slides: 49
