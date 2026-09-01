@@ -11,7 +11,8 @@ ingest:
 # Deck config lives in content/ (course-specific); the generator is the src/preza_gen submodule.
 _settings := "content/build_deck_v3-settings.yml"
 _content := "content/preza-dbt-v3-content.yml"
-_dagster_content := "content/preza-dagster-content.yml"
+# v2 — актуальная дека Dagster; v1 (content/preza-dagster-content.yml) оставлена как архив
+_dagster_content := "content/preza-dagster-v2-content.yml"
 _prefect_content := "content/preza-prefect-content.yml"
 _cicd_obs_content := "content/preza-cicd-observability-content.yml"
 _airflow_content := "content/preza-apache-airflow-content.yml"

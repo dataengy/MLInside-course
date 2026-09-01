@@ -1,0 +1,239 @@
+# preza-dagster-v2-images.yml — РЕЕСТР КАРТИНОК деки content/preza-dagster-v2-content.yml.
+#
+# Пишется командой `python3 scripts/preza/images_manifest.py sync content/preza-dagster-v2-content.yml`; правится и руками.
+#
+# Зачем файл существует: картинку со слайда может снять человек — в контент-YAML или в
+# PowerPoint. Без реестра следующий проход расстановки увидел бы «неиспользованный файл»
+# и вернул картинку обратно. Здесь фиксируется НАМЕРЕНИЕ, а не факт.
+#
+#   placed          стоит на слайде; реестр и контент согласны
+#   manual-removed  снята со слайда руками → НЕ предлагать к постановке снова
+#   manual-moved    перенесена на другой слайд руками → видно откуда и куда
+#   spare           файл есть, на слайдах не используется, поставить можно
+#   wanted          картинки ещё нет — есть жёлтая 🔍-ссылка на поиск в подвале слайда
+#
+# Чтобы вернуть снятую картинку в оборот, поменяйте её state на `spare` руками.
+#
+# layout.box    — рамка из настроек сборки (settings.image_box), дюймы
+# layout.placed — фактический прямоугольник после вписывания, дюймы
+# layout.fit    — contain: вписать целиком с сохранением пропорций (fit_image_box)
+# layout.anchor — bottom: нижняя кромка прижата к fmt.visual_bottom
+deck: content/preza-dagster-v2-content.yml
+settings: content/build_deck_v3-settings.yml
+media_dir: data/source/media
+generated: '2026-09-01'
+images:
+- file: pic-ae-dataduel.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-data-platform-arch.jpg
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dbt-dag-large.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dbt-docs-model.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dbt-hub-packages.jpg
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dbt-layers-flow.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dbt-lineage-graph.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dbt-overview.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dbt-package-page.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-dbt-run-terminal.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-elt-roles-split.jpg
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-ideal-data-architecture.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-jinja-compiled.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-jinja-source.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-jinja-target-name.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-lineage-model-monitor.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-model-layers-principles.jpg
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-olist-csv-files.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-olist-db-schema.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-olist-er.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+- file: pic-roles-de-ae-da.png
+  slide_id: null
+  state: spare
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  changed: '2026-09-01'
+  note: ''
+wanted:
+- slide_id: 049-odin-pajplajn-tri-interfeysa
+  label: 🔍 Скриншоты Airflow 2 / Airflow 3 / Dagster для триптиха
+  url: https://www.google.com/search?q=airflow+3+assets+graph+view+screenshot
+- slide_id: 920-a14-shag-4-materialize
+  label: '🔍 Снять: Materialize в интерфейсе и журнал запуска с событиями по ассетам'
+  url: https://docs.dagster.io/guides/build/assets
+- slide_id: 921-a14-shag-5-asset-graph
+  label: '🔍 Снять: Asset Graph из трёх узлов со статусами'
+  url: https://docs.dagster.io/guides/build/assets
+- slide_id: 922-a14-shag-6-metadannye
+  label: '🔍 Снять: карточка ассета с метаданными и графиком метрики по времени'
+  url: https://docs.dagster.io/guides/build/assets/metadata-and-tags
+- slide_id: 923-a14-shag-7-selective-recomputation
+  label: '🔍 Снять: устаревшие узлы после правки upstream'
+  url: https://docs.dagster.io/guides/build/assets/asset-selection-syntax/reference
+- slide_id: 927-a15-level-2-skvoznoj-graf
+  label: '🔍 Снять: dbt-модели как отдельные ассеты внутри Dagster'
+  url: https://docs.dagster.io/integrations/libraries/dbt
+- slide_id: 929-a15-level-3-testy-v-checks
+  label: '🔍 Снять: dbt-тесты как asset checks на карточке модели'
+  url: https://docs.dagster.io/guides/test/asset-checks
+- slide_id: 931-a16-mlflow-v-metadannyh-asseta
+  label: '🔍 Снять: метаданные с mlflow_run_id и model_uri рядом с тем же run в MLflow'
+  url: https://mlflow.org/docs/latest/ml/tracking/

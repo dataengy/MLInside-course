@@ -79,7 +79,11 @@ planning:
 # Bounds enforced by the skill's validate_content.py before every build.
 deck_generation:
   slides_min: 20
-  slides_max: 110                 # 2026-09-01: 90→110 — Dagster v2.1: Quick Start развёрнут в 10 шагов, блок dbt по уровням 0→4,
+  slides_max: 120                 # 2026-09-01: 110→120 — Dagster v2.2: три live-demo checkpoint внутри нарратива;
+                                  #             слайды, чьё содержание уехало в живой показ, не удалены, а перенесены
+                                  #             в приложение как screenshot fallback (A14–A16), плюс A17–A18;
+                                  #             основная часть при этом СЖАЛАСЬ с 86 до 64 слайдов и 98.0 → 89.1 мин
+                                  # 2026-09-01: 90→110 — Dagster v2.1: Quick Start развёрнут в 10 шагов, блок dbt по уровням 0→4,
                                   #             сравнение переписано на Airflow 2.x/3.x/Dagster, четыре референс-архитектуры;
                                   #             приложение выросло до 19 слайдов (A1–A13)
                                   # 2026-09-01: 76→90 — Dagster v2: Quick Start, блок dbt и ML lifecycle;

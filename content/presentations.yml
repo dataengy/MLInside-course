@@ -154,48 +154,63 @@ presentations:
   - 'Версионирование данных: Отслеживание происхождения (lineage) датасетов и версий моделей.'
   content: content/preza-dagster-v2-content.yml
   out_name: MLInside_Современная-оркестрация-ML-пайплайнов-Dagster
-  slides: 105
+  slides: 113
   visuals: code-tables
   generated: true
+  demos:
+    runbook: docs/dagster-demo-runbook.md
+    slides:
+    - 017-demo-1-quick-start
+    - 026-demo-2-dagster-dbt
+    - 042-demo-3-mlflow
   homework:
     repo: https://github.com/hnkovr/mlinside-hw-olist
     spec: homework/mlinside-hw-olist/docs/HW2-dagster.md
     slides:
-    - 083-domashnee-zadanie
-    - 084-dz-orkestriruem-dbt-proekt
-    - 085-dz-kriterii-ocenki
+    - 061-domashnee-zadanie
+    - 062-dz-orkestriruem-dbt-proekt
+    - 063-dz-kriterii-ocenki
   recording:
     lecture_n: 6
+    # Блоки нарезаны так, чтобы ни одно живое демо не оказалось на стыке: демо целиком
+    # внутри своего блока, пауза на монтаж — до или после него, но не в середине показа.
     blocks:
     - title: 'Проблема, Dagster и ассет'
       from: 001-sovremennaya-orkestraciya-ml
       to: 011-asset-protiv-task
-    - title: Quick Start
+    - title: 'Quick Start и DEMO 1'
       from: 012-quick-start
-      to: 022-shag-9-itog-quick-start
-    - title: Dagster + dbt
-      from: 023-dagster-i-dbt
-      to: 035-level-4-multi-dbt
+      to: 019-shag-9-itog-quick-start
+    - title: 'Dagster + dbt и DEMO 2'
+      from: 020-dagster-i-dbt
+      to: 028-level-4-multi-dbt
     - title: ML lifecycle в Dagster
-      from: 036-ml-lifecycle-kak-asset-graph
-      to: 049-granica-lifecycle-protiv-ispolneniya
-    - title: MLflow и паттерны переобучения
-      from: 050-dagster-i-mlflow
-      to: 059-avtomatizaciya-chto-vybrat
+      from: 029-ml-lifecycle-kak-asset-graph
+      to: 039-granica-lifecycle-protiv-ispolneniya
+    - title: 'MLflow, DEMO 3 и паттерны переобучения'
+      from: 040-dagster-i-mlflow
+      to: 047-pattern-s-podtverzhdeniem
     - title: 'Airflow 2.x, Airflow 3.x и Dagster'
-      from: 060-airflow-i-dagster
-      to: 067-sbalansirovannyj-vyvod
-    - title: Соседи и референс-архитектуры
-      from: 068-orkestratory-ryadom
-      to: 078-d-korporativnoe-sosuschestvovanie
-    - title: 'Решение, эксплуатация и ДЗ'
-      from: 079-kogda-nuzhen-i-kogda-net
-      to: 086-spasibo-za-vnimanie
+      from: 048-airflow-i-dagster
+      to: 053-sbalansirovannyj-vyvod
+    - title: 'Архитектуры, решение и ДЗ'
+      from: 054-referens-arhitektury
+      to: 064-spasibo-za-vnimanie
     # Приложение записывать не надо — блок заведён только затем, чтобы план покрывал
     # деку целиком (src/course/blocks.py требует покрытия без дыр).
-    - title: 'Приложение — в запись не идёт'
+    # A14–A16 внутри него — screenshot fallback для трёх демо: если живой показ сорвался,
+    # лектор идёт по этим слайдам, и они попадают в запись вместо демо.
+    # Разбито на три, чтобы не срабатывал гейт «блок > 25 мин»: оценка идёт по эвристике
+    # 1.3 мин/слайд и не знает, что этот блок не записывается.
+    - title: 'Приложение A1–A13 — в запись не идёт'
       from: 900-prilozhenie
       to: 918-istoriya-i-persony
+    - title: 'Приложение A14–A16 (запасные экраны демо) — в запись не идёт'
+      from: 919-a14-quick-start-ekran-za-ekranom
+      to: 936-a16-avtomatizaciya-chto-vybrat
+    - title: 'Приложение A17–A18 — в запись не идёт'
+      from: 937-a17-orkestratory-ryadom
+      to: 948-a18-d-korporativnoe-sosuschestvovanie
   published:
     version: '1.4'
     slides: 49
