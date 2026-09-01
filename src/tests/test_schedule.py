@@ -133,7 +133,7 @@ def review():
     pytest.importorskip("click")
     if not (REVIEW_SCRIPTS / "review_content.py").exists():
         pytest.skip("preza-review skill scripts not installed")
-    import review_content
+    import review_content  # ty: ignore[unresolved-import]  # скилл-скрипт, путь в фикстуре
 
     return review_content
 

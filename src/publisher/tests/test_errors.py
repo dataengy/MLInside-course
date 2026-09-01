@@ -36,8 +36,9 @@ def test_leg_failures_are_recorded_explained(monkeypatch, tmp_path):
 
     monkeypatch.setattr(runner.Runner, "_leg_drive", boom)
     r = runner.Runner.__new__(runner.Runner)  # no config needed: only the drive leg runs
-    r.cfg, r._services, r._sheet_ctx = None, {}, None
+    # Намеренно без конфига: тест гоняет только drive-ногу, cfg в ней не читается.
+    r.cfg, r._services, r._sheet_ctx = None, {}, None  # ty: ignore[invalid-assignment]
     built = runner.detect.BuiltDeck("D", tmp_path / "d.pptx", 1, 2, 0, "", "sig")
     ds = st.DeckState(version="1.2", slides=10)
     out = r.publish_one({}, built, ds, only={"drive"}, force=False)
-    assert out.failed and "место, а не права" in ds.drive.error and quota in ds.drive.error
+    assert out.failed and "место, а не права" in (ds.drive.error or "") and quota in (ds.drive.error or "")

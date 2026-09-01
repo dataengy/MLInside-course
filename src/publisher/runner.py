@@ -58,7 +58,8 @@ def seed_from_published(entry: dict, built: detect.BuiltDeck) -> st.DeckState | 
         drive_url=pub.get("url"),
         published_at=pub.get("at"),
     )
-    legs = pub.get("legs") if isinstance(pub.get("legs"), dict) else {}
+    legs_raw = pub.get("legs")
+    legs = legs_raw if isinstance(legs_raw, dict) else {}
     default = "ok" if pub.get("at") else "pending"
     for name in st.LEGS:
         raw = legs.get(name)

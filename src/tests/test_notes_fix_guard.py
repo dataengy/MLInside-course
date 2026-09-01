@@ -17,7 +17,7 @@ import yaml
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "scripts" / "preza"))
 
-import notes_fix  # noqa: E402
+import notes_fix  # noqa: E402  # ty: ignore[unresolved-import]  # путь добавлен выше
 
 PROSE = "[~1 мин] **Главное:** это не конкурс подходов. Ни один из них не требование dbt."
 BULLETS = (

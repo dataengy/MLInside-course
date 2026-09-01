@@ -34,7 +34,7 @@ def _ensure_path() -> None:
 def get_service(scopes: list[str] | None = None) -> Any:
     """Authenticated Sheets v4 service (ADC first — see ``integrations/google/sheets/auth.py``)."""
     _ensure_path()
-    from sheets import auth
+    from sheets import auth  # ty: ignore[unresolved-import]  # путь даёт _ensure_path()
 
     return auth.get_service(scopes)
 
@@ -42,6 +42,6 @@ def get_service(scopes: list[str] | None = None) -> Any:
 def sheet_utils() -> Any:
     """The hardlinked ``utils`` module (``get_sheet_values``, ``list_sheet_names``, …)."""
     _ensure_path()
-    from sheets import utils
+    from sheets import utils  # ty: ignore[unresolved-import]  # путь даёт _ensure_path()
 
     return utils

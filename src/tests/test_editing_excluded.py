@@ -15,7 +15,7 @@ import yaml
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "scripts" / "preza"))
 
-import edit_slides  # noqa: E402
+import edit_slides  # noqa: E402  # ty: ignore[unresolved-import]  # путь добавлен выше
 
 AIRFLOW = "content/preza-apache-airflow-content.yml"
 

@@ -1,6 +1,7 @@
 """course.reminders — разбор settings/reminders.yml и план upsert-а (без сети)."""
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml
@@ -8,7 +9,7 @@ import yaml
 from course import reminders as rem
 from course import settings as cs
 
-SPEC = {
+SPEC: dict[str, Any] = {
     "projects": {"mlinside": "P1", "sys": "P2"},
     "issue_url": "https://example/issues/",
     "reminders": [

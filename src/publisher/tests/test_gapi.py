@@ -12,7 +12,7 @@ class _Resp:
 
 def _http_error(status, msg="boom"):
     e = RuntimeError(f"<HttpError {status} ... {msg}>")
-    e.resp = _Resp(status)
+    e.resp = _Resp(status)  # ty: ignore[unresolved-attribute]  # форма HttpError
     return e
 
 

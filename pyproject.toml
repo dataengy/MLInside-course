@@ -55,3 +55,9 @@ root = ["./src"]
 [tool.ty.rules]
 # preza_gen leans on python-pptx/PIL dynamic attrs — keep unresolved-attribute advisory
 unresolved-attribute = "warn"
+# `ty: ignore[unresolved-import]` стоит на необязательных зависимостях (weasyprint,
+# playwright) и на модулях, попадающих на sys.path в рантайме. Нужна ли директива,
+# зависит от того, какие extras установлены в этом окружении, — поэтому «неиспользованная
+# директива» не должна красить проверку: иначе `just typecheck` даёт разный результат
+# на одной и той же ревизии.
+unused-ignore-comment = "ignore"

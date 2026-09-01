@@ -106,10 +106,10 @@ def test_drive_failure_isolates_tg_and_skips_sheet(env, monkeypatch):
     outcomes, failed = runner.run(cfg)
     assert failed
     ds = st.read_state(cfg.state_file)["X"]
-    assert ds.drive.status == "error" and "quota" in ds.drive.error
+    assert ds.drive.status == "error" and "quota" in (ds.drive.error or "")
     assert ds.tg.status == "ok"  # tg still attempted (without a URL)
     assert seen["tg"][0]["drive_url"] is None
-    assert ds.sheet.status == "skipped" and "drive not ok" in ds.sheet.error
+    assert ds.sheet.status == "skipped" and "drive not ok" in (ds.sheet.error or "")
     assert ds.published_at is None
 
 
@@ -198,5 +198,5 @@ def test_missing_folder_id_fails_drive_leg_only(env, tmp_path):
     outcomes, failed = runner.run(cfg)
     assert failed
     ds = st.read_state(cfg.state_file)["X"]
-    assert "publish-init-drive" in ds.drive.error
+    assert "publish-init-drive" in (ds.drive.error or "")
     assert ds.tg.status == "ok"
