@@ -4723,14 +4723,10 @@ content:
 - kind: content
   id: 927-a15-level-2-skvoznoj-graf
   title: 'Level 2: сквозной граф от загрузки до обучения'
+  image: pic-dagster-dbt-to-ml.png
   bullets:
-  - Целевой уровень для MLE — dbt и ML в одном графе
-  - Слева граф начинается загрузкой, справа заканчивается моделью
-  - Витрина признаков — единственный стык, и он теперь описан
-  materials:
-  - label: '🔍 Снять: dbt-модели как отдельные ассеты внутри Dagster'
-    url: https://docs.dagster.io/integrations/libraries/dbt
-    highlight: true
+  - Целевой уровень MLE — dbt и ML в одном графе
+  - Витрина признаков — единственный стык
   code_lang: diagram
   code: |2
      ingestion
@@ -4863,15 +4859,11 @@ content:
 - kind: content
   id: 929-a15-level-3-testy-v-checks
   title: 'Level 3: dbt-тесты становятся asset checks'
+  image: pic-dagster-dbt-checks.png
   bullets:
-  - Тесты из dbt-проекта грузятся как проверки ассетов
-  - Проверка видна на карточке модели рядом с материализацией
-  - Упавшая проверка останавливает ветку графа, а не весь запуск
-  - Одинаковый язык качества для данных и для модели
+  - dbt-тесты грузятся как проверки ассетов
+  - Упавшая останавливает ветку, а не весь запуск
   materials:
-  - label: '🔍 Снять: dbt-тесты как asset checks на карточке модели'
-    url: https://docs.dagster.io/guides/test/asset-checks
-    highlight: true
   - label: dbt-тесты как asset checks
     url: https://docs.dagster.io/examples/full-pipelines/dbt/dbt-tests
   code_lang: diagram
