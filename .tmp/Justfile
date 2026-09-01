@@ -43,6 +43,44 @@ contact-sheet src=SRC:
 extract-source src=SRC:
     cd {{_root}} && python3 .tmp/extract_source.py {{src}}
 
+# ── v4-дека: черновая сборка и QA (см. README, раздел «Скрипты v4-деки») ──────
+# Питон берётся из локального venv: pyproject требует >=3.11, а `uv` есть не везде.
+PY := ".venv/bin/python"
+V4 := "content/preza-dbt-v4-content.yml"
+V4_SETTINGS := ".tmp/v4_build_settings.yml"
+V4_OUT := ".tmp/build/MLInside_Введение-в-dbt_v4.0.1"
+
+# Разовая подготовка venv, если его нет (python-pptx/pyyaml/pillow/loguru/click + QA-довески).
+v4-venv:
+    cd {{_root}} && python3.11 -m venv .venv 2>/dev/null || python3.14 -m venv .venv
+    cd {{_root}} && .venv/bin/pip install -q -e . pymupdf pytest
+
+# Вёрстка ДО сборки: кегль/высота код-панелей, ширина строк, таблицы, зазор до логотипа.
+v4-fit content=V4:
+    cd {{_root}} && PYTHONPATH=src {{PY}} .tmp/fit_check.py {{content}}
+
+# Хронометраж по меткам [~N мин] с разбивкой по секциям (цель 90–105 мин).
+v4-timing content=V4:
+    cd {{_root}} && {{PY}} .tmp/deck_timing.py {{content}}
+
+# Сборка в .tmp/build — МИМО data/generated, чтобы Stop-хук не отправил черновик в Telegram.
+v4-build content=V4:
+    cd {{_root}} && PYTHONPATH=src {{PY}} -m preza_gen.build_deck --pptx --html \
+      --settings {{V4_SETTINGS}} --content {{content}}
+
+# Полный проход: линт → вёрстка → хронометраж → сборка → PDF → вылеты и наезд на логотип.
+v4-qa content=V4:
+    cd {{_root}} && {{PY}} .tmp/lint_content_scalars.py {{content}}
+    just -f {{justfile()}} v4-fit {{content}}
+    just -f {{justfile()}} v4-timing {{content}}
+    just -f {{justfile()}} v4-build {{content}}
+    cd {{_root}} && soffice --headless --convert-to pdf --outdir .tmp/build {{V4_OUT}}.pptx >/dev/null
+    cd {{_root}} && {{PY}} .tmp/pdf_overflow_check.py {{V4_OUT}}.pdf
+
+# Разложить собранное в data/drafts — единственный явный шаг «это уже не черновик».
+v4-ship:
+    cd {{_root}} && cp {{V4_OUT}}.pptx {{V4_OUT}}.html data/drafts/
+
 # Remove generated QA artifacts (keep scripts/docs)
 clean:
     cd {{_root}} && rm -rf .tmp/render .tmp/render-pdf .tmp/media .tmp/*.png .tmp/*.pptx
@@ -50,3 +88,94 @@ clean:
 # Build the deck, open it locally, and send the newest version to Telegram.
 publish:
     cd {{_root}} && just publish
+
+# ── git: диагностика чекаута и identity (разбор сессии 2026-08-31) ────────────
+# Штатная починка — `just update` в корне. Здесь то, что нужно ДО неё: понять,
+# что сломано, и проверить, что детектор поломки вообще срабатывает.
+
+# Триаж сломанного чекаута. Пустой индекс при живом HEAD — след оборванного clone:
+# git status покажет все файлы как deleted, а те же файлы на диске — как untracked.
+git-triage:
+    #!/usr/bin/env bash
+    cd {{_root}}
+    echo "── индекс vs HEAD ──"
+    printf 'index=%s  HEAD=%s   (index=0 при HEAD>0 → чекаут оборвался)\n' \
+      "$(git ls-files | wc -l | tr -d ' ')" \
+      "$(git ls-tree -r HEAD --name-only | wc -l | tr -d ' ')"
+    echo "── файлы HEAD, отсутствующие на диске ──"
+    # -z обязателен: без него ls-tree экранирует кириллицу в кавычки с \NNN,
+    # и каждое такое имя ложно считается пропавшим (в этом репо — 68 штук).
+    git ls-tree -r -z HEAD --name-only \
+      | while IFS= read -r -d '' f; do [ -e "$f" ] || echo "$f"; done | wc -l
+    echo "── git-lfs: конфиг vs бинарник ──"
+    if git config --get-regexp '^filter\.lfs\.' >/dev/null 2>&1; then
+      command -v git-lfs >/dev/null \
+        && echo "ок: filter.lfs.* + $(git lfs version | awk '{print $1}')" \
+        || echo "!! filter.lfs.* есть, бинарника НЕТ — любой чекаут упадёт на smudge"
+    else
+      echo "LFS в этом репозитории не настроен"
+    fi
+    echo "── локальные ветки с именем remotes/… (двусмысленный ref) ──"
+    git for-each-ref refs/heads --format='%(refname:short)' | grep '^remotes/' || echo "нет"
+    echo "── сабмодули ('-' = не инициализирован) ──"
+    git submodule status
+    echo "── reflog (одна запись clone = чекаут не доехал) ──"
+    git reflog -5
+
+# Что git РЕАЛЬНО отправит в github.com против того, что показывает gh.
+# Расхождение → приватные репо отвечают «Repository not found», а не 403.
+git-whoami:
+    #!/usr/bin/env bash
+    echo "── креденшл, который отдаст хелпер ──"
+    printf 'protocol=https\nhost=github.com\n\n' | git credential fill 2>/dev/null \
+      | sed 's/^password=.*/password=<redacted>/'
+    echo "── аккаунты gh ──"
+    gh auth status 2>&1 | grep -E 'Logged in|Active account'
+
+# Доступ каждого аккаунта к репо БЕЗ переключения активного:
+#   just -f .tmp/Justfile gh-can-see hnkovr/preza_gen hnkovr dataengy
+gh-can-see repo *accounts:
+    #!/usr/bin/env bash
+    for a in {{accounts}}; do
+      printf '%-12s ' "$a"
+      t="$(gh auth token -u "$a" 2>/dev/null)" || { echo "нет токена"; continue; }
+      GH_TOKEN="$t" gh api "repos/{{repo}}" --jq '"OK private=" + (.private|tostring)' 2>/dev/null \
+        || echo "нет доступа"
+    done
+
+# Клонировать/тянуть под другим gh-аккаунтом, не трогая активный и не трогая keychain.
+# Пустой credential.helper= СБРАСЫВАЕТ список — без него osxkeychain ответит первым.
+#   just -f .tmp/Justfile git-as hnkovr submodule update --init --recursive
+git-as account +args:
+    #!/usr/bin/env bash
+    cd {{_root}}
+    prev="$(gh auth status --active 2>/dev/null | sed -n 's/.*account \([^ ]*\).*/\1/p' | head -1)"
+    gh auth switch -u "{{account}}" >/dev/null 2>&1 || true
+    git -c credential.helper= -c credential.helper='!gh auth git-credential' {{args}}
+    rc=$?
+    [ -n "$prev" ] && gh auth switch -u "$prev" >/dev/null 2>&1 || true
+    exit $rc
+
+# Прогнать команду с PATH БЕЗ одного бинарника — проверка детектора в сломанном
+# состоянии (детектор, проверенный только на здоровой машине, не проверен):
+#   just -f .tmp/Justfile without git-lfs just repo-doctor
+without bin +cmd:
+    #!/usr/bin/env bash
+    fake="$(mktemp -d)"
+    for f in /opt/homebrew/bin/*; do
+      b="$(basename "$f")"
+      [ "$b" = "{{bin}}" ] && continue
+      ln -sf "$f" "$fake/$b" 2>/dev/null
+    done
+    PATH="$fake:/usr/bin:/bin:/usr/sbin:/sbin" {{cmd}}
+
+# Одноразовый репозиторий с ровно той поломкой, что даёт оборванный clone.
+# Печатает путь — дальше проверять на нём триаж и починку, не рискуя рабочим репо.
+toy-broken-index:
+    #!/usr/bin/env bash
+    d="$(mktemp -d)/toy"; mkdir -p "$d"; cd "$d"
+    git init -q .
+    echo hi > a.txt && git add a.txt
+    git -c user.email=t@t -c user.name=t commit -qm init
+    rm .git/index
+    echo "$d"

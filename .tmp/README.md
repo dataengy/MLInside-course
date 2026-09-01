@@ -30,6 +30,14 @@ package (`src/preza_gen/`); safe to delete. Run via the local Justfile from the 
 | `patch_slide_code.py` | Замена блока `code:` одного слайда по `id`, без переформатирования всего контент-YAML. |
 | `v4_build_settings.yml` | Копия настроек сборки с `out_dir: .tmp/build` — черновая сборка мимо `data/generated`, чтобы Stop-хук не отправил её в Telegram. |
 
+Рецепты в `.tmp/Justfile`: `v4-venv` (разовая подготовка окружения), `v4-fit`, `v4-timing`,
+`v4-build`, `v4-qa` (полный проход), `v4-ship` (разложить в `data/drafts`).
+
+```bash
+just -f .tmp/Justfile v4-qa      # линт → вёрстка → хронометраж → сборка → PDF → наезд на логотип
+just -f .tmp/Justfile v4-ship    # собранное → data/drafts
+```
+
 ## Usage
 ```bash
 just -f .tmp/Justfile verify                 # verify the current v3.9 deck
