@@ -400,3 +400,10 @@ worktree-land cmd="check" *ARGS:
 # → .tmp/claude-project-bundle/ (+ MANIFEST.md). Гайд: docs/claude-project/README.md
 claude-project-bundle *ARGS:
     cd {{_dir}} && bash scripts/claude-project/bundle.sh {{ARGS}}
+
+# Убрать файл или каталог БЕЗ безвозвратного удаления: перенос в ../.recyclebin рядом
+# с репозиториями. Точный дубль (sha256 совпал с сохранённой копией) можно удалить —
+# но запись об удалении всё равно уходит в .recyclebin/.history.csv.
+# Пример: just recycle .tmp/render-pdf   ·   just recycle --dup-of data/source/manual/x.pptx data/drafts/x.pptx
+recycle *ARGS:
+    cd {{_dir}} && bash scripts/recycle.sh {{ARGS}}
