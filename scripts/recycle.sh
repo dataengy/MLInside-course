@@ -23,7 +23,16 @@
 #   * корзина и источник на разных томах → не mv, а копирование со сверкой sha256.
 set -u
 
-BIN="${RECYCLEBIN:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." 2>/dev/null && pwd -P)/.recyclebin}"
+# Корзина живёт РЯДОМ с репозиториями, поэтому корень берём от ОСНОВНОГО чекаута, а не от
+# расположения скрипта: в worktree (.claude/worktrees/<имя>/) отсчёт «на два вверх» дал бы
+# .claude/.recyclebin. `--git-common-dir` в worktree указывает на .git основного чекаута.
+_common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+if [ -n "$_common" ]; then
+  _repo_root=$(dirname "$_common")
+else
+  _repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd -P)
+fi
+BIN="${RECYCLEBIN:-$(dirname "$_repo_root")/.recyclebin}"
 LOG="$BIN/.history.csv"
 DRY=0
 DUP_OF=""
