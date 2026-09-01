@@ -23,6 +23,32 @@ settings: content/build_deck_v3-settings.yml
 media_dir: data/source/media
 generated: '2026-09-01'
 images:
+- file: pic-airflow3-vs-dagster.png
+  origin:
+    kind: local
+    source: 'локальные Airflow 3.3.1 (airflow standalone) и Dagster, сняты Playwright с localhost'
+    url: null
+  note: 'две панели одного демо-пайплайна: сверху Airflow 3.3.1, вкладка Assets — ассеты есть, но в колонках Scheduled Dags и Producing Tasks видно, что за каждым стоят DAG и задача; снизу карточки графа Dagster, где ассет и есть узел'
+  state: placed
+  changed: '2026-09-01'
+  slide_id: 049-odin-pajplajn-tri-interfeysa
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 5.0
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1254
+    - 1012
+    scale: 0.4211
+    placed:
+      left: 7.35
+      top: 2.07
+      width: 5.5
+      height: 4.44
 - file: pic-dagster-run-log.png
   origin:
     kind: local
@@ -131,9 +157,10 @@ images:
 - file: pic-dagster-dbt-to-ml.png
   origin:
     kind: local
-    source: 'одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost'
+    source: одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost
     url: null
-  note: 'снят с локального демо-проекта: dbt на DuckDB подключён через dagster-dbt, feature_mart (4/4 checks) → feature_table → training_dataset'
+  note: 'снят с локального демо-проекта: dbt на DuckDB подключён через dagster-dbt, feature_mart (4/4
+    checks) → feature_table → training_dataset'
   state: placed
   changed: '2026-09-01'
   slide_id: 927-a15-level-2-skvoznoj-graf
@@ -157,9 +184,10 @@ images:
 - file: pic-dagster-dbt-checks.png
   origin:
     kind: local
-    source: 'одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost'
+    source: одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost
     url: null
-  note: 'снят с локального демо-проекта: вкладка Checks у feature_mart, четыре dbt-теста как asset checks, unique_id ведёт в dbt'
+  note: 'снят с локального демо-проекта: вкладка Checks у feature_mart, четыре dbt-теста как asset checks,
+    unique_id ведёт в dbt'
   state: placed
   changed: '2026-09-01'
   slide_id: 929-a15-level-3-testy-v-checks
@@ -183,9 +211,10 @@ images:
 - file: pic-dagster-mlflow-link.png
   origin:
     kind: local
-    source: 'одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost'
+    source: одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost
     url: null
-  note: 'снят с локального демо-проекта: один run id в метаданных Dagster и в карточке прогона MLflow (backend на sqlite, file store больше не поднимается)'
+  note: 'снят с локального демо-проекта: один run id в метаданных Dagster и в карточке прогона MLflow
+    (backend на sqlite, file store больше не поднимается)'
   state: placed
   changed: '2026-09-01'
   slide_id: 931-a16-mlflow-v-metadannyh-asseta
@@ -404,7 +433,4 @@ images:
     url: null
   changed: '2026-09-01'
   note: ''
-wanted:
-- slide_id: 049-odin-pajplajn-tri-interfeysa
-  label: 🔍 Скриншоты Airflow 2 / Airflow 3 / Dagster для триптиха
-  url: https://www.google.com/search?q=airflow+3+assets+graph+view+screenshot
+wanted: []

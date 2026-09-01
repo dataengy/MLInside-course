@@ -2756,18 +2756,15 @@ content:
 - kind: content
   id: 049-odin-pajplajn-tri-interfeysa
   title: Один пайплайн в трёх интерфейсах
+  image: pic-airflow3-vs-dagster.png
   bullets:
-  - Один и тот же логический пайплайн, снятый в трёх системах
   - Отличие от Airflow — не в возможностях, а в единице графа
-  - Слева и в центре единицей графа остаётся задача
-  - Справа единицей графа является объект, который надо получить
-  - Живого демо Airflow нет намеренно — инфраструктуры много, пользы мало
+  - В Airflow 3 ассет есть, но за ним DAG и задача
+  - В Dagster ассет и есть узел графа
+  - Airflow 2 — только на схеме, его интерфейс не снимали
   materials:
   - label: Airflow 3 — Assets
     url: https://airflow.apache.org/docs/apache-airflow/stable/authoring-and-scheduling/assets.html
-  - label: 🔍 Скриншоты Airflow 2 / Airflow 3 / Dagster для триптиха
-    url: https://www.google.com/search?q=airflow+3+assets+graph+view+screenshot
-    highlight: true
   code_lang: diagram
   code: |2
      ОДИН ПАЙПЛАЙН, ТРИ ЭКРАНА
