@@ -330,8 +330,9 @@ repo-doctor:
     cd {{_dir}} && bash scripts/repo-update.sh doctor
 
 # ── cross-account repo sharing (docs in scripts/repo-share.sh header) ────────
-# Both hnkovr and dataengy admin on the umbrella repo + every hnkovr/* submodule,
-# so whichever identity the keychain hands git can always clone and push.
+# Both hnkovr and dataengy admin on the umbrella repo + every submodule (все они с
+# 2026-09-01 под dataengy), чтобы любая из двух личностей в keychain могла клонировать
+# и пушить. Список репозиториев берётся из .gitmodules — новый сабмодуль попадает сам.
 
 # Read-only: access matrix for every submodule + related repo, per account
 repo-share-doctor:
