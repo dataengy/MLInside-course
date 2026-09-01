@@ -1,5 +1,12 @@
 # preza-dbt-v4-content.yml — WHAT deck: «Трансформация данных и витрины (dbt)».
 #
+# v4.8.0 — один слайд в PART 3, следом за «ещё четыре подхода»: «Нужен ли отдельный
+#   оркестратор в modern data stack?». Тренд сближения transformation engines, платформ
+#   данных и оркестрации: SQLMesh и Bruin несут свой scheduler, Databricks — Lakeflow Jobs,
+#   Snowflake — Dynamic Tables. Граница проведена по DAG: внутри одного data DAG оркестрация
+#   становится фичей движка, между системами остаётся отдельным слоем. Основной части
+#   слайд времени не занимает — метки [~N мин] у него нет.
+#
 # v4.6.1 — правка v4.6.0: на слайде «Когда простых marts мало» хвост «Рассказа» вынесен
 #   в раздел «Формы хранения» — 3NF/EDW и Wide/OBT методологиями моделирования не являются
 #   и в одной шкале с Medallion/Kimball/Data Vault стояли не на своём месте.
@@ -64,7 +71,7 @@
 # осторожно / переход, и оценку хронометража [~N мин].
 
 deck:
-  out_name: MLInside_Введение-в-dbt_v4.7.0   # semver в имени → naming: fixed
+  out_name: MLInside_Введение-в-dbt_v4.8.0   # semver в имени → naming: fixed
   naming: fixed
   version_major: 4
   format: alina-2026-08
@@ -5244,6 +5251,74 @@ content:
     - Для процедурной логики, точного cron или сложного MERGE остаются streams/tasks.
     - __dbt выигрывает переносимостью и экосистемой__, нативные средства — меньшим количеством операционного кода внутри своей платформы.
     - ~~Современный стек часто сочетает эти подходы, а не выбирает ровно один.~~
+- kind: content
+  id: 926-nuzhen-li-otdelnyy-orkestrator
+  title: Нужен ли отдельный оркестратор в modern data stack?
+  materials:
+  - label: SQLMesh scheduler
+    url: https://sqlmesh.readthedocs.io/en/stable/guides/scheduling/
+  - label: Bruin overview
+    url: https://getbruin.com/docs/bruin/overview.html
+  - label: Lakeflow Jobs
+    url: https://docs.databricks.com/aws/en/jobs/
+  - label: Snowflake Dynamic Tables
+    url: https://docs.snowflake.com/en/user-guide/dynamic-tables-about
+  bullets:
+  - 'Оркестрация не исчезает — она всё чаще встраивается в трансформер или платформу'
+  - 'SQLMesh и Bruin несут свой scheduler и DAG; Databricks — Lakeflow, Snowflake — Dynamic Tables'
+  - 'Внутри одного data DAG отдельный оркестратор всё чаще не нужен'
+  - 'Между системами (API, ingestion, Spark, ML, алерты) он остаётся отдельным слоем'
+  - 'Event-driven, ветвления, ML/LLM и несколько платформ — по-прежнему за Dagster/Airflow'
+  - 'Это death of the mandatory standalone orchestrator, а не death of orchestration'
+  code_lang: diagram
+  code: |2
+     dbt-era                  2026+
+     ──────────────────       ────────────────────────────
+     Airflow / Dagster        SQLMesh     scheduler + DAG
+            ↓                 Bruin       ingestion + DAG
+        dbt / SQL             Databricks  Lakeflow Jobs
+            ↓                 Snowflake   Dynamic Tables
+     склад / lakehouse                ↓
+                                склад / lakehouse
+
+     ──────────────────────────────────────────────────────
+     ВНУТРИ ОДНОГО DAG    SQL ─→ deps ─→ incremental ─→ cron
+            ↓             оркестрация встроена в движок
+     МЕЖДУ СИСТЕМАМИ      API ─→ Spark ─→ ML ─→ dbt ─→ alerts
+            ↓             Dagster / Airflow / Kestra / Prefect
+  notes: |2
+    **Главное:**
+    - Тезис слайда: !!оркестрация не исчезает — она всё чаще встраивается в transformation engine или в саму платформу данных!!.
+    - Классический стек был трёхслойным: Airflow/Dagster сверху, dbt посередине, склад снизу.
+    - Новый тренд — слить верхние два слоя.
+
+    **Разбор:**
+    - **SQLMesh** — не просто альтернативный движок трансформаций: у него есть __встроенный production-планировщик__, окружения и свой DAG, поэтому внешний оркестратор для локального графа моделей ему не нужен.
+    - **Bruin** идёт дальше и совмещает в одном CLI ingestion, трансформации, quality checks и расписание — то есть закрывает и ту часть, ради которой обычно и ставили Airflow.
+    - **Databricks** развивает **Lakeflow Jobs** и Lakeflow Pipelines: расписание, зависимости и ретраи живут в платформе, а не в отдельном сервисе.
+    - **Snowflake Dynamic Tables** сами выводят порядок обновления из зависимостей и держат свежесть по `TARGET_LAG`; для процедурной логики рядом остаются Tasks.
+
+    **Отдельный orchestrator — нужен ли:**
+    - SQLMesh pipeline — часто не нужен.
+    - Bruin pipeline — часто не нужен.
+    - Databricks-native стек — часто не нужен.
+    - Snowflake SQL pipeline — всё реже нужен.
+    - Multi-system / сложный workflow — всё ещё нужен.
+
+    **Осторожно:**
+    - Формулировать это как «смерть оркестрации» — ошибка: речь про !!смерть обязательного отдельного оркестратора!!, а не про исчезновение Airflow, Dagster или Kestra.
+    - И Databricks, и Snowflake сохраняют интеграции с внешними оркестраторами — то есть это convergence и сокращение числа обязательных слоёв, а не вытеснение.
+
+    **Где отдельный слой остаётся ценным:**
+    - Гетерогенные и кросс-платформенные workflow.
+    - Event-driven оркестрация.
+    - Ветвления и сложный control flow.
+    - ML-, LLM- и инфраструктурные нагрузки.
+    - Координация нескольких независимых пайплайнов и платформ.
+    - Enterprise-wide control plane.
+
+    **TAKEAWAY TO REPEAT:**
+    - Для локального data DAG оркестрация становится __фичей движка__; для гетерогенной платформы она остаётся __отдельным архитектурным слоем__.
 - kind: content
   id: 046b-dbt-pandas-i-spark
   title: 'Где исполняется Python: pandas и Spark'
