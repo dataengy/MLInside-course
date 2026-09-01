@@ -26,7 +26,7 @@ images:
 - file: pic-dagster-run-log.png
   origin:
     kind: local
-    source: 'одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost'
+    source: одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost
     url: null
   note: 'снят с локального демо-проекта: страница запуска — 3 ассета, 2 проверки, 5 секунд'
   state: placed
@@ -52,7 +52,7 @@ images:
 - file: pic-dagster-asset-graph.png
   origin:
     kind: local
-    source: 'одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost'
+    source: одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost
     url: null
   note: 'снят с локального демо-проекта: feature_table → training_dataset → trained_model, все материализованы'
   state: placed
@@ -78,9 +78,10 @@ images:
 - file: pic-dagster-asset-metadata.png
   origin:
     kind: local
-    source: 'одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost'
+    source: одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost
     url: null
-  note: 'снят с локального демо-проекта: метаданные материализации trained_model (roc_auc, rows, features, model_uri, preview)'
+  note: 'снят с локального демо-проекта: метаданные материализации trained_model (roc_auc, rows, features,
+    model_uri, preview)'
   state: placed
   changed: '2026-09-01'
   slide_id: 922-a14-shag-6-metadannye
@@ -104,7 +105,7 @@ images:
 - file: pic-dagster-stale-graph.png
   origin:
     kind: local
-    source: 'одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost'
+    source: одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost
     url: null
   note: 'снят с локального демо-проекта: Unsynced после смены code_version у feature_table'
   state: placed
@@ -126,6 +127,84 @@ images:
       left: 8.93
       top: 1.51
       width: 2.34
+      height: 5.0
+- file: pic-dagster-dbt-to-ml.png
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-09-01'
+  slide_id: 927-a15-level-2-skvoznoj-graf
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 5.0
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 775
+    - 1444
+    scale: 0.3324
+    placed:
+      left: 8.76
+      top: 1.51
+      width: 2.68
+      height: 5.0
+- file: pic-dagster-dbt-checks.png
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-09-01'
+  slide_id: 929-a15-level-3-testy-v-checks
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 5.0
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 1365
+    - 680
+    scale: 0.3868
+    placed:
+      left: 7.35
+      top: 3.77
+      width: 5.5
+      height: 2.74
+- file: pic-dagster-mlflow-link.png
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-09-01'
+  slide_id: 931-a16-mlflow-v-metadannyh-asseta
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 5.0
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 945
+    - 1012
+    scale: 0.4743
+    placed:
+      left: 7.77
+      top: 1.51
+      width: 4.67
       height: 5.0
 - file: pic-ae-dataduel.png
   slide_id: null
@@ -329,12 +408,3 @@ wanted:
 - slide_id: 049-odin-pajplajn-tri-interfeysa
   label: 🔍 Скриншоты Airflow 2 / Airflow 3 / Dagster для триптиха
   url: https://www.google.com/search?q=airflow+3+assets+graph+view+screenshot
-- slide_id: 927-a15-level-2-skvoznoj-graf
-  label: '🔍 Снять: dbt-модели как отдельные ассеты внутри Dagster'
-  url: https://docs.dagster.io/integrations/libraries/dbt
-- slide_id: 929-a15-level-3-testy-v-checks
-  label: '🔍 Снять: dbt-тесты как asset checks на карточке модели'
-  url: https://docs.dagster.io/guides/test/asset-checks
-- slide_id: 931-a16-mlflow-v-metadannyh-asseta
-  label: '🔍 Снять: метаданные с mlflow_run_id и model_uri рядом с тем же run в MLflow'
-  url: https://mlflow.org/docs/latest/ml/tracking/

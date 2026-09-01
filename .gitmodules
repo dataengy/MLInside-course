@@ -16,3 +16,6 @@
 [submodule "homework/mlinside-hw-olist"]
 	path = homework/mlinside-hw-olist
 	url = https://github.com/hnkovr/mlinside-hw-olist.git
+[submodule "data/code/dagster_demo"]
+	path = data/code/dagster_demo
+	url = https://github.com/dataengy/mlinside-dagster-demo.git

@@ -158,7 +158,11 @@ presentations:
   visuals: code-tables
   generated: true
   demos:
-    runbook: docs/dagster-demo-runbook.md
+    # Практика вынесена в сабмодуль; сценарий живёт рядом с кодом, здесь только указатель.
+    repo: https://github.com/dataengy/mlinside-dagster-demo
+    submodule: data/code/dagster_demo
+    runbook: data/code/dagster_demo/docs/RUNBOOK.md
+    pointer: docs/dagster-demo-runbook.md
     slides:
     - 017-demo-1-quick-start
     - 026-demo-2-dagster-dbt
