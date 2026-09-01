@@ -18,6 +18,7 @@ lecture materials, deck generators and the course data library.
 | `src/schedule/` | course schedule sheet → `settings/schedule.yml` → `content/presentations.yml` |
 | `src/course/` | правила продакшена как код: план блоков записи ≤25 мин (`just preza-blocks`) + статус для SessionStart-хука (`just course-status`) |
 | `settings/reminders.yml` + `scripts/todoist/` | напоминания курса в Todoist (`just course-reminders[-apply]`), идемпотентно по `key:` в описании задачи |
+| `docs/claude-project/` | Claude-проект «MLInside \| 2026/09» (claude.ai): инструкции, память, знание, расписания — исходники + гайд по управлению (`just claude-project-bundle`) |
 | `.ai/AI-glossary.{ru,en}.md` | глоссарий проекта — термины лент курса, дек и сессий |
 | `docs/reviews/` | per-deck review reports from `/preza-review` |
 | `docs/course-rules.md`, `docs/course-qa.md` | правила подготовки и записи лекций от менеджера курса + журнал Q&A / открытые вопросы (скаляры — `settings/config.yml → course_production`) |

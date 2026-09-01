@@ -394,3 +394,8 @@ secrets-reveal:
 # Пример: just worktree-land check   ·   just worktree-land remove . --force-remove
 worktree-land cmd="check" *ARGS:
     cd {{_dir}} && bash scripts/worktree_land.sh {{cmd}} {{ARGS}}
+
+# Собрать комплект файлов для Knowledge Claude-проекта «MLInside | 2026/09»
+# → .tmp/claude-project-bundle/ (+ MANIFEST.md). Гайд: docs/claude-project/README.md
+claude-project-bundle *ARGS:
+    cd {{_dir}} && bash scripts/claude-project/bundle.sh {{ARGS}}
