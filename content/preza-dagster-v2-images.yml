@@ -130,10 +130,10 @@ images:
       height: 5.0
 - file: pic-dagster-dbt-to-ml.png
   origin:
-    kind: unknown
-    source: null
+    kind: local
+    source: 'одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost'
     url: null
-  note: ''
+  note: 'снят с локального демо-проекта: dbt на DuckDB подключён через dagster-dbt, feature_mart (4/4 checks) → feature_table → training_dataset'
   state: placed
   changed: '2026-09-01'
   slide_id: 927-a15-level-2-skvoznoj-graf
@@ -156,10 +156,10 @@ images:
       height: 5.0
 - file: pic-dagster-dbt-checks.png
   origin:
-    kind: unknown
-    source: null
+    kind: local
+    source: 'одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost'
     url: null
-  note: ''
+  note: 'снят с локального демо-проекта: вкладка Checks у feature_mart, четыре dbt-теста как asset checks, unique_id ведёт в dbt'
   state: placed
   changed: '2026-09-01'
   slide_id: 929-a15-level-3-testy-v-checks
@@ -182,10 +182,10 @@ images:
       height: 2.74
 - file: pic-dagster-mlflow-link.png
   origin:
-    kind: unknown
-    source: null
+    kind: local
+    source: 'одноразовый проект Dagster (uvx create-dagster), снят Playwright с localhost'
     url: null
-  note: ''
+  note: 'снят с локального демо-проекта: один run id в метаданных Dagster и в карточке прогона MLflow (backend на sqlite, file store больше не поднимается)'
   state: placed
   changed: '2026-09-01'
   slide_id: 931-a16-mlflow-v-metadannyh-asseta
