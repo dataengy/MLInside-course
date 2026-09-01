@@ -50,7 +50,7 @@ settings:
   #                   поставить сюда обратно 3 и 240.
   notes_format:
     clock: true
-    scope: stamped
+    scope: main
     bullets_max_sentences: 999
     bullets_max_chars: 99999
   notes_emphasis:
