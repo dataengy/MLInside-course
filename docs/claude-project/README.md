@@ -91,6 +91,7 @@ just -f ~/.ai/skills/_scripts/session/workstation/Justfile state --apply   # о�
 # на второй станции:
 git pull && git submodule update --init --recursive && git lfs pull
 just secrets-bootstrap                    # если .env.secrets отсутствует (docs/secrets-sync.md)
+just memory-pull                          # память Claude Code из .ai/memory/ (её нет вне git)
 just repo-doctor && just course-status
 ```
 

@@ -8,6 +8,8 @@
 
 ## Что где
 - `tasks/` — бэклог задач (PDF-движки, MLE-контент, Prefect, перенос `.claude`).
+- `memory/` — версионируемая копия памяти Claude Code (живёт в `~/.claude/projects/<slug>/memory/`,
+  вне git): `just memory-check|push|pull`, [README](memory/README.md).
 - `.codex/`, `skills/{local,global/{symlinks,hardlinks}}` — под будущую AI-оснастку проекта.
 
 ## Генератор презентаций `preza_gen` (v3)
