@@ -1,21 +1,21 @@
 [submodule "src/preza_gen"]
 	path = src/preza_gen
-	url = https://github.com/hnkovr/preza_gen.git
+	url = https://github.com/dataengy/preza_gen.git
 [submodule "src/librarian"]
 	path = src/librarian
-	url = https://github.com/hnkovr/librarian.git
+	url = https://github.com/dataengy/librarian.git
 [submodule "data/code/dbt_project"]
 	path = data/code/dbt_project
-	url = https://github.com/hnkovr/hse-dz45-dbt-project.git
+	url = https://github.com/dataengy/hse-dz45-dbt-project.git
 [submodule "data/code/clickhouse_hw"]
 	path = data/code/clickhouse_hw
-	url = https://github.com/hnkovr/hse-dz45-clickhouse-hw.git
+	url = https://github.com/dataengy/hse-dz45-clickhouse-hw.git
 [submodule "src/picstore"]
 	path = src/picstore
-	url = https://github.com/hnkovr/picstore.git
+	url = https://github.com/dataengy/picstore.git
 [submodule "homework/mlinside-hw-olist"]
 	path = homework/mlinside-hw-olist
-	url = https://github.com/hnkovr/mlinside-hw-olist.git
+	url = https://github.com/dataengy/mlinside-hw-olist.git
 [submodule "data/code/dagster_demo"]
 	path = data/code/dagster_demo
 	url = https://github.com/dataengy/mlinside-dagster-demo.git
