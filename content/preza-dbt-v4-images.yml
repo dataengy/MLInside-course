@@ -23,6 +23,33 @@ settings: .tmp/v4_build_settings.yml
 media_dir: data/source/media
 generated: '2026-09-01'
 images:
+- file: pic-dbt-logo.png
+  origin:
+    kind: unknown
+    source: null
+    url: null
+  note: ''
+  state: placed
+  changed: '2026-09-01'
+  slide_id: 001-dbt-dlya-full-stack-data-specialist
+  removed_from: 001-dbt-dlya-full-stack-data-specialist
+  layout:
+    box:
+      left: 7.35
+      top: 1.65
+      width: 5.5
+      height: 4.7
+    fit: contain
+    anchor: bottom
+    natural_px:
+    - 726
+    - 270
+    scale: 0.7273
+    placed:
+      left: 7.35
+      top: 4.46
+      width: 5.5
+      height: 2.05
 - file: pic-roles-de-ae-da.png
   origin:
     kind: local
@@ -714,16 +741,6 @@ images:
   changed: '2026-09-01'
   slide_id: null
   removed_from: 012-skvoznaya-arhitektura
-- file: pic-dbt-logo.png
-  origin:
-    kind: unknown
-    source: null
-    url: null
-  note: ''
-  state: spare
-  changed: '2026-09-01'
-  slide_id: null
-  removed_from: 001-dbt-dlya-full-stack-data-specialist
 - file: pic-ideal-data-architecture.png
   origin:
     kind: local

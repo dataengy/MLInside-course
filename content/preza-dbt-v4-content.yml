@@ -87,6 +87,7 @@ content:
 - kind: title
   id: 001-dbt-dlya-full-stack-data-specialist
   title: Трансформация данных и витрины (dbt)
+  image: pic-dbt-logo.png
   notes: |2
     [00:00–01:00 · ~1 мин] **Главное:**
     - Это лекция не про «ещё один инструмент аналитика», а про то, как перестать держать подготовку данных и признаков в ad-hoc Python-скриптах.

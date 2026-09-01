@@ -34,6 +34,9 @@ settings:
     top: 1.65
     width: 5.5
     height: 4.7
+  # Рамка марки на ТИТУЛЬНОМ слайде — правый нижний угол: слева внизу логотип MLINSIDE.
+  # Отдельная от image_box: там визуал занимает правую колонку целиком, а здесь логотип.
+  title_image_box: {left: 8.30, top: 5.30, width: 4.40, height: 1.70}
   code_style: {font: Consolas, size: 13, min_size: 9, fg: E6EDF3, bg: 0D1117}
   code_box:      {left: 6.95, top: 1.7, width: 5.95, height: 5.2}
   code_box_full: {left: 0.55, top: 1.6, width: 12.3, height: 4.8}
