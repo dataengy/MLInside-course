@@ -1,8 +1,9 @@
 # formats.yml — named FORMATTING profiles for preza_gen. Referenced from a deck settings
 # yaml via `settings.formats_file`; a deck picks one with `deck.format`.
 #
-# GENERATED-AND-EDITED: `just preza-merge-apply` rewrites this whole file, so keep prose
-# out of it — durable explanation lives in docs/preza-merge-lane.md.
+# `just preza-merge-apply` обновляет ОДИН профиль и не трогает остальной файл, включая
+# ваши комментарии. Объяснения профилей держите прямо здесь, рядом с числами;
+# развёрнутый разбор лейна — docs/preza-merge-lane.md.
 formats:
   classic:
     body_font:

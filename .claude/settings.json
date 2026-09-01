@@ -50,6 +50,12 @@
             "command": "bash scripts/hooks/course-production-status.sh",
             "timeout": 10,
             "statusMessage": "Checking course production rules"
+          },
+          {
+            "type": "command",
+            "command": "bash scripts/hooks/yaml-writers-status.sh",
+            "timeout": 10,
+            "statusMessage": "Checking YAML writers keep comments"
           }
         ]
       },

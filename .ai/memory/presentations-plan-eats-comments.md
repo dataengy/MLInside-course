@@ -45,7 +45,11 @@ metadata:
    `test_repeated_writes_are_byte_stable` в `src/publisher/tests/test_plan_writer.py`;
    оба падают на реализации через `safe_dump` — проверено подменой.
 
-Тот же риск остаётся у любой ленты, которая переписывает YAML целиком и пока не
-переведена на round-trip, — например `just preza-merge-apply` для `settings/formats.yml`
-(см. [[deck-footer-clearance]]). См. также [[deck-images-registry]] — реестр картинок,
-который правится и руками, и скриптом.
+`just preza-merge-apply` (`settings/formats.yml`) переведён на round-trip тем же приёмом,
+коммит `4a2082c` — оговорка про него снята 2026-09-02, риск закрыт и там.
+
+Правило выбора между round-trip, блочной хирургией и `safe_dump` — скилл `yaml-writers`
+и `docs/glossary.md`. Сторож `scripts/hooks/yaml-writers-status.sh` (SessionStart) ругается,
+если в охраняемом файле убавилось комментариев или модуль с обязательством round-trip
+вернулся к `safe_dump`. См. также [[deck-images-registry]] — реестр картинок, который
+правится и руками, и скриптом.

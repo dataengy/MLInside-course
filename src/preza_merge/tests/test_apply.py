@@ -130,3 +130,54 @@ def test_graft_backend_is_not_implemented(tmp_path):
             descr="x",
             backend="graft",
         )
+
+
+# ── комментарии ──────────────────────────────────────────────────────────────
+#
+# settings/formats.yml правится и машиной, и руками: числа профиля без объяснения,
+# почему они именно такие, через месяц читаются как случайный набор. write_profile
+# пишет round-trip и правит профиль ПО КЛЮЧАМ — оба свойства держатся тестами ниже,
+# иначе первый же переход на safe_dump унесёт пояснения молча.
+# Стратегии записи YAML и когда какая уместна — docs/glossary.md.
+
+# Шапка файла каноническая: её дописывает код при каждой записи (как в publisher.plan_writer),
+# поэтому здесь её нет — проверяем комментарии ВНУТРИ документа.
+_COMMENTED_FORMATS = """\
+formats:
+  classic:
+    # почему 6.51: подвал это логотип И строка «Материалы»
+    visual_bottom: 6.51
+    code_border: accent
+"""
+
+
+def _comment_lines(text: str) -> list[str]:
+    return [ln.strip() for ln in text.splitlines() if ln.strip().startswith("#")]
+
+
+def test_write_profile_keeps_comments(tmp_path):
+    p = tmp_path / "formats.yml"
+    p.write_text(_COMMENTED_FORMATS, encoding="utf-8")
+
+    apply.write_profile(p, "alina", "classic", {"code_border": "none"})
+
+    text = p.read_text(encoding="utf-8")
+    assert "# почему 6.51: подвал это логотип И строка «Материалы»" in _comment_lines(text), (
+        "комментарий внутри документа не пережил запись профиля"
+    )
+    assert text.count("named FORMATTING profiles") == 1, "каноническая шапка удвоилась"
+    doc = yaml.safe_load(text)
+    assert doc["formats"]["alina"]["code_border"] == "none"
+    assert doc["formats"]["alina"]["visual_bottom"] == 6.51  # унаследовано от базы
+    assert doc["formats"]["classic"]["code_border"] == "accent"  # база не тронута
+
+
+def test_write_profile_is_byte_stable_on_repeat(tmp_path):
+    """Второй прогон подряд обязан дать тот же файл — иначе каждая запись шумит диффом."""
+    p = tmp_path / "formats.yml"
+    p.write_text(_COMMENTED_FORMATS, encoding="utf-8")
+
+    apply.write_profile(p, "alina", "classic", {"code_border": "none"})
+    first = p.read_text(encoding="utf-8")
+    apply.write_profile(p, "alina", "classic", {"code_border": "none"})
+    assert p.read_text(encoding="utf-8") == first
