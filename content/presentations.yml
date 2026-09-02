@@ -113,12 +113,13 @@ presentations:
   published:
     version: '4.9'
     slides: 131
-    url: null
-    drive_file_id: null
+    url:
+      https://docs.google.com/presentation/d/1ybvCM-rfC30s3PG8BT9iezFHOEvxQkyw/edit?usp=drivesdk&ouid=114649393700360884364&rtpof=true&sd=true
+    drive_file_id: 1ybvCM-rfC30s3PG8BT9iezFHOEvxQkyw
     at: null
     legs:
       tg: error
-      drive: error
+      drive: ok
       sheet: skipped
 - topic: Оркестрация данных (Apache Airflow)
   owner: Влад Бояджи
