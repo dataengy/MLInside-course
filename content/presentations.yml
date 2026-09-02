@@ -111,8 +111,8 @@ presentations:
       from: 041-dopolnitelnye-vozmozhnosti-i
       to: 051-spasibo-za-vnimanie
   published:
-    version: '4.9'
-    slides: 131
+    version: '4.10'
+    slides: 136
     url:
       https://docs.google.com/presentation/d/1ybvCM-rfC30s3PG8BT9iezFHOEvxQkyw/edit?usp=drivesdk&ouid=114649393700360884364&rtpof=true&sd=true
     drive_file_id: 1ybvCM-rfC30s3PG8BT9iezFHOEvxQkyw
@@ -120,7 +120,7 @@ presentations:
     legs:
       tg: error
       drive: ok
-      sheet: skipped
+      sheet: error
 - topic: Оркестрация данных (Apache Airflow)
   owner: Влад Бояджи
   status: draft

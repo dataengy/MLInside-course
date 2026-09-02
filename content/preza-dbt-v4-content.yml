@@ -1,5 +1,11 @@
 # preza-dbt-v4-content.yml — WHAT deck: «Трансформация данных и витрины (dbt)».
 #
+# v4.10.0 — правка v4.9.0: восемь уникальных слайдов из ручной деки v4.7.5-man
+#   (свод пяти ручных дек 4.7.x). Пять новыми слайдами — секреты, dbt_project.yml,
+#   packages.yml, selectors.yml, Activity Schema; два обогатили существующие — легенда
+#   «что уезжает в git» в дереве проекта и имена правил dbt_project_evaluator в заметках;
+#   один пропущен как свёрнутая копия трёх других.
+#
 # v4.9.0 — слайд «Data Mesh в dbt: домены и контракты» сразу за слайдом про exposures,
 #   contracts и groups. Отвечает на вопрос, во что groups/access вырастают, когда доменов
 #   становится несколько: соответствие идей Data Mesh механизмам dbt, YAML границы домена
@@ -77,7 +83,7 @@
 # осторожно / переход, и оценку хронометража [~N мин].
 
 deck:
-  out_name: MLInside_Введение-в-dbt_v4.9.0   # semver в имени → naming: fixed
+  out_name: MLInside_Введение-в-dbt_v4.10.0   # semver в имени → naming: fixed
   naming: fixed
   version_major: 4
   format: alina-2026-08
@@ -102,7 +108,7 @@ content:
     **Переход:**
     - ~~«Посмотрим план, а потом сразу разберёмся, почему подготовка данных перестала быть чужой зоной ответственности».~~
 
-    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.9.0 · 2026-09-01
+    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.10.0 · 2026-09-01
 - kind: agenda
   id: 002-plan-lekcii
   title: План лекции
@@ -4515,7 +4521,7 @@ content:
     - Ни одна из них не входит в хронометраж — это материал для самостоятельного чтения.
     - Вопросы.
 
-    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.9.0 · 2026-09-01
+    — Сгенерировано: model=claude-opus-5 · harness=Claude Code · effort=high · version=v4.10.0 · 2026-09-01
 - kind: section
   id: 950-part-2-ds-mle-nyuansy
   title: PART 2 · DS/MLE НЮАНСЫ
