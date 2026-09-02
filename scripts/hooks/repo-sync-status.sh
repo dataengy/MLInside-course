@@ -15,6 +15,18 @@ if [ -n "$upstream" ]; then
     ahead="${counts%%	*}"; behind="${counts##*	}"
     [ "$ahead" != "0" ] && say "⚠ $branch is ahead of $upstream by $ahead commit(s) — push pending"
     [ "$behind" != "0" ] && say "⚠ $branch is behind $upstream by $behind commit(s) — pull/rebase pending"
+    # Разошлись обе стороны — это НЕ две независимые строки выше, а третье состояние:
+    # ни ff, ни `pull` не пройдут, а `reset --hard` уничтожит $ahead коммитов, которых нет
+    # НИГДЕ, кроме этой машины. В общем чекауте они обычно чужие: коммитила другая сессия.
+    # 2026-09-02 так разошёлся main с коммитом «пять ручных дек 4.7.x сведены в одну».
+    if [ "$ahead" != "0" ] && [ "$behind" != "0" ] && [ "$ahead" != "?" ]; then
+        say "⛔ $branch РАЗОШЁЛСЯ с $upstream (+$ahead/-$behind): ff не пройдёт, reset --hard сотрёт $ahead коммит(ов), которых нет на remote — порядок в скилле shared-checkout-sync"
+        # …и вдвойне опасно, когда поверх лежит чья-то незавершённая работа: rebase откажет,
+        # merge полезет в правящиеся файлы. Сначала пусть автор закоммитит.
+        tracked_dirty="$(git status --porcelain=v1 2>/dev/null | grep -cv '^??' || true)"
+        [ "${tracked_dirty:-0}" != "0" ] && \
+            say "⛔ …и ${tracked_dirty} незакоммиченных путей поверх расхождения — синхронизацию не начинать, пока автор не закоммитит"
+    fi
 else
     say "⚠ $branch has no upstream"
 fi
