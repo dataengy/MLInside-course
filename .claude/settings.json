@@ -35,6 +35,10 @@
           },
           {
             "type": "command",
+            "command": "bash scripts/hooks/preza-manual-unported-status.sh"
+          },
+          {
+            "type": "command",
             "command": "bash scripts/hooks/branch-pr-status.sh",
             "timeout": 10,
             "statusMessage": "Checking branches without PRs"
