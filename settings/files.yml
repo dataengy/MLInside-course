@@ -52,9 +52,13 @@ presentation:
 
   # Кого открывать и править. Ручная и генераторская головы держатся ОТДЕЛЬНО: пока правки
   # из ручной не уехали в контент, «текущая» у них разная, и путать их нельзя.
+  # ЧТО СЮДА НЕ ПИШУТ. Не каждую сборку: генераторская линия движется по нескольку версий в
+  # день, и список превратился бы в дубль журнала публикаций. История версий живёт в
+  # `content/presentations.yml` (курсор `published`) и в git. Здесь — только точки, где линии
+  # РАЗОШЛИСЬ или СОШЛИСЬ, плюс текущая голова.
   current:
     MLInside_Введение-в-dbt:
-      generated: data/generated/MLInside_Введение-в-dbt_v4.10.0.pptx
+      generated: data/generated/MLInside_Введение-в-dbt_v4.11.1.pptx
       manual: null
       manual_note: >-
         Ручная линия ЗАКРЫТА 2026-09-02: содержимое v4.7.5-man перенесено в контент (91f0ca0)
@@ -84,7 +88,7 @@ presentation:
       descr: >-
         Сборки из content/preza-dbt-v4-content.yml, всегда воспроизводимы командой. С
         v4.10.0 вобрала линию M — расхождение ручной и генераторской сторон закрыто.
-      chain: [v4.9.0, v4.10.0]
+      chain: [v4.9.0, v4.10.0, …, v4.11.1]
 
   # Общий предок ВСЕХ линий — v4.7.0 (126 слайдов): последняя версия, где ручная и
   # генераторская стороны совпадали.
@@ -341,27 +345,40 @@ presentation:
       not_diffed: >-
         Остальное не сверялось: версия старая, и почти всё в ней перекрыто более поздними.
 
-    - id: v4.10.0
-      path: data/generated/MLInside_Введение-в-dbt_v4.10.0.pptx
+    - id: v4.11.1
+      path: data/generated/MLInside_Введение-в-dbt_v4.11.1.pptx
       lane: generated
       line: G
       status: current-generated
-      timestamp: 2026-09-02T16:34
+      timestamp: 2026-09-02T18:00
       slides: 136
-      parents: [v4.9.0, v4.7.5-man]
       built_from: content/preza-dbt-v4-content.yml
-      summary: >-
-        Первая сборка, где ручная и генераторская линии снова сошлись: v4.9.0 плюс
-        перенесённое из v4.7.5-man.
+      summary: Текущая голова генераторской линии; сборки после схождения идут поверх v4.10.0.
       timing: {main: '142:54', appendix: '12:00', main_target: '90–105 мин'}
       issues:
         - id: timing-overrun
           status: open
           symptom: основная часть 142:54 при цели 90–105 мин
-          cause: объём контента; перенос из ручной деки добавил ещё 4:30
+          cause: объём контента; перенос из ручной деки добавил 4:30
           inherited_from: v4.7.5-man
           owner: content
-          note: чинится сокращением или переносом слайдов в приложения, а не пересчётом часов
+          note: >-
+            Чинится сокращением или переносом слайдов в приложения, а не пересчётом часов.
+            Правки v4.11.x времени не добавили: «Shift left» переработан на месте.
+
+    - id: v4.10.0
+      path: data/generated/MLInside_Введение-в-dbt_v4.10.0.pptx
+      lane: generated
+      line: G
+      status: convergence-point
+      timestamp: 2026-09-02T16:34
+      slides: 136
+      parents: [v4.9.0, v4.7.5-man]
+      superseded_by: v4.11.1
+      built_from: content/preza-dbt-v4-content.yml
+      summary: >-
+        Первая сборка, где ручная и генераторская линии снова сошлись: v4.9.0 плюс
+        перенесённое из v4.7.5-man. Записана как точка схождения, а не как текущая версия.
 
     - id: v4.9.0
       path: /Users/user/Downloads/_MLInside.2026-08/MLInside_Введение-в-dbt_v4.9.0.pptx

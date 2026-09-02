@@ -32,6 +32,7 @@ STATUS = {
     "archived-in-git": "⚪️ в git, не в работе",
     "ported-awaiting-retirement": "🟡 перенесена в контент, ждёт корзины",
     "superseded": "⚪️ перекрыта",
+    "convergence-point": "🔗 точка схождения линий",
 }
 OP = {
     "insert": "вставлен",
