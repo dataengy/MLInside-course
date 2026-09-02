@@ -111,6 +111,9 @@ lower `min_share` itself to force a stubborn rule to fire.
    code-panel border removed) was found that way, not by the pixel diff.
 6. **Copying slides between `.pptx` files (the `graft` backend) is deliberately unimplemented**
    and raises — this lane derives generator rules, it does not splice binary slide content.
+   When slides genuinely must move between two decks — two HAND-edited lines of the same deck
+   that diverged, so there is no single source to port into the content YAML — that is a
+   different lane: `/preza-graft` (`.tmp/graft_slides.py` + `.tmp/renumber_notes.py`).
 
 ## Routing
 

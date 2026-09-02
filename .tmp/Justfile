@@ -83,6 +83,45 @@ v4-qa content=V4:
 v4-ship:
     cd {{_root}} && cp {{V4_OUT}}.pptx {{V4_OUT}}.html data/drafts/
 
+# ── слияние двух РУЧНЫХ линий деки: перенос слайдов между .pptx ───────────────
+# Когда нужно. Дека растёт двумя способами сразу: генератор пересобирает её из YAML, а
+# человек правит готовый pptx. Пока ручная линия одна — всё сходится. Как только их две
+# (открыли и правили разные версии), слить нечем: `preza_merge` разбирает ФОРМАТИРОВАНИЕ,
+# а backend `graft` там намеренно не реализован (src/preza_merge/apply.py).
+#
+# Направление слияния. Берём голову той линии, где БОЛЬШЕ пересобранного генератором, и
+# доносим в неё руками сделанные слайды из второй. Наоборот дороже: сгенерированное
+# воспроизводится командой, ручное — нет.
+
+# Перенести слайды между двумя pptx. Номера 1-based и от ИСХОДНОГО состояния файлов.
+#   just -f .tmp/Justfile graft <target> <source> <out> --insert 21:21 --replace 30:29
+#   …добавьте --report, чтобы увидеть план и заголовки, ничего не записав.
+graft target source out *ARGS:
+    cd {{_root}} && {{PY}} .tmp/graft_slides.py {{quote(target)}} {{quote(source)}} {{quote(out)}} {{ARGS}}
+
+# Конкретное слияние 2026-09-02: ручные линии v4.7.4-man (голова) и v4.7.2-man (форк) → v4.7.5-man.
+# Рецепт оставлен НЕ ради повторного прогона (исходники уехали в ../.recyclebin), а как
+# протокол: по нему видно, какие ровно слайды переехали и почему именно эти. Разбор —
+# в settings/files.yml, раздел presentation.
+V47_TGT := "data/drafts/MLInside_Введение-в-dbt_v4.7.4-man.pptx"
+V47_SRC := "data/drafts/MLInside_Введение-в-dbt_v4.7.2-man.pptx"
+V47_OUT := ".tmp/build/MLInside_Введение-в-dbt_v4.7.5-man.pptx"
+graft-v47man:
+    just -f {{justfile()}} graft {{V47_TGT}} {{V47_SRC}} {{V47_OUT}} \
+        --insert 21:21 --insert 22:21 --insert 24:21 --replace 30:29
+    just -f {{justfile()}} notes-renumber {{V47_OUT}} --set 32=1.5
+    cd {{_root}} && {{PY}} .tmp/verify_deck.py {{V47_OUT}}
+    cd {{_root}} && soffice --headless --convert-to pdf --outdir .tmp/build {{V47_OUT}} >/dev/null
+    cd {{_root}} && {{PY}} .tmp/pdf_overflow_check.py {{replace(V47_OUT, ".pptx", ".pdf")}}
+
+# Пересчитать часы `[MM:SS–MM:SS · ~N мин]` в подстрочниках ГОТОВОЙ .pptx по порядку слайдов.
+# Для деки, у которой есть контент-YAML, это НЕ нужно: там штатный путь — `just preza-notes
+# apply <content>`, и часы проставляются на каждой сборке. Этот рецепт — для ручной линии,
+# где YAML нет, а слайды переставляли и вставляли: шапка осталась от прежнего порядка.
+# `--set N=МИН` задаёт длительность слайду, у которого метки `[~N мин]` в заметке нет.
+notes-renumber deck *ARGS:
+    cd {{_root}} && {{PY}} .tmp/renumber_notes.py {{quote(deck)}} {{ARGS}}
+
 # Remove generated QA artifacts (keep scripts/docs)
 clean:
     cd {{_root}} && rm -rf .tmp/render .tmp/render-pdf .tmp/media .tmp/*.png .tmp/*.pptx
