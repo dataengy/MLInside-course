@@ -1,0 +1,16 @@
+# Две перестановки из .ai/TODO-man.md.
+#
+# «MLOps-смысл ключевых концепций dbt» стоял 17-м, ДО самих концепций. Его таблица
+# ссылается на source, freshness, ref, test, unit test, docs, incremental, snapshot,
+# exposure, state:modified, CI и оркестратор — то есть на ВСЮ деку, включая блоки, которые
+# идут в конце. Это итоговый слайд, а не вводный: уезжает в финал, между витриной Olist и
+# «Итог: где вы стоите».
+#
+# «Shift left» стоял 24-м, в onboarding-блоке, за полсотни слайдов до CI — автор писал, что
+# он «вырван из контекста», и это ровно оно. Уезжает в блок CI/CD: после «Изменение
+# SQL-фичи — это изменение ML-системы» (зачем) и перед pre-commit (первый рубеж подробно).
+#
+# Переходы соседей правит .tmp/v49/fix_transitions.py: подстановка `sub` ищет внутри
+# ОДНОГО блока слайда, а различать одинаковые строки приходится по соседнему блоку.
+- {op: move, id: 013-mlops-smysl-konceptov-dbt, after: 062-priznaki-mart-delivery-features}
+- {op: move, id: 014d-shift-left,               after: 060-izmenenie-sql-fichi-eto-izmenenie-ml-sistemy}
