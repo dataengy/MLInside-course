@@ -54,8 +54,13 @@ presentation:
   # из ручной не уехали в контент, «текущая» у них разная, и путать их нельзя.
   current:
     MLInside_Введение-в-dbt:
-      manual: data/source/manual/MLInside_Введение-в-dbt_v4.7.5-man.pptx
-      generated: /Users/user/Downloads/_MLInside.2026-08/MLInside_Введение-в-dbt_v4.9.0.pptx
+      generated: data/generated/MLInside_Введение-в-dbt_v4.10.0.pptx
+      manual: null
+      manual_note: >-
+        Ручная линия ЗАКРЫТА 2026-09-02: содержимое v4.7.5-man перенесено в контент (91f0ca0)
+        и пересобрано в v4.10.0 — линии снова сошлись. Пока новой ручной правки нет, править
+        надо КОНТЕНТ, а не pptx. Сам файл v4.7.5-man ещё лежит в data/source/manual и ждёт
+        переноса в корзину по правилу из README того каталога.
 
   # Линии развития. Ключ линии проставлен каждому форку в поле `line` — по нему видно
   # родство, которого НЕ видно по номеру версии в имени файла.
@@ -76,8 +81,10 @@ presentation:
       chain: [v4.7.5-man]
     G:
       kind: generated
-      descr: Сборки из content/preza-dbt-v4-content.yml, всегда воспроизводимы командой.
-      chain: [v4.9.0]
+      descr: >-
+        Сборки из content/preza-dbt-v4-content.yml, всегда воспроизводимы командой. С
+        v4.10.0 вобрала линию M — расхождение ручной и генераторской сторон закрыто.
+      chain: [v4.9.0, v4.10.0]
 
   # Общий предок ВСЕХ линий — v4.7.0 (126 слайдов): последняя версия, где ручная и
   # генераторская стороны совпадали.
@@ -93,9 +100,10 @@ presentation:
       path: data/source/manual/MLInside_Введение-в-dbt_v4.7.5-man.pptx
       lane: manual
       line: M
-      status: current-manual
+      status: ported-awaiting-retirement
       timestamp: 2026-09-02T04:06
       slides: 134
+      ported_into: {content: content/preza-dbt-v4-content.yml, commit: 91f0ca0, rebuilt_as: v4.10.0}
       parents: [v4.7.4-man, v4.7.2-man@drafts]
       base: v4.7.4-man
       summary: Свод обеих ручных линий; база — голова линии A, слайды донора — из линии B.
@@ -161,21 +169,55 @@ presentation:
           fix: 'just -f .tmp/Justfile drop-shapes … --slide 32 --shape 94'
           note: содержимое дублировалось — «ПЛОХО» повторяло четыре правила слева, «ХОРОШО» — подпись под «ЭТАЛОННЫМ ПУТЁМ»
         - id: timing-overrun
-          status: open
+          status: moved
+          moved_to: v4.10.0
           symptom: сумма длительностей 146.4 мин при цели 90–105
           cause: проблема в объёме контента, а не в штампах — пересчёт часов её не лечит
-          owner: content
+          note: >-
+            После переноса в контент вопрос живёт на генераторской линии: в v4.10.0 основная
+            часть 142:54. Уменьшился, но цели по-прежнему не удовлетворяет.
         - id: untimed-slides
-          status: open
+          status: closed
+          closed: 2026-09-02
           count: 42
           symptom: 42 слайда без метки `[~N мин]` и потому вне хронометража
-          note: из них слайды 20–25 — блок ручных конфигов
+          note: >-
+            Снято переносом: в контенте у слайдов метки проставлены генератором, и блок
+            ручных конфигов (20–25 в деке) в хронометраж вошёл.
       todo:
         - id: content-port-v475
+          status: done
+          done: 2026-09-02
+          commit: 91f0ca0
           what: перенести слайды v4.7.5-man в content/preza-dbt-v4-content.yml
           why: правка, живущая только в pptx, гибнет на следующей сборке генератора
-          blocked_by: null
-          note: теперь однозначно — источник один, а не две расходящиеся деки
+          result:
+            new_slides:
+              - {title: 'СЕКРЕТЫ: шаблон отдельно, значения отдельно', at: 22, part: main}
+              - {title: 'dbt_project.yml — главный файл проекта', at: 23, part: main}
+              - {title: 'Activity Schema: одна таблица, любое окно', at: 60, part: main}
+              - {title: 'packages.yml и package-lock.yml', at: 107, part: 3}
+              - {title: 'Именованные селекторы: selectors.yml', at: 108, part: 3}
+            enriched:
+              - slide: Структура dbt-проекта
+                what: легенда «что уезжает в git» (маркеры ✓/✗) вместо почти-дубля слайда 20
+              - slide: 'Правила слоёв: что ломается и чем это ловится'
+                what: >-
+                  в заметки уехали имена правил dbt_project_evaluator
+                  (fct_marts_or_intermediate_dependent_on_source, fct_multiple_sources_joined,
+                  fct_rejoining_of_upstream_concepts, fct_chained_views_dependencies) —
+                  схему из 94 фигур генератор не воспроизведёт, а имена переносимы
+            skipped:
+              - slide: 25
+                title: НАСЛЕДОВАНИЕ КОНФИГОВ, ПАКЕТЫ, СЕЛЕКТОРЫ
+                why: свёрнутая ранняя версия слайдов 22–24, автор сам её развернул
+          verified_by_me:
+            note: >-
+              Сверено независимо, а не со слов: все пять слайдов лежат в контенте на
+              заявленных позициях, четыре имени правил evaluator — в заметках нужного слайда,
+              маркеры ✓/✗ — в дереве слайда «Структура dbt-проекта». Заголовки деки, не
+              найденные в контенте дословно, разобраны поштучно: два оказались тем же слайдом
+              с более длинным заголовком, один — пропущенным осознанно.
 
     - id: v4.7.4-man
       path: /Users/user/gi/@dataengy/.recyclebin/20260902-MLInside_Введение-в-dbt_v4.7.4-man.pptx
@@ -299,26 +341,47 @@ presentation:
       not_diffed: >-
         Остальное не сверялось: версия старая, и почти всё в ней перекрыто более поздними.
 
+    - id: v4.10.0
+      path: data/generated/MLInside_Введение-в-dbt_v4.10.0.pptx
+      lane: generated
+      line: G
+      status: current-generated
+      timestamp: 2026-09-02T16:34
+      slides: 136
+      parents: [v4.9.0, v4.7.5-man]
+      built_from: content/preza-dbt-v4-content.yml
+      summary: >-
+        Первая сборка, где ручная и генераторская линии снова сошлись: v4.9.0 плюс
+        перенесённое из v4.7.5-man.
+      timing: {main: '142:54', appendix: '12:00', main_target: '90–105 мин'}
+      issues:
+        - id: timing-overrun
+          status: open
+          symptom: основная часть 142:54 при цели 90–105 мин
+          cause: объём контента; перенос из ручной деки добавил ещё 4:30
+          inherited_from: v4.7.5-man
+          owner: content
+          note: чинится сокращением или переносом слайдов в приложения, а не пересчётом часов
+
     - id: v4.9.0
       path: /Users/user/Downloads/_MLInside.2026-08/MLInside_Введение-в-dbt_v4.9.0.pptx
       lane: generated
       line: G
-      status: current-generated
+      status: superseded
       timestamp: 2026-09-01T22:07
       slides: 131
       bytes: 6909097
+      superseded_by: v4.10.0
       built_from: content/preza-dbt-v4-content.yml
-      summary: Голова генераторской линии; от общего предка ушла на пять слайдов.
+      summary: Последняя сборка ДО схождения линий; от общего предка ушла на пять слайдов.
       own_content: [Data Mesh / dbt Mesh, разбиение блоков, перенос ecosystem-тем в Part 3]
       todo:
         - id: rebuild-after-content-port
+          status: done
+          done: 2026-09-02
           what: пересобрать после того, как v4.7.5-man уедет в контент
           why: только так ручная и генераторская линии снова сойдутся
-          blocked_by: content-port-v475
-          unblocked: 2026-09-02
-          note: >-
-            До 2026-09-02 было заблокировано вопросом «какая ручная версия актуальна».
-            Вопрос закрыт: ручные линии сведены, PowerPoint закрыт, lock-файла нет.
+          result: v4.10.0 (136 слайдов) — все пять перенесённых слайдов на месте
 
   # Где ещё искали форки и не нашли — чтобы следующий проход не искал заново.
   searched_and_empty:

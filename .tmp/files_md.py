@@ -30,6 +30,8 @@ STATUS = {
     "current-generated": "🟢 текущая сборка",
     "merged-and-retired": "⚪️ слита и убрана",
     "archived-in-git": "⚪️ в git, не в работе",
+    "ported-awaiting-retirement": "🟡 перенесена в контент, ждёт корзины",
+    "superseded": "⚪️ перекрыта",
 }
 OP = {
     "insert": "вставлен",
@@ -82,12 +84,15 @@ def render(doc) -> str:
     _p(L, "## Что открывать и править", "")
     for deck, cur in pr["current"].items():
         _p(L, f"**{deck}**", "")
-        for lane, path in cur.items():
-            label = {"manual": "правят руками", "generated": "собирает генератор"}.get(lane, lane)
-            _p(L, f"- `{path}` — {label}")
+        for lane in ("generated", "manual"):
+            if lane not in cur:
+                continue
+            label = {"manual": "правят руками", "generated": "собирает генератор"}[lane]
+            path = cur[lane]
+            _p(L, f"- `{path}` — {label}" if path else f"- {label}: линии нет")
+            if cur.get(f"{lane}_note"):
+                _p(L, f"  - {_wrap(cur[f'{lane}_note'])}")
         _p(L, "")
-    _p(L, "Ручная и генераторская головы РАЗНЫЕ, и это нормально: пока правки из ручной деки",
-       "не уехали в контент, у линий нет общей вершины. Путать их нельзя.", "")
 
     _p(L, "## Линии", "")
     for key, line in pr["lines"].items():
@@ -95,28 +100,35 @@ def render(doc) -> str:
         _p(L, f"- **{key}** ({line['kind']}) — {_wrap(line['descr'])}", f"  - {chain}")
     _p(L, "", f"Общий предок всех линий: **{pr['common_ancestor']}**.", "")
 
+    # В сводку наверху попадает только НЕзакрытое: закрытое остаётся в карточке версии, где
+    # у него есть контекст. Иначе список «что осталось» разрастается прошлым и его перестают
+    # читать — а он ровно для того, чтобы его читали первым.
     open_todos, open_issues = [], []
     for f in pr["forks"]:
         for t in f.get("todo") or []:
-            open_todos.append((f["id"], t))
+            if t.get("status") != "done":
+                open_todos.append((f["id"], t))
         for i in f.get("issues") or []:
             if i.get("status") == "open":
                 open_issues.append((f["id"], i))
 
-    if open_todos or open_issues:
-        _p(L, "## Что осталось сделать", "")
-        for fid, t in open_todos:
-            blocked = t.get("blocked_by")
-            tail = f" — ждёт `{blocked}`" if blocked else ""
-            _p(L, f"- **{t['id']}** ({fid}){tail}", f"  - {_wrap(t['what'])}",
-               f"  - зачем: {_wrap(t['why'])}")
-            if t.get("note"):
-                _p(L, f"  - {_wrap(t['note'])}")
-        for fid, i in open_issues:
-            _p(L, f"- **{i['id']}** ({fid}) — {_wrap(i['symptom'])}")
-            if i.get("cause"):
-                _p(L, f"  - причина: {_wrap(i['cause'])}")
-        _p(L, "")
+    _p(L, "## Что осталось сделать", "")
+    if not open_todos and not open_issues:
+        _p(L, "Ничего: все задачи по этой деке закрыты.", "")
+    for fid, t in open_todos:
+        blocked = t.get("blocked_by")
+        tail = f" — ждёт `{blocked}`" if blocked else ""
+        _p(L, f"- **{t['id']}** ({fid}){tail}", f"  - {_wrap(t['what'])}",
+           f"  - зачем: {_wrap(t['why'])}")
+        if t.get("note"):
+            _p(L, f"  - {_wrap(t['note'])}")
+    for fid, i in open_issues:
+        _p(L, f"- **{i['id']}** ({fid}) — {_wrap(i['symptom'])}")
+        if i.get("cause"):
+            _p(L, f"  - причина: {_wrap(i['cause'])}")
+        if i.get("note"):
+            _p(L, f"  - {_wrap(i['note'])}")
+    _p(L, "")
 
     _p(L, "## Версии", "")
     for f in pr["forks"]:
@@ -135,6 +147,14 @@ def render(doc) -> str:
             _p(L, f"- перекрыта: **{f['superseded_by']}**")
         if f.get("built_from"):
             _p(L, f"- собирается из: `{f['built_from']}`")
+        if f.get("ported_into"):
+            pi = f["ported_into"]
+            _p(L, f"- перенесена в `{pi['content']}` (коммит `{pi['commit']}`), "
+                  f"пересобрана как **{pi['rebuilt_as']}**")
+        if f.get("timing"):
+            tm = f["timing"]
+            _p(L, f"- хронометраж: основная часть {tm['main']}, приложения {tm['appendix']} "
+                  f"(цель по основной — {tm['main_target']})")
         if f.get("restore_from"):
             _p(L, f"- восстановить из коммитов: {', '.join(f'`{c}`' for c in f['restore_from'])}")
         if f.get("tool"):
@@ -199,18 +219,46 @@ def render(doc) -> str:
                 _p(L, f"- {VERIFIED.get(k, k)}: {val}")
             _p(L, "")
 
-        closed = [i for i in (f.get("issues") or []) if i.get("status") == "closed"]
-        opened = [i for i in (f.get("issues") or []) if i.get("status") != "closed"]
-        if opened or closed:
+        issues = f.get("issues") or []
+        if issues:
             _p(L, "**Замечания**", "")
-            for i in opened + closed:
-                mark = "✅" if i.get("status") == "closed" else "⚠️"
+            rank = {"open": 0, "moved": 1, "closed": 2}
+            for i in sorted(issues, key=lambda x: rank.get(x.get("status"), 0)):
+                mark = {"closed": "✅", "moved": "↪️"}.get(i.get("status"), "⚠️")
                 where = f" (слайд {i['slide']})" if i.get("slide") else ""
                 _p(L, f"- {mark} **{i['id']}**{where} — {_wrap(i['symptom'])}")
                 for key, label in (("cause", "причина"), ("inherited_from", "пришло из"),
-                                   ("fix", "лечение"), ("note", "детали"), ("owner", "чья зона")):
+                                   ("moved_to", "живёт дальше в"), ("fix", "лечение"),
+                                   ("note", "детали"), ("owner", "чья зона")):
                     if i.get(key):
                         _p(L, f"  - {label}: {_wrap(i[key])}")
+            _p(L, "")
+
+        for t in f.get("todo") or []:
+            if t.get("status") != "done":
+                continue
+            _p(L, f"**Сделано: {t['id']}** ({t.get('done', '')}"
+                  f"{', ' + t['commit'] if t.get('commit') else ''})", "",
+               _wrap(t["what"]), "")
+            r = t.get("result")
+            if isinstance(r, str):
+                _p(L, f"- итог: {_wrap(r)}")
+            elif isinstance(r, dict):
+                for title, items in (("новые слайды", r.get("new_slides")),
+                                     ("обогащено", r.get("enriched")),
+                                     ("пропущено осознанно", r.get("skipped"))):
+                    if not items:
+                        continue
+                    _p(L, f"- {title}:")
+                    for it in items:
+                        head = it.get("title") or it.get("slide") or ""
+                        pos = f" → #{it['at']}" if it.get("at") else ""
+                        part = f" (часть {it['part']})" if it.get("part") else ""
+                        tail = f" — {_wrap(it['what'] or it.get('why', ''))}" if it.get("what") else (
+                            f" — {_wrap(it['why'])}" if it.get("why") else "")
+                        _p(L, f"  - {head}{pos}{part}{tail}")
+            if t.get("verified_by_me"):
+                _p(L, f"- проверка: {_wrap(t['verified_by_me'].get('note', ''))}")
             _p(L, "")
 
     _p(L, "## Где искали форки и не нашли", "",
