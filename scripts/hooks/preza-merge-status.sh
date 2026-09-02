@@ -7,10 +7,17 @@
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." 2>/dev/null || exit 0
 
+# Интерпретатор: системный python3 в этом репозитории БЕЗ pyyaml, и хук с `|| true`
+# от этого не падает, а молча ничего не печатает — пять хуков так и стояли мёртвыми.
+# Берём окружение проекта, если оно есть.
+PY=python3
+[ -x .venv/bin/python ] && PY=.venv/bin/python
+
+
 [ -f settings/merge.yml ] || exit 0
 [ -f content/presentations.yml ] || exit 0
 
-python3 - 2>/dev/null <<'EOF' || true
+"$PY" - 2>/dev/null <<'EOF' || true
 import re
 import shlex
 from pathlib import Path

@@ -6,6 +6,13 @@
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." 2>/dev/null || exit 0
 
+# Интерпретатор: системный python3 в этом репозитории БЕЗ pyyaml, и хук с `|| true`
+# от этого не падает, а молча ничего не печатает — пять хуков так и стояли мёртвыми.
+# Берём окружение проекта, если оно есть.
+PY=python3
+[ -x .venv/bin/python ] && PY=.venv/bin/python
+
+
 PLAN="content/presentations.yml"
 [ -f "$PLAN" ] || exit 0
 
@@ -13,7 +20,7 @@ if [ ! -f settings/gsheet.yml ]; then
   echo "[preza-accents] ⚠ settings/gsheet.yml отсутствует — синк листа не настроен (just presentations-plan)"
 fi
 
-python3 - "$PLAN" 2>/dev/null <<'EOF' || true
+"$PY" - "$PLAN" 2>/dev/null <<'EOF' || true
 import sys, yaml
 plan = yaml.safe_load(open(sys.argv[1], encoding="utf-8")) or {}
 decks = [e for e in plan.get("presentations", []) if e.get("content")]

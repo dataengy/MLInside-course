@@ -14,6 +14,13 @@
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." 2>/dev/null || exit 0
 
+# Интерпретатор: системный python3 в этом репозитории БЕЗ pyyaml, и хук с `|| true`
+# от этого не падает, а молча ничего не печатает — пять хуков так и стояли мёртвыми.
+# Берём окружение проекта, если оно есть.
+PY=python3
+[ -x .venv/bin/python ] && PY=.venv/bin/python
+
+
 # Stop-хук не должен рекурсивно будить сам себя.
 INPUT="$(cat 2>/dev/null || echo '{}')"
 case "$INPUT" in *'"stop_hook_active":true'*) exit 0 ;; esac
@@ -22,7 +29,7 @@ case "$INPUT" in *'"stop_hook_active":true'*) exit 0 ;; esac
 [ -d data/generated ] || exit 0
 
 # ── что отправлять: те же данные, что у SessionStart-хука, без сети ────────────
-PENDING="$(python3 - <<'EOF' 2>/dev/null || true
+PENDING="$("$PY" - <<'EOF' 2>/dev/null || true
 import json, re, sys
 from pathlib import Path
 

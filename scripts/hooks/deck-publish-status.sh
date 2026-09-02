@@ -9,11 +9,18 @@
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." 2>/dev/null || exit 0
 
+# Интерпретатор: системный python3 в этом репозитории БЕЗ pyyaml, и хук с `|| true`
+# от этого не падает, а молча ничего не печатает — пять хуков так и стояли мёртвыми.
+# Берём окружение проекта, если оно есть.
+PY=python3
+[ -x .venv/bin/python ] && PY=.venv/bin/python
+
+
 PLAN="content/presentations.yml"
 [ -f "$PLAN" ] || exit 0
 [ -d data/generated ] || exit 0
 
-python3 - "$PLAN" 2>/dev/null <<'EOF' || true
+"$PY" - "$PLAN" 2>/dev/null <<'EOF' || true
 import json, re, sys
 from pathlib import Path
 
