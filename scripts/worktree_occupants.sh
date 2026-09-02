@@ -73,6 +73,13 @@ check() {  # печатает отчёт, возвращает 0 если сво
   # настоящий занимающий — это claude, редактор, PowerPoint, node, python, а не транзитный
   # awk из этого же конвейера. Список намеренно узкий: лучше лишний раз сказать «занято».
   drop_self() { grep -Ev '^(bash|sh|zsh|fish|awk|grep|sed|sort|head|tail|tr|cut|lsof|ps|xargs|wc|uniq|cat|find|dirname|basename) ' ; }
+  # Процессы, которым cwd достался ПО НАСЛЕДСТВУ и которые каталогом не пользуются:
+  # `caffeinate` харнесс запускает, чтобы машина не уснула, и он наследует cwd сессии.
+  # Внимание: «только cwd, без открытых файлов» НЕ является признаком ненастоящего
+  # занимающего — рабочие сессии claude ловятся ровно по cwd и без единого дескриптора,
+  # и снос отнимет у них рабочий каталог. Поэтому исключение по ИМЕНИ, а не по признаку.
+  # lsof обрезает COMMAND до 9 символов, отсюда `caffeinat`.
+  is_inherited() { printf '%s' "$1" | grep -Eq '^(caffeinat|caffeinate|mdworker|mds|Spotlight)$'; }
   # 1. открытые файлы (не cwd). Свой служебный .cc-writes не в счёт — его держит сессия,
   # которая как раз и спрашивает; он исчезнет при выходе из дерева.
   files=$(lsof 2>/dev/null | grep -F "$ABS" | awk '$4!="cwd"{print $1" "$2" "$NF}' | grep -v '/\.claude/\.cc-writes' | drop_self || true)
@@ -81,10 +88,26 @@ check() {  # печатает отчёт, возвращает 0 если сво
     printf '%s\n' "$files" | awk '{printf "    %s pid %s → %s\n", $1, $2, $3}' | head -8
   fi
   # 2. процессы, сидящие в каталоге
-  cwds=$(lsof 2>/dev/null | grep -F "$ABS" | awk '$4=="cwd"{print $1" "$2}' | sort -u | drop_self | awk '{print "    "$1" pid "$2}' || true)
-  if [ -n "$cwds" ]; then
+  local real="" inherited=""
+  while IFS=' ' read -r cmd cpid; do
+    [ -n "${cmd:-}" ] || continue
+    if is_inherited "$cmd"; then
+      inherited="${inherited}    $cmd pid $cpid
+"
+    else
+      real="${real}    $cmd pid $cpid
+"
+    fi
+  done <<EOF_CWD
+$(lsof 2>/dev/null | grep -F "$ABS" | awk '$4=="cwd"{print $1" "$2}' | sort -u | drop_self)
+EOF_CWD
+  if [ -n "$real" ]; then
     busy=1; say "✗ процессы с cwd внутри дерева:"
-    printf '%s\n' "$cwds" | head -8
+    printf '%s' "$real" | head -8
+  fi
+  if [ -n "$inherited" ]; then
+    say "ⓘ cwd по наследству, каталогом не пользуются (занятостью не считается):"
+    printf '%s' "$inherited" | head -4
   fi
   # 3. замок
   lock=$(lock_holder)
