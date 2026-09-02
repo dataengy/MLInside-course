@@ -122,6 +122,19 @@ graft-v47man:
 notes-renumber deck *ARGS:
     cd {{_root}} && {{PY}} .tmp/renumber_notes.py {{quote(deck)}} {{ARGS}}
 
+# Убрать фигуру со слайда готовой .pptx. Индексы 0-based и от ИСХОДНОГО состояния слайда;
+# без --report скрипт всё равно печатает, что именно уносит. Для деки с контент-YAML это НЕ
+# нужно — там правится YAML; здесь ручная линия, где чинить больше негде.
+#   just -f .tmp/Justfile drop-shapes <deck> --slide 32 --shape 94
+drop-shapes deck *ARGS:
+    cd {{_root}} && {{PY}} .tmp/drop_shapes.py {{quote(deck)}} {{ARGS}}
+
+# Пересобрать settings/files.md из раздела `presentation` в settings/files.yml.
+# YAML — источник правды, .md производный: два текста об одном разъезжаются, и потом
+# непонятно, какому верить. `--check` (exit 1, если .md отстал) годится для хука или CI.
+files-md *ARGS:
+    cd {{_root}} && {{PY}} .tmp/files_md.py {{ARGS}}
+
 # Remove generated QA artifacts (keep scripts/docs)
 clean:
     cd {{_root}} && rm -rf .tmp/render .tmp/render-pdf .tmp/media .tmp/*.png .tmp/*.pptx

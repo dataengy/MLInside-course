@@ -57,7 +57,11 @@ reasoning_effort: "normal"
    `.tmp/pdf_overflow_check.py` — и сверить замечания с базой, чтобы отличить унаследованные от
    новых.
 8. **Записать разбор** в `settings/files.yml → presentation`: новая текущая версия, каждая
-   исходная — в `merged-and-retired` с путём в корзине. Исходники убрать через `/recyclebin`.
+   исходная — в `merged-and-retired` с путём в корзине, а `changes` / `not_taken` / `issues` /
+   `todo` — полями, не прозой. «Не перенесено» обязано быть записано так же явно, как
+   перенесённое: иначе через месяц оно читается как «пропустили». Затем
+   `just -f .tmp/Justfile files-md` — человекочитаемый `settings/files.md` генерируется из
+   YAML, руками его не правят. Исходники убрать через `/recyclebin`.
 
 ## Границы
 
@@ -79,7 +83,9 @@ reasoning_effort: "normal"
 |---|---|---|
 | перенос слайдов | `.tmp/graft_slides.py` | `preza_merge` graft не реализован |
 | пересчёт часов | `.tmp/renumber_notes.py` | `just preza-notes` считает по контент-YAML, которого у ручной линии нет |
+| снять фигуру-мусор | `.tmp/drop_shapes.py` | у ручной линии нет YAML, править больше негде |
 | формат шапки | `preza_gen.notes` | единственный источник правды; `renumber_notes` сверяется с ним на импорте |
+| человекочитаемый разбор | `.tmp/files_md.py` | `settings/files.md` производен от YAML, чтобы два текста не разъезжались |
 
 ## Маршрутизация
 

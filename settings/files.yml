@@ -33,9 +33,8 @@ ingested:
 # начать править версию N, а генератору уйти на N+1, N+2 — получаются ДВЕ разошедшиеся
 # линии с общим предком, и слияние приходится делать вручную, слайд за слайдом.
 #
-# Здесь фиксируется: какая версия считается текущей для человека, и какие линии от неё
-# отошли. Смысл записи — не архив, а предупреждение: прежде чем править деку руками,
-# посмотрите сюда и убедитесь, что правите ту версию, которая объявлена текущей.
+# Смысл записи — не архив, а предупреждение: прежде чем править деку руками, посмотрите
+# сюда и убедитесь, что правите ту версию, которая объявлена текущей.
 #
 # ВАЖНО ПРО ПРИРОДУ РАСХОЖДЕНИЯ. Правка, сделанная только в pptx, умирает на следующей
 # сборке: генератор соберёт деку из YAML заново и ничего о ней не узнает. Поэтому слияние
@@ -43,200 +42,289 @@ ingested:
 #
 # ИСКЛЮЧЕНИЕ, 2026-09-02. Ручных линий оказалось ДВЕ, и переносить в контент было нечего до
 # тех пор, пока они не сведены между собой. Слияние pptx↔pptx сделано разово скриптом
-# `.tmp/graft_slides.py` (`just -f .tmp/Justfile graft-v47man`) — он переносит слайды между
-# деками с общим шаблоном. Это не отменяет правило выше: результат v4.7.5-man всё равно
-# ждёт переноса в контент, просто теперь переносить надо из ОДНОГО файла, а не из двух.
+# `.tmp/graft_slides.py` (`just -f .tmp/Justfile graft-v47man`). Это не отменяет правило
+# выше: результат v4.7.5-man всё равно ждёт переноса в контент, просто теперь переносить
+# надо из ОДНОГО файла, а не из двух.
+#
+# ЧЕЛОВЕКОЧИТАЕМЫЙ ВИД этого раздела — `settings/files.md`, он ГЕНЕРИРУЕТСЯ отсюда
+# (`just -f .tmp/Justfile files-md`). Правьте YAML, потом перегенерируйте .md.
 presentation:
 
-  # Полный путь к версии, которую человек считает своей рабочей. Именно её открывают,
-  # правят и от неё отсчитывают форки.
-  current_presentation_version:
-    MLInside_Введение-в-dbt: /Users/user/gi/@dataengy/MLInside-course/data/source/manual/MLInside_Введение-в-dbt_v4.7.5-man.pptx
+  # Кого открывать и править. Ручная и генераторская головы держатся ОТДЕЛЬНО: пока правки
+  # из ручной не уехали в контент, «текущая» у них разная, и путать их нельзя.
+  current:
+    MLInside_Введение-в-dbt:
+      manual: data/source/manual/MLInside_Введение-в-dbt_v4.7.5-man.pptx
+      generated: /Users/user/Downloads/_MLInside.2026-08/MLInside_Введение-в-dbt_v4.9.0.pptx
 
-  # Расхождение зафиксировано 2026-09-01, сведено 2026-09-02. Общий предок ручных линий —
-  # v4.7.0 (126 слайдов): последняя версия, где ручная и генераторская линии совпадали.
-  #
-  # ЧТО ОКАЗАЛОСЬ НА САМОМ ДЕЛЕ (разбор 2026-09-02 — прежняя запись здесь врала в двух местах).
-  # Ручных линий было не одна, а две, и «v4.7.2-man» — это ДВА РАЗНЫХ ФАЙЛА под одним именем:
-  #   * `data/source/manual/…v4.7.2-man.pptx` (130 слайдов) — снимок линии A;
-  #   * `data/drafts/…v4.7.2-man.pptx`        (132 слайда)  — голова линии B, другой файл.
-  # Линия A: v4.7.0+man (127) → source/manual v4.7.2-man (130) → v4.7.3-man (130, слайд 33
-  # пересобран схемой из 41 фигуры вместо ASCII — потому файл и ЛЕГЧЕ, никакого «Сохранить
-  # как») → v4.7.4-man (131, добавлен «Activity Schema»).
-  # Линия B: отдельный форк, где вручную набраны развёрнутые слайды про YML-конфиги и
-  # собрана схема «Правила слоёв» на 95 фигур. Номер 4.7.2 в её имени вводит в заблуждение:
-  # по содержанию она не предшествует 4.7.3, а идёт вбок.
-  #
-  # Сведены обе в v4.7.5-man (134 слайда): за базу взята голова линии A, из линии B
-  # перенесены три слайда конфигов и схема «Правила слоёв» заменой ASCII-версии.
+  # Линии развития. Ключ линии проставлен каждому форку в поле `line` — по нему видно
+  # родство, которого НЕ видно по номеру версии в имени файла.
+  lines:
+    A:
+      kind: manual
+      descr: Основная ручная линия, от неё взята база слияния.
+      chain: [v4.7.0+man, v4.7.2-man@source-manual, v4.7.3-man, v4.7.4-man]
+    B:
+      kind: manual
+      descr: >-
+        Боковой форк. Номер 4.7.2 в имени вводит в заблуждение: по содержимому линия не
+        предшествует v4.7.3, а идёт вбок от общего предка.
+      chain: [v4.7.2-man@drafts]
+    M:
+      kind: manual
+      descr: Свод линий A и B, 2026-09-02.
+      chain: [v4.7.5-man]
+    G:
+      kind: generated
+      descr: Сборки из content/preza-dbt-v4-content.yml, всегда воспроизводимы командой.
+      chain: [v4.9.0]
+
+  # Общий предок ВСЕХ линий — v4.7.0 (126 слайдов): последняя версия, где ручная и
+  # генераторская стороны совпадали.
+  common_ancestor: v4.7.0
+
+  # ⚠️ КОЛЛИЗИЯ ИМЁН, из-за которой прежняя запись здесь считала два файла одним:
+  # `v4.7.2-man` носили ДВА разных файла — 130 слайдов в data/source/manual (линия A) и
+  # 132 в data/drafts (голова линии B). Поэтому у форков есть `id` с суффиксом каталога:
+  # различать их по одному имени файла нельзя.
   forks:
 
-    - path: /Users/user/gi/@dataengy/MLInside-course/data/source/manual/MLInside_Введение-в-dbt_v4.7.5-man.pptx
+    - id: v4.7.5-man
+      path: data/source/manual/MLInside_Введение-в-dbt_v4.7.5-man.pptx
       lane: manual
+      line: M
+      status: current-manual
       timestamp: 2026-09-02T04:06
       slides: 134
-      status: current-manual
-      descr: >-
-        Свод обеих ручных линий. База — v4.7.4-man (линия A, 131 слайд); из v4.7.2-man
-        (линия B, 132) перенесены `DBT_PROJECT.YML — ГЛАВНЫЙ ФАЙЛ ПРОЕКТА`,
-        `PACKAGES.YML И PACKAGE-LOCK.YML`, `ИМЕНОВАННЫЕ СЕЛЕКТОРЫ: SELECTORS.YML` вставкой
-        после слайда 21 и `ПРАВИЛА СЛОЁВ` (95 фигур) заменой ASCII-версии на слайде 29.
-        Не перенесены: дубли (`ЧЕТЫРЕ ФАЙЛА`, `СЕКРЕТЫ`), устаревшие варианты (`Что брать
-        под ML`, ASCII-схема Olist) и пустой слайд-мусор. Медиа не прибавилось: все 27
-        картинок линии B уже были в базе; ушла одна (image15.jpg), жившая только на
-        заменённом слайде. Хронометраж подстрочников пересчитан
-        (`.tmp/renumber_notes.py`) — до этого он был сломан и в самой v4.7.4.
-      known_issues:
-        - >-
-          Слайд 32 `ПРАВИЛА СЛОЁВ`: тёмная панель «ПЛОХО/ХОРОШО» налезает на диаграммы и
-          уходит за подвал (7.445in при подвале с 6.954in). Дефект ПРИШЁЛ ИЗ ИСХОДНИКА —
-          рендер слайда побайтово тот же, что в v4.7.2-man; похоже на остаток ASCII-версии,
-          не убранный после того, как поверх собрали схему. Лечится удалением панели.
-        - >-
-          Сумма длительностей 146.4 мин при цели 90–105. Пересчёт часов этого не чинит:
-          проблема в контенте, а не в штампах. Отдельно: 42 слайда идут без метки
-          `[~N мин]` и потому вне хронометража — из них 20–25 это блок ручных конфигов.
-      merge_scenario:
-        strategy: content-port
-        status: pending
-        descr: >-
-          Перенос в `content/preza-dbt-v4-content.yml` НЕ сделан — это отдельная работа.
-          Теперь она хотя бы однозначна: источник один, а не две расходящиеся деки.
+      parents: [v4.7.4-man, v4.7.2-man@drafts]
+      base: v4.7.4-man
+      summary: Свод обеих ручных линий; база — голова линии A, слайды донора — из линии B.
+      tool: just -f .tmp/Justfile graft-v47man
+      changes:
+        - op: insert
+          from: v4.7.2-man@drafts
+          src_slide: 21
+          at: 22
+          title: DBT_PROJECT.YML — ГЛАВНЫЙ ФАЙЛ ПРОЕКТА
+        - op: insert
+          from: v4.7.2-man@drafts
+          src_slide: 22
+          at: 23
+          title: PACKAGES.YML И PACKAGE-LOCK.YML
+        - op: insert
+          from: v4.7.2-man@drafts
+          src_slide: 24
+          at: 24
+          title: 'ИМЕНОВАННЫЕ СЕЛЕКТОРЫ: SELECTORS.YML'
+        - op: replace
+          from: v4.7.2-man@drafts
+          src_slide: 30
+          at: 32
+          title: 'ПРАВИЛА СЛОЁВ: ЧТО ЛОМАЕТСЯ И ЧЕМ ЭТО ЛОВИТСЯ'
+          note: 95 фигур собранной руками схемы вместо 5 фигур ASCII-версии
+        - op: drop-shape
+          at: 32
+          shape: Rounded Rectangle 97
+          note: остаток ASCII-вёрстки поверх новой схемы; см. issue slide32-panel
+        - op: renumber-notes
+          note: >-
+            Часы `[MM:SS–MM:SS · ~N мин]` пересчитаны по фактическому порядку слайдов.
+            Слайду 32 длительность задана явно (1.5 мин) — унаследована от заменённого.
+      not_taken:
+        - {src_slide: 20, title: ЧЕТЫРЕ YML-ФАЙЛА…, reason: duplicate, of: 20}
+        - {src_slide: 23, title: СЕКРЕТЫ…, reason: duplicate, of: 21}
+        - {src_slide: 32, title: 'Что брать под ML', reason: superseded, note: в базе версия полнее}
+        - {src_slide: 34, title: 'Olist: от сырых таблиц…', reason: superseded, note: ASCII против схемы}
+        - {src_slide: 35, title: '(пустой)', reason: junk}
+      media:
+        before: 28
+        after: 27
+        added: 0
+        dropped: [image15.jpg]
+        note: >-
+          Все 27 картинок линии B уже были в базе, новых частей ноль. Ушедшая жила только
+          на заменённом слайде 29.
+      verified:
+        slides: 134
+        notes_with_clock_monotonic: true
+        emphasis_runs: {bold: 1491, underline: 700, italic: 517}
+        pdf_overflow_findings: 1
+        pdf_overflow_note: единственное замечание (стр. 19) унаследовано из v4.7.4
+      issues:
+        - id: slide32-panel
+          status: closed
+          closed: 2026-09-02
+          slide: 32
+          symptom: панель «ПЛОХО/ХОРОШО» налезала на диаграммы и уходила за подвал (7.445in при подвале с 6.954in)
+          cause: остаток ASCII-вёрстки, не убранный после того, как поверх собрали схему
+          inherited_from: v4.7.2-man@drafts
+          fix: 'just -f .tmp/Justfile drop-shapes … --slide 32 --shape 94'
+          note: содержимое дублировалось — «ПЛОХО» повторяло четыре правила слева, «ХОРОШО» — подпись под «ЭТАЛОННЫМ ПУТЁМ»
+        - id: timing-overrun
+          status: open
+          symptom: сумма длительностей 146.4 мин при цели 90–105
+          cause: проблема в объёме контента, а не в штампах — пересчёт часов её не лечит
+          owner: content
+        - id: untimed-slides
+          status: open
+          count: 42
+          symptom: 42 слайда без метки `[~N мин]` и потому вне хронометража
+          note: из них слайды 20–25 — блок ручных конфигов
+      todo:
+        - id: content-port-v475
+          what: перенести слайды v4.7.5-man в content/preza-dbt-v4-content.yml
+          why: правка, живущая только в pptx, гибнет на следующей сборке генератора
+          blocked_by: null
+          note: теперь однозначно — источник один, а не две расходящиеся деки
 
-    - path: /Users/user/gi/@dataengy/.recyclebin/20260902-MLInside_Введение-в-dbt_v4.7.4-man.pptx
+    - id: v4.7.4-man
+      path: /Users/user/gi/@dataengy/.recyclebin/20260902-MLInside_Введение-в-dbt_v4.7.4-man.pptx
       lane: manual
+      line: A
+      status: merged-and-retired
       timestamp: 2026-09-01T21:33
       slides: 131
       bytes: 9384912
-      status: merged-and-retired
-      descr: >-
-        Голова линии A и база слияния. Восстанавливается из коммита 51d3fa4.
-      merge_scenario:
-        strategy: pptx-graft
-        status: done
-        descr: Целиком вошла в v4.7.5-man.
+      parents: [v4.7.3-man]
+      merged_into: v4.7.5-man
+      strategy: pptx-graft
+      restore_from: [51d3fa4]
+      summary: Голова линии A и база слияния — вошла в свод целиком.
+      own_content: ['Activity Schema: одна таблица, любое окно']
 
-    - path: /Users/user/gi/@dataengy/.recyclebin/20260902-MLInside_Введение-в-dbt_v4.7.2-man.pptx
+    - id: v4.7.2-man@drafts
+      path: /Users/user/gi/@dataengy/.recyclebin/20260902-MLInside_Введение-в-dbt_v4.7.2-man.pptx
       lane: manual
+      line: B
+      status: merged-and-retired
       timestamp: 2026-09-02T02:43
       slides: 132
       bytes: 9852100
-      status: merged-and-retired
-      descr: >-
-        Голова линии B — форк, а не предшественник v4.7.3 (см. разбор выше). Единственное
-        место, где жили развёрнутые слайды про YML-конфиги и схема «Правила слоёв».
-        Восстанавливается из коммита 51d3fa4.
-      merge_scenario:
-        strategy: pptx-graft
-        status: done
-        descr: >-
-          Четыре слайда перенесены в v4.7.5-man, остальные расхождения признаны дублями или
-          устаревшими. Команда переноса — `just -f .tmp/Justfile graft-v47man`.
+      parents: [v4.7.0+man]
+      merged_into: v4.7.5-man
+      strategy: pptx-graft
+      restore_from: [51d3fa4]
+      summary: >-
+        Голова линии B — форк, а не предшественник v4.7.3. Единственное место, где жили
+        развёрнутые слайды про YML-конфиги и схема «Правила слоёв».
+      own_content:
+        - DBT_PROJECT.YML — ГЛАВНЫЙ ФАЙЛ ПРОЕКТА
+        - PACKAGES.YML И PACKAGE-LOCK.YML
+        - 'ИМЕНОВАННЫЕ СЕЛЕКТОРЫ: SELECTORS.YML'
+        - 'ПРАВИЛА СЛОЁВ: схема на 95 фигур'
 
-    - path: /Users/user/gi/@dataengy/.recyclebin/20260902-MLInside_Введение-в-dbt_v4.7.3-man.pptx
+    - id: v4.7.3-man
+      path: /Users/user/gi/@dataengy/.recyclebin/20260902-MLInside_Введение-в-dbt_v4.7.3-man.pptx
       lane: manual
+      line: A
+      status: merged-and-retired
       timestamp: 2026-09-01T21:35
       slides: 130
       bytes: 9380371
-      status: merged-and-retired
-      descr: >-
-        Промежуточная точка линии A: v4.7.2-man из source/manual плюс пересобранный слайд 33
-        (схема из 41 фигуры вместо ASCII-текстбокса — отсюда и меньший размер файла).
-        Полностью перекрыта v4.7.4-man. Восстанавливается из коммита 164e26d.
-      merge_scenario:
-        strategy: superseded
-        status: done
-        descr: Своего содержимого сверх v4.7.4-man не несёт.
+      parents: [v4.7.2-man@source-manual]
+      superseded_by: v4.7.4-man
+      strategy: superseded
+      restore_from: [164e26d]
+      summary: Промежуточная точка линии A — свыше v4.7.4-man своего не несёт.
+      own_content: ['слайд 33: схема из 41 фигуры вместо ASCII-текстбокса']
+      note: >-
+        Файл ЛЕГЧЕ предшественника на 0.5 МБ именно из-за этой замены, а не из-за
+        «Сохранить как» — прежняя запись здесь трактовала это неверно.
 
-    - path: /Users/user/gi/@dataengy/.recyclebin/20260902-1-MLInside_Введение-в-dbt_v4.7.2-man.pptx
+    - id: v4.7.2-man@source-manual
+      path: /Users/user/gi/@dataengy/.recyclebin/20260902-1-MLInside_Введение-в-dbt_v4.7.2-man.pptx
       lane: manual
+      line: A
+      status: merged-and-retired
       timestamp: 2026-09-01T21:33
       slides: 130
       bytes: 9865858
-      status: merged-and-retired
-      descr: >-
-        Снимок линии A ДО пересборки слайда 33; от v4.7.3-man отличается ровно этим одним
-        слайдом. Лежал в `data/source/manual/` под тем же именем, что и голова линии B в
-        `data/drafts/` — из-за этой коллизии имён прежняя запись здесь и приняла два файла
-        за один. Восстанавливается из коммита dc8c25f.
-      merge_scenario:
-        strategy: superseded
-        status: done
-        descr: Полностью перекрыт v4.7.3-man, тот — v4.7.4-man.
+      parents: [v4.7.0+man]
+      superseded_by: v4.7.3-man
+      strategy: superseded
+      restore_from: [dc8c25f]
+      summary: Снимок линии A ДО пересборки слайда 33; от v4.7.3-man отличается ровно им.
+      note: >-
+        Носил то же имя, что голова линии B в data/drafts — из-за этой коллизии прежняя
+        запись и приняла два файла за один.
 
-    - path: /Users/user/gi/@dataengy/.recyclebin/20260902-MLInside_Введение-в-dbt_v4.7.0+man.pptx
+    - id: v4.7.0+man
+      path: /Users/user/gi/@dataengy/.recyclebin/20260902-MLInside_Введение-в-dbt_v4.7.0+man.pptx
       lane: manual
+      line: A
+      status: merged-and-retired
       timestamp: 2026-09-01T19:37
       slides: 127
       bytes: 9846055
-      status: merged-and-retired
-      descr: >-
-        Точка ответвления ручной линии: v4.7.0 плюс один слайд «Кто определяет развитие
-        dbt Core?». Спасена из `.tmp/build/` (каталог в .gitignore) снимком 19:37, когда
-        файл был открыт в PowerPoint. Восстанавливается из коммитов 813ed9d и 7444058.
-      merge_scenario:
-        strategy: content-port
-        status: done
-        descr: >-
-          Слайд про governance перенесён в контент как `904-kto-opredelyaet-razvitie-dbt-core`
-          (Part 3), схема из фигур переложена в ASCII, авторская строка TAKEAWAY сохранена
-          дословно. Перестановка AE перед «dbt за 60 секунд» тоже перенесена.
+      parents: [v4.7.0]
+      strategy: content-port
+      restore_from: [813ed9d, 7444058]
+      summary: Точка ответвления ручной линии — v4.7.0 плюс слайд про governance.
+      own_content: ['Кто определяет развитие dbt Core?']
+      ported_to_content:
+        - slide: 904-kto-opredelyaet-razvitie-dbt-core
+          part: 3
+          note: схема из фигур переложена в ASCII, строка TAKEAWAY сохранена дословно
+        - note: перестановка AE перед «dbt за 60 секунд»
+      rescue: >-
+        Спасена из .tmp/build/ (каталог в .gitignore) снимком 19:37, когда файл был открыт
+        в PowerPoint.
 
-    - path: /Users/user/gi/@dataengy/.recyclebin/MLInside_Введение-в-dbt_v4.4.1-man.pptx
+    - id: v4.4.1-man
+      path: /Users/user/gi/@dataengy/.recyclebin/MLInside_Введение-в-dbt_v4.4.1-man.pptx
       lane: manual
+      status: merged-and-retired
       timestamp: 2026-09-01T04:18
       slides: 126
       bytes: 6080786
-      status: merged-and-retired
-      descr: >-
-        Ручная правка поверх v4.4.0. Из git убрана после сверки по трём осям (тексты фигур,
-        md5 картинок, заметки) — ноль расхождений на 125 общих слайдах, переносить было
-        нечего. Лежит в корзине вне репозитория, восстанавливается из коммита 813ed9d.
-      merge_scenario:
-        strategy: content-port
-        status: done
-        descr: Оба изменения (новый слайд + перестановка) уже в контенте, версия закрыта.
+      strategy: content-port
+      restore_from: [813ed9d]
+      summary: Ручная правка поверх v4.4.0; переносить оказалось нечего.
+      diffed_by: [тексты фигур, md5 картинок, заметки]
+      diff_result: ноль расхождений на 125 общих слайдах
 
-    - path: /Users/user/gi/@dataengy/MLInside-course/data/source/manual/MLInside_Введение-в-dbt_v4.2.1-man.pptx
+    - id: v4.2.1-man
+      path: data/source/manual/MLInside_Введение-в-dbt_v4.2.1-man.pptx
       lane: manual
+      status: archived-in-git
       timestamp: 2026-09-01T00:36
       slides: 119
       bytes: 7071479
-      status: archived-in-git
-      descr: >-
-        Самая ранняя сохранившаяся ручная линия, от v4.2.0. Отстаёт от текущей на 11 слайдов.
-      merge_scenario:
-        strategy: content-port
-        status: partial
-        descr: >-
-          Перенесены dagster-правки и картинка «Короткий рейтинг». Остальное не сверялось:
-          версия старая, и почти всё в ней перекрыто более поздними.
+      strategy: content-port
+      strategy_status: partial
+      summary: Самая ранняя сохранившаяся ручная линия, от v4.2.0.
+      ported_to_content:
+        - note: dagster-правки
+        - note: картинка «Короткий рейтинг»
+      not_diffed: >-
+        Остальное не сверялось: версия старая, и почти всё в ней перекрыто более поздними.
 
-    - path: /Users/user/Downloads/_MLInside.2026-08/MLInside_Введение-в-dbt_v4.9.0.pptx
+    - id: v4.9.0
+      path: /Users/user/Downloads/_MLInside.2026-08/MLInside_Введение-в-dbt_v4.9.0.pptx
       lane: generated
+      line: G
+      status: current-generated
       timestamp: 2026-09-01T22:07
       slides: 131
       bytes: 6909097
-      status: current-generated
-      descr: >-
-        Голова генераторской линии: собрана из `content/preza-dbt-v4-content.yml`, всегда
-        воспроизводима командой сборки. От общего предка v4.7.0 ушла на пять слайдов —
-        Data Mesh / dbt Mesh, разбиение блоков, перенос ecosystem-тем в Part 3.
-      merge_scenario:
-        strategy: rebuild-after-content-port
-        status: pending
-        descr: >-
-          Слияние идёт ТОЛЬКО в одну сторону — правки из ручной деки переносятся в контент,
-          после чего дека пересобирается и обе линии снова сходятся. Обратный перенос
-          невозможен: правка, сделанная в pptx, гибнет на следующей сборке.
-          Разблокировано 2026-09-02: вопрос «какая ручная версия актуальна» закрыт — все
-          ручные линии сведены в v4.7.5-man, PowerPoint закрыт, lock-файла нет. Осталось
-          собственно перенести её слайды в `content/preza-dbt-v4-content.yml`; это
-          отдельная работа, в свод 2026-09-02 она не входила.
+      built_from: content/preza-dbt-v4-content.yml
+      summary: Голова генераторской линии; от общего предка ушла на пять слайдов.
+      own_content: [Data Mesh / dbt Mesh, разбиение блоков, перенос ecosystem-тем в Part 3]
+      todo:
+        - id: rebuild-after-content-port
+          what: пересобрать после того, как v4.7.5-man уедет в контент
+          why: только так ручная и генераторская линии снова сойдутся
+          blocked_by: content-port-v475
+          unblocked: 2026-09-02
+          note: >-
+            До 2026-09-02 было заблокировано вопросом «какая ручная версия актуальна».
+            Вопрос закрыт: ручные линии сведены, PowerPoint закрыт, lock-файла нет.
 
-  # Где ещё искали форки и не нашли — чтобы следующий проход не искал заново:
-  #   * опубликованные артефакты Claude — список пуст (`Artifact action: list`, scope all);
-  #   * data/generated/ и ~/Downloads/_MLInside.2026-08/ — только сборки генератора,
-  #     собственных линий не образуют;
-  #   * копии в .claude/worktrees/*/ и .recyclebin/*/ — это чекауты и резервные снимки
-  #     тех же файлов, отдельными форками не считаются.
+  # Где ещё искали форки и не нашли — чтобы следующий проход не искал заново.
+  searched_and_empty:
+    - where: опубликованные артефакты Claude
+      result: 'список пуст (`Artifact action: list`, scope all)'
+    - where: data/generated/ и ~/Downloads/_MLInside.2026-08/
+      result: только сборки генератора, собственных линий не образуют
+    - where: .claude/worktrees/*/ и .recyclebin/*/
+      result: чекауты и резервные снимки тех же файлов, отдельными форками не считаются
