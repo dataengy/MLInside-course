@@ -1,0 +1,47 @@
+- kind: content
+  id: 042b-activity-schema-odna-tablica
+  title: 'Activity Schema: одна таблица, любое окно'
+  materials:
+  - label: Activity Schema
+    url: https://www.activityschema.com/
+  code_caption: 'то же point-in-time, но условие переезжает из JOIN внутрь агрегата'
+  code_lang: sql
+  code: |2
+    -- ФАКТ: одна строка = одно событие продавца
+    {{ config(materialized='incremental',
+              engine='MergeTree()',
+              order_by='(entity_id, activity_ts)') }}
+    select os.seller_id                    as entity_id,
+           o.order_delivered_customer_date as activity_ts,
+           'order_delivered'               as activity,
+           o.delay_days                    as value
+    from {{ ref('stg_orders') }} as o
+    join order_seller as os using (order_id)
+    where o.order_delivered_customer_date is not null
+
+    -- ── ПРИЗНАК: то же условие, но внутри агрегата ─────────────
+    select cur.order_id,
+           avgIf(a.value,
+                 a.activity_ts <  cur.order_purchase_timestamp
+             and a.activity_ts >= cur.order_purchase_timestamp
+                                  - interval 90 day)
+             as seller_avg_delay_90d
+    from {{ ref('stg_orders') }} as cur
+    join order_seller as cs using (order_id)
+    left join {{ ref('int_seller_activity') }} as a
+           on a.entity_id = cs.seller_id
+    group by cur.order_id
+  notes: |2
+    [~1.5 мин] **Главное:** Activity Schema !!не отменяет point-in-time!! — она меняет форму таблицы, из которой считается признак.
+
+    **TAKEAWAY TO REPEAT:** дешевеет СЛЕДУЮЩИЙ признак, а не сама корректность.
+
+    **Разбор кода:** сверху таблица событий — `entity_id`, `activity_ts`, `activity`, `value`: один продавец, один момент, одно событие, одно значение. Снизу тот же самый признак, что на предыдущем слайде, но два условия переехали из `JOIN` внутрь `avgIf`. Сравнить построчно стоит вслух: условия !!дословно те же!! — строго раньше момента покупки и окно в 90 дней назад.
+
+    **Практический смысл:** что меняется при переходе к этой форме.
+
+    Своя модель под каждый признак — против одной таблицы событий на все признаки. Условие point-in-time в `JOIN` — против условия внутри `avgIf`. Новое окно в 30 дней: правка модели — против ещё одной строки в `select`.
+
+    **Осторожно:** цена тоже есть. Классическая форма читается сразу, обе грани видны глазом; для Activity Schema нужен словарь — какие вообще бывают `activity`. И повторю главное: !!корректность дешевле не становится!!, условие никуда не делось.
+
+    **Переход:** ~~«Границы разобрали. Дальше — где заканчивается dbt».~~

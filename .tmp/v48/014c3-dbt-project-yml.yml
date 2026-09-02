@@ -1,0 +1,50 @@
+- kind: content
+  id: 014c3-dbt-project-yml
+  title: 'dbt_project.yml — главный файл проекта'
+  materials:
+  - label: dbt_project.yml
+    url: https://docs.getdbt.com/reference/dbt_project.yml
+  code_caption: 'идентичность и пути · дефолты материализаций по каталогам'
+  code_lang: yaml
+  code: |2
+    name: olist                     # идентичность
+    version: '1.0.0'
+    config-version: 2
+    profile: olist                  # → profiles.yml
+    require-dbt-version: [">=1.8.0", "<2.0.0"]
+
+    model-paths: ["models"]         # пути
+    seed-paths:  ["seeds"]
+    macro-paths: ["macros"]
+    clean-targets: ["target", "dbt_packages"]
+
+    vars:
+      lookback_days: 3              # → {{ var('lookback_days') }}
+    on-run-start: ["{{ create_udfs() }}"]
+    query-comment: "dbt | {{ target.name }}"
+
+    # ── дефолты материализаций: каталог глубже — сильнее ────────
+    models:
+      olist:
+        +materialized: view         # дефолт для всех
+        marts:
+          +materialized: table
+          +engine: MergeTree()
+          ml:
+            ml_order_delay_features:
+              +materialized: incremental
+              +unique_key: [order_id]
+  notes: |2
+    [~1.5 мин] **Главное:** этот файл !!и делает каталог проектом!!. Дефолты живут здесь, исключения — рядом с моделью.
+
+    **Разбор кода:** верх — идентичность и пути: имя, профиль, требуемая версия dbt, где лежат модели и что чистить. Ниже — `vars` (переменные проекта, видны как `{{ var(...) }}`), хуки и комментарий, который dbt подставляет в каждый запрос: по нему в логах хранилища видно, чей это SQL.
+
+    Нижний блок — самое полезное. Материализации задаются !!по каталогам!!: `view` по умолчанию, `table` в marts, `incremental` для конкретной ML-витрины.
+
+    **Практический смысл:** приоритет запомнить один раз — __чем ближе к модели, тем сильнее__:
+
+    `config()` в `.sql` > `config:` в `schema.yml` > `dbt_project.yml`.
+
+    Внутри самого файла сильнее более глубокий каталог. А конфиг вашего проекта сильнее конфига установленного пакета — поэтому дефолты пакета можно переопределять, не трогая его код.
+
+    **Переход:** ~~«Осталось понять, в каком порядке ловить ошибки, пока правка ещё на вашей машине».~~

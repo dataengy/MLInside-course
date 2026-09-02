@@ -1,0 +1,29 @@
+# Перенос восьми уникальных слайдов из ручной деки v4.7.5-man в контент.
+#
+# Пять переносятся новыми слайдами, два обогащают существующие, один (25) пропущен как
+# свёрнутая копия 22–24 — автор её сам развернул, в ней даже номер страницы остался от копии.
+#
+# Раскладка: секреты и dbt_project.yml — в основную часть, где уже стоит «Проект ≠
+# окружение»; packages.yml и selectors.yml — в PART 3 к остальному справочнику, чтобы не
+# раздувать хронометраж лекции справочной глубиной; Activity Schema — сразу за
+# point-in-time на SQL, она с ним прямо сравнивается.
+
+- {op: insert_after, id: 014c-proekt-ne-okruzhenie,   file: 014c2-sekrety.yml}
+- {op: insert_after, id: 014c2-sekrety-shablon-i-znacheniya, file: 014c3-dbt-project-yml.yml}
+- {op: insert_after, id: 042-pit-na-sql,              file: 042b-activity-schema.yml}
+- {op: insert_after, id: 911-pakety-versii-i-riski,   file: 911b-packages-yml.yml}
+- {op: insert_after, id: 911b-packages-yml-i-lock,    file: 911c-selectors-yml.yml}
+
+# Слайд 20 ручной деки: то же дерево, но с пометками «что коммитим». Это его единственное
+# отличие от нашего слайда со структурой, поэтому переносится в него, а не отдельным слайдом.
+- op: sub
+  count: 1
+  find: "     └── selectors.yml          именованные наборы моделей\n\n     ~/.dbt/profiles.yml        окружение и подключения, ВНЕ git"
+  replace: "     ├── selectors.yml       ✓  именованные наборы моделей\n     └── .gitignore          ✓  target/ dbt_packages/ .env*\n\n     ~/.dbt/profiles.yml     ✓  только env_var() — без значений\n     .env.secrets            ✗  локально, в .gitignore\n     target/ dbt_packages/   ✗  сборочные, ставятся заново"
+
+# Слайд 32 ручной деки: та же схема, но с ИМЕНАМИ правил dbt_project_evaluator. Схему из
+# 94 фигур генератор не воспроизведёт, а имена правил — самое ценное в ней и их не было.
+- op: sub
+  count: 1
+  find: "    - Правильный ход — не отключать правило, а оформить исключение (в `dbt_project_evaluator` это seed), чтобы для всех остальных моделей правило продолжало работать."
+  replace: "    - Правильный ход — не отключать правило, а оформить исключение (в `dbt_project_evaluator` это seed), чтобы для всех остальных моделей правило продолжало работать.\n\n    **Как это называется в отчёте:** у каждого нарушения из левой колонки есть имя правила, и по нему удобно искать. `mart → source` — `fct_marts_or_intermediate_dependent_on_source`. Джойн источников в staging — `fct_multiple_sources_joined`. Сущность, пришедшая двумя путями, — `fct_rejoining_of_upstream_concepts`. Цепочка вьюх — `fct_chained_views_dependencies`. Запускается это одной строкой: `dbt build --select package:dbt_project_evaluator`, и слой перестаёт быть договорённостью, становясь тестом в CI."

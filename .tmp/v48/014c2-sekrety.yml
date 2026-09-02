@@ -1,0 +1,46 @@
+- kind: content
+  id: 014c2-sekrety-shablon-i-znacheniya
+  title: 'Секреты: шаблон отдельно, значения отдельно'
+  materials:
+  - label: env_var
+    url: https://docs.getdbt.com/reference/dbt-jinja-functions/env_var
+  code_caption: 'profiles.yml коммитим · .env.secrets — никогда'
+  code_lang: yaml
+  code: |2
+    # profiles.yml — КОММИТИМ, значений здесь нет
+    olist:                        # = profile: olist в dbt_project.yml
+      target: "{{ env_var('DBT_TARGET', 'dev') }}"
+      outputs:
+        dev:
+          type: clickhouse
+          host: "{{ env_var('DBT_HOST') }}"
+          port: "{{ env_var('DBT_PORT','8443') | int }}"
+          secure: true
+          user: "{{ env_var('DBT_USER') }}"
+          password: "{{ env_var('DBT_ENV_SECRET_PASSWORD') }}"
+          schema: "{{ env_var('DBT_SCHEMA') }}"
+          threads: 4
+
+    # ── .env.secrets — НЕ коммитим, лежит в .gitignore ──────────
+    DBT_HOST=<clickhouse-host>
+    DBT_USER=<user>
+    DBT_ENV_SECRET_PASSWORD=<password>
+    DBT_SCHEMA=<dbt_schema>
+
+    # dbt читает только файл с именем .env, поэтому подаём явно:
+    set -a && source .env.secrets && set +a
+    dbt build --selector nightly
+  notes: |2
+    [~1.5 мин] **Главное:** в репозиторий уезжает !!форма, а не содержимое!! — структура, шаблоны и версии да, значения никогда.
+
+    **Разбор кода:** `profiles.yml` целиком состоит из `env_var()`. Один и тот же файл работает на ноутбуке и в CI — разница только в том, кто наполняет окружение: человек через `.env.secrets` или хранилище секретов пайплайна.
+
+    **Осторожно:** три места, где спотыкаются.
+
+    Имя блока обязано совпадать с `profile:` в `dbt_project.yml`. Не совпало — `Could not find profile named 'olist'`, и сообщение не подсказывает, где именно расхождение.
+
+    Префикс `DBT_ENV_SECRET_` — !!не косметика!!. dbt разрешает такие переменные только в `profiles.yml` и `packages.yml` и маскирует значения в логах; обычная переменная с паролем в лог попадёт.
+
+    `.env.secrets` dbt сам не читает — он знает только файл с именем `.env`. Поэтому переменные подаются в окружение явно, строкой `set -a && source … && set +a`.
+
+    **Переход:** ~~«Теперь главный файл проекта — что в нём вообще есть».~~

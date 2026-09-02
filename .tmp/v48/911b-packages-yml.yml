@@ -1,0 +1,41 @@
+- kind: content
+  id: 911b-packages-yml-i-lock
+  title: 'packages.yml и package-lock.yml'
+  materials:
+  - label: Package management
+    url: https://docs.getdbt.com/docs/build/packages
+  code_caption: 'пять источников пакета · намерение и факт коммитим оба'
+  code_lang: yaml
+  code: |2
+    packages:
+      # 1. dbt Hub — основной способ
+      - package: dbt-labs/dbt_utils
+        version: [">=1.4.0", "<2.0.0"]
+
+      # 2. git — ТЕГ или коммит, не ветка
+      - git: "https://github.com/org/olist_macros.git"
+        revision: v0.3.1
+        subdirectory: "macros"      # пакет вложен в репозиторий
+
+      # 3. приватный репозиторий
+      - private: org/internal_dbt
+        provider: "github"          # github | gitlab | ado
+
+      # 4. локальный пакет (монорепо)
+      - local: ../olist_internal
+
+      # 5. tarball по URL
+      - tarball: https://.../dbt_utils/tar.gz/1.4.1
+        name: dbt_utils
+  notes: |2
+    **Главное:** `packages.yml` — это !!намерение!!, `package-lock.yml` — !!факт!!. Коммитить надо оба, иначе «работает у меня» перестаёт быть проверяемым утверждением.
+
+    **Разбор:** пять источников, и выбор между ними — не вкусовщина.
+
+    **Hub** — основной путь, версия диапазоном: мажор фиксируем, патчи пускаем. **git** — только тег или сорокасимвольный коммит: ветка означает, что сборка меняется в тот день, когда кто-то запушил в чужой репозиторий. **private** — приватные репозитории через провайдера. **local** — монорепо, пакет рядом в дереве. **tarball** — когда пакет опубликован архивом.
+
+    **Практический смысл:** обновление пакета — !!осознанный шаг!!: `dbt deps --upgrade`, а потом диффом смотрим, что изменилось в `package-lock.yml`. Пререлизы приезжают только с `install_prerelease: true`.
+
+    **Осторожно:** для dbt Mesh и кросс-проектных ссылок файл другой — `dependencies.yml`, и Jinja в нём не работает.
+
+    **Когда доставать:** когда спрашивают «а как подключить свой пакет» или «почему у коллеги собралось, а у меня нет».

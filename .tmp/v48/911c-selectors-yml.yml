@@ -1,0 +1,41 @@
+- kind: content
+  id: 911c-selectors-yml
+  title: 'Именованные селекторы: selectors.yml'
+  materials:
+  - label: YAML selectors
+    url: https://docs.getdbt.com/reference/node-selection/yaml-selectors
+  code_caption: 'selectors.yml в корне проекта, рядом с dbt_project.yml'
+  code_lang: yaml
+  code: |2
+    selectors:
+      - name: nightly
+        description: "Ночная сборка без ML-витрин"
+        default: true               # для голого dbt build
+        definition:
+          union:
+            - method: path
+              value: models
+            - exclude:
+                - method: tag
+                  value: ml_heavy
+
+      - name: ci_slim
+        definition:
+          method: state
+          value: modified
+          children: true            # = state:modified+
+
+    # ── как вызывать ───────────────────────────────────────────
+    dbt run -s tag:nightly          # выражение
+    dbt run --selector nightly      # имя  (dbt <= 1.11)
+    dbt run -s selector:nightly     # имя  (dbt 1.12+)
+  notes: |2
+    **Главное:** выражение в командной строке одноразовое; `selectors.yml` — то же самое, но !!с именем, в git и под ревью!!.
+
+    **Разбор:** файл лежит в корне проекта, рядом с `dbt_project.yml`. `nightly` собирает всё из `models`, кроме помеченного тегом `ml_heavy`; `default: true` означает, что голый `dbt build` возьмёт именно его. `ci_slim` — тот самый `state:modified+` из блока про Slim CI, только под именем.
+
+    **Практический смысл:** то, что гоняется ночью, — !!тоже артефакт в git!!. Оркестратор вызывает `--selector nightly`, а не список из сорока имён моделей, и изменение состава ночной сборки проходит через pull request, а не через правку DAG-а.
+
+    **Осторожно:** `-s` / `--select` принимает ВЫРАЖЕНИЕ, а `--selector` — ИМЯ из файла. Флаги разные, и их постоянно путают. В dbt 1.12 появился третий способ — `-s selector:nightly`, — который снимает путаницу, но старую форму не отменяет.
+
+    **Когда доставать:** на вопрос «как не тащить список моделей в оркестратор» и рядом со слайдом про селекторы графа.
