@@ -422,3 +422,9 @@ memory-push:
 # Память Claude Code: .ai/memory/ → живая память (на новой станции)
 memory-pull:
     cd {{_dir}} && bash scripts/memory-sync.sh pull
+
+# Кто занимает worktree: открытые файлы, процессы с cwd, живой замок, незакоммиченное.
+# exit 1 = занято. Отвечает на «отнимет ли снос файлы сейчас»; на «кто из сессий жив»
+# отвечает ListAgents — спрашивать оба. Пример: just worktree-occupants .claude/worktrees/x --wait 10
+worktree-occupants path="." *ARGS:
+    cd {{_dir}} && bash scripts/worktree_occupants.sh {{path}} {{ARGS}}

@@ -240,3 +240,15 @@ recyclebin:
   history: ../.recyclebin/.history.csv
   delete_allowed_when: content_identical   # sha256 сошёлся с сохранённой копией — только тогда rm
   log_always: true                  # журнал ведётся и для удалений, и для переносов
+
+# ── Снос worktree: сначала выяснить, занят ли он ───────────────────────────
+# В одном дереве здесь обычно работают НЕСКОЛЬКО сессий, и `git worktree remove` отнимает
+# рабочий каталог у того, кто в нём сидит. Занятость измеряется (scripts/worktree_occupants.sh,
+# just worktree-occupants), живость сессий — инструментом ListAgents; это разные вопросы.
+# Правило: не сносить, пока дерево не окажется свободным `wait_rounds` проверок ПОДРЯД —
+# занятость мигает, и одна удачная проверка ничего не доказывает.
+worktree_removal:
+  occupancy_check: scripts/worktree_occupants.sh
+  wait_rounds: 10                   # чистых проверок подряд перед сносом
+  wait_interval_sec: 60
+  liveness_unknown_means: alive     # под песочницей ps/kill запрещены; ошибаться только в эту сторону
