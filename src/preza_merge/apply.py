@@ -16,6 +16,7 @@ from pathlib import Path
 
 from schedule.settings import dump_roundtrip, load_roundtrip
 
+from .graft import GraftError, graft, parse_ops
 from .report import accepted_keys, undecided
 from .rules import MergeConfig
 
@@ -110,13 +111,12 @@ def run(
     patch_of: str,
     descr: str,
     backend: str = "settings",
+    inserts: list[str] | None = None,
+    replaces: list[str] | None = None,
 ) -> Path:
     """Apply a decided proposal and build the patch version. Returns the built .pptx path."""
     if backend == "graft":
-        raise NotImplementedError(
-            "backend 'graft' (copying slides between .pptx files) is iteration 2 — "
-            "see docs/preza-merge-lane.md § Границы"
-        )
+        return _run_graft(proposal, inserts or [], replaces or [], descr)
     if backend != "settings":
         raise ValueError(f"unknown backend: {backend!r}")
 
@@ -140,3 +140,28 @@ def run(
     if res.out_path is None:
         raise SystemExit("сборка не дала .pptx — смотрите вывод build_deck")
     return res.out_path
+
+
+def _run_graft(proposal: dict, inserts: list[str], replaces: list[str], descr: str) -> Path:
+    """Бэкенд ``graft``: перенести слайды форка в нашу деку.
+
+    Управляется ЯВНЫМ планом (``--insert``/``--replace``), а не предложением: предложение
+    несёт правила ФОРМАТИРОВАНИЯ со списками слайдов, из него нельзя вывести «возьми вот
+    этот слайд». Пустой план — ошибка, а не пустая работа.
+
+    Результат — рукописный артефакт: из content-YAML он не воспроизводится, поэтому кладётся
+    в ``data/source/manual/`` рядом с прочими ручными деками. Перенос содержимого в контент
+    это НЕ отменяет — иначе следующая сборка выдаст деку без этих слайдов
+    (docs/deck-manual-pass.md).
+    """
+    prop = proposal["proposal"]
+    target = Path(prop["ours_pptx"])
+    source = Path(prop["theirs_pptx"])
+    for path, role in ((target, "ours_pptx"), (source, "theirs_pptx")):
+        if not path.is_file():
+            raise GraftError(f"{role} не найден: {path}")
+
+    ops = parse_ops(inserts, replaces)
+    suffix = f"+{descr}" if descr else "+graft"
+    out = Path("data/source/manual") / f"{target.stem}{suffix}.pptx"
+    return graft(target, source, out, ops)["out"]

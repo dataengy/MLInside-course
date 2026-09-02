@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from preza_merge import apply, rules
+from preza_merge import apply, graft, rules
 
 _REPO = Path(__file__).resolve().parents[3]
 
@@ -117,18 +117,49 @@ def test_apply_refuses_while_a_decision_is_missing(tmp_path):
         )
 
 
-def test_graft_backend_is_not_implemented(tmp_path):
+def _graft_proposal(tmp_path):
+    """Предложение, из которого бэкенд graft берёт только пару файлов."""
+    from pptx import Presentation
+
+    made = {}
+    for role, titles in (("ours", ["A", "B"]), ("theirs", ["X"])):
+        prs = Presentation()
+        for title in titles:
+            prs.slides.add_slide(prs.slide_layouts[1]).shapes.title.text = title
+        made[role] = tmp_path / f"{role}.pptx"
+        prs.save(str(made[role]))
+    return {"proposal": {"rules": [], "regressions": [], "profile": "merged",
+                         "deck": "content/x.yml",
+                         "ours_pptx": str(made["ours"]),
+                         "theirs_pptx": str(made["theirs"])}}
+
+
+def test_graft_backend_needs_an_explicit_plan(tmp_path):
+    """Предложение несёт правила ФОРМАТИРОВАНИЯ — плана слайдов из него не вывести.
+
+    Поэтому пустой план обязан падать, а не тихо ничего не переносить: молчаливый no-op
+    здесь выглядел бы как успешный перенос.
+    """
     cfg = rules.MergeConfig.load(_REPO / "settings" / "merge.yml")
-    with pytest.raises(NotImplementedError, match="graft"):
+    with pytest.raises(graft.GraftError, match="план пуст"):
         apply.run(
-            {"proposal": {"rules": [], "regressions": [], "profile": "merged",
-                          "deck": "content/x.yml"}},
-            cfg,
+            _graft_proposal(tmp_path), cfg,
             settings_yml=_REPO / "content" / "build_deck_v3-settings.yml",
             formats_path=_formats(tmp_path),
-            patch_of="3.19",
-            descr="x",
-            backend="graft",
+            patch_of="3.19", descr="x", backend="graft",
+        )
+
+
+def test_graft_backend_reports_a_missing_file_by_role(tmp_path):
+    cfg = rules.MergeConfig.load(_REPO / "settings" / "merge.yml")
+    prop = _graft_proposal(tmp_path)
+    prop["proposal"]["theirs_pptx"] = str(tmp_path / "нет-такого.pptx")
+    with pytest.raises(graft.GraftError, match="theirs_pptx"):
+        apply.run(
+            prop, cfg,
+            settings_yml=_REPO / "content" / "build_deck_v3-settings.yml",
+            formats_path=_formats(tmp_path),
+            patch_of="3.19", descr="x", backend="graft", inserts=["1:1"],
         )
 
 
