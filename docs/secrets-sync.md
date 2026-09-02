@@ -52,18 +52,57 @@ just secrets-bootstrap                # Bitwarden pull → (fallback) gpg-key pu
 
 # 5 — gate
 just secrets-doctor                   # must exit 0
-just test                             # 371 passed / 4 skipped as of 2026-08-26
+just check                            # lint + typecheck + test; 445 passed / 7 skipped as of 2026-09-02
 ```
 
-Two known traps on a fresh machine:
+Three known traps on a fresh machine:
 
 - **`uv.lock` is git-ignored**, so dependencies re-resolve from `pyproject.toml` ranges instead
   of being pinned — the new machine can legitimately get different versions.
-- **`just test` runs `python3 -m pytest`, i.e. whatever `python3` resolves to on `PATH`**, not
-  the `.venv` that `just sync` builds. On this workstation that happens to be a framework
-  Python 3.13 with the deps installed globally. On a clean machine the gate fails until the
-  deps are in the ambient interpreter too; `uv run python -m pytest` runs green inside the venv
-  (and collects *more* tests than the ambient interpreter does).
+- **Голый `python3` здесь без `pyyaml`.** Рецепты `just` и статус-хуки это уже учитывают
+  (`uv run --extra dev`, `.venv/bin/python`), но свой скрипт `python3` звать не стоит.
+  Раньше на этом молча стояли пять хуков: с `2>/dev/null || true` они не падали, а просто
+  ничего не печатали — выключенное раннее оповещение выглядело как «всё в порядке».
+  (Прежняя редакция этого пункта описывала `just test` как `python3 -m pytest`; рецепты
+  переведены на `uv run --extra dev` 2026-09-02, и `just check` теперь проходит целиком.)
+- **Песочница Claude Code блокирует кэши вне репозитория**, и `just check` из-за этого падает
+  с `Failed to initialize cache at ~/.cache/uv` (код 2) ещё до линта. Лечится строкой в
+  **пользовательских** настройках — раздел ниже.
+
+## Песочница: что добавить в `~/.claude/settings.json`
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "allowWrite": [
+        "~/.cache/uv",
+        "~/<путь-до-клона>/MLInside-course/.pytest_cache"
+      ]
+    }
+  }
+}
+```
+
+Первая строка чинит `just check`, вторая убирает `PytestCacheWarning` (тесты и без неё
+проходят, но `--lastfailed` между запусками не работает).
+
+Три вещи, проверенные опытом, — чтобы не повторять разбор:
+
+1. **В проектный `.claude/settings.json` это класть бесполезно**: `sandbox.filesystem.allowWrite`
+   оттуда игнорируется целиком. Проверено обеими записями по отдельности — из проектных
+   настроек `just check` падает ровно так же, как без них. Настройка машинная и в git не едет,
+   отсюда и этот раздел вместо коммита.
+2. **Глобы не поддерживаются.** Ни `~/gi/**/.pytest_cache`, ни `~/…/worktrees/*/.pytest_cache`
+   не срабатывают — только точные пути. Для worktree правило и не нужно: рабочий каталог
+   сессии разрешён всегда, поэтому изнутри worktree его `.pytest_cache` пишется сам.
+3. **Относительный путь в пользовательских настройках резолвится от `~/.claude`**, а не от
+   репозитория. Голое `.pytest_cache` там означало бы `~/.claude/.pytest_cache` и молча ничего
+   бы не давало — нужен абсолютный путь.
+
+Настройка подхватывается сразу, перезапуск не нужен. Разовый обходной путь, если правило ещё
+не стоит, — запуск с отключённой песочницей; управление правилами — команда `/sandbox`.
 
 `secrets-bootstrap` is safe to re-run; it ends with `secrets-doctor`, which checks tools,
 vault status, GPG key presence, template drift, that file-typed secrets
