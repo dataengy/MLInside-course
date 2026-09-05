@@ -118,3 +118,76 @@
   есть.
 - **Готово, когда:** кадр заменён, реестр пересинхронизирован, `fit_check` даёт 0 замечаний.
 - **Блокирует:** ничего. Приоритет низкий — текущий кадр не врёт, просто менее нагляден.
+
+## 2026-09-04 · дека Dagster -simple: 50 слайдов, код и схемы, только Airflow 3 + Cosmos
+
+### Откалибровать модель вписывания код-панели в `preza_gen`
+
+- **Зачем:** `_fit_code_size` считает, что строка в 79 символов влезает в правую колонку
+  5.95in при 13pt; в LibreOffice и PowerPoint такая строка переносится уже с ~57–60
+  символов. Генератор выбирает крупный кегль, панель рвётся, а проверка «overflow: нет»
+  врёт. Обходится только руками — ≤48 символов в строке (так собрана дека -simple).
+- **Где:** `src/preza_gen/renderers/pptx.py` — `_visual_lines`, `_code_height`,
+  `_fit_code_size`. Это сабмодуль `src/preza_gen` (ветка `feat/image-full`), правка едет
+  в его репозиторий.
+- **Контекст:** замечено 2026-09-04 на `content/preza-dagster-simple-content.yml`: панели
+  60–80 символов рвались на кадрах PDF при 13pt, после реформата до ≤48 — чисто. Причина не
+  установлена: либо ширина символа в модели занижена, либо не вычитаются внутренние поля
+  панели, либо Consolas на macOS подменяется более широким шрифтом (в PowerPoint с Consolas
+  перенос наступит позже, но тоже раньше 79). Кадры снимать через pymupdf — Poppler на
+  машине нет.
+- **Как проверить:**
+  ```bash
+  PYTHONPATH=src .venv/bin/python -c "from preza_gen.renderers import pptx as R; \
+    print(R._fit_code_size('x'*70, R.ImageBox(0, 0, 5.95, 4.8), {'size': 13, 'min_size': 9}))"
+  # сейчас печатает 13.0; после калибровки — кегль, при котором кадр PDF не переносит строку
+  ```
+- **Готово, когда:** для строки в 70 символов модель даёт кегль без переноса на кадре PDF;
+  деки v2 и -simple пересобираются без визуальных изменений.
+- **Блокирует:** ничего.
+
+### Решить, заводить ли деку -simple в `content/presentations.yml`
+
+- **Зачем:** дека собрана как черновик под ручную вставку в целевую презентацию и намеренно
+  не в плане: publish-хук её не видит, `preza-review-all` не проверяет. Если она станет
+  самостоятельной лекцией, ей нужны запись в плане и акценты.
+- **Где:** `content/presentations.yml`; дека `content/preza-dagster-simple-content.yml`,
+  рецепт `just dagster-simple-build`.
+- **Контекст:** сборка v1.0.0 лежит в `.tmp/build/` и `~/Downloads/_MLInside.2026-08/`;
+  статус «в план не заводить» записан в шапке YAML.
+- **Как проверить:** `grep -n dagster-simple content/presentations.yml`.
+- **Готово, когда:** либо запись в плане есть и `just preza-review
+  content/preza-dagster-simple-content.yml` проходит, либо решение «черновик» подтверждено
+  и запись не нужна.
+- **Блокирует:** **человек** — статус деки.
+
+### Дать `.tmp/render_pdf_pages.py` запасной путь без Poppler
+
+- **Зачем:** скрипт падает с `pdftoppm is required`, Poppler на машине нет; кадры для
+  проверки вёрстки снимались одноразовым скриптом через `uv run --with pymupdf`.
+- **Где:** `.tmp/render_pdf_pages.py`; рецепт `render-pdf` в `.tmp/Justfile` вызывает
+  системный `python3`, у которого нет pyyaml, — тот же дефект, что у `lint-scalars`.
+- **Контекст:** рабочая замена — `uv run --no-project --with pymupdf python`,
+  `pymupdf.open(pdf)[n].get_pixmap(dpi=110).save(path)`.
+- **Как проверить:** `just -f .tmp/Justfile render-pdf .tmp/build/<дека>.pdf 5` создаёт
+  PNG на машине без `pdftoppm`.
+- **Готово, когда:** команда выше отрабатывает без Poppler.
+- **Блокирует:** ничего.
+
+### Сверить слайды 039 и 042 деки -simple с актуальными Airflow и Cosmos перед записью
+
+- **Зачем:** код `@asset` из `airflow.sdk` и `DbtDag` Cosmos сверены 2026-09-04 по пакетам
+  apache-airflow-task-sdk 1.3.1 и astronomer-cosmos 1.15.1; обе библиотеки выпускают
+  минорные версии раз в несколько месяцев, к записи сигнатуры могут уехать.
+- **Где:** слайды `039-airflow-3-asset-i-planirovanie-po-assetam` и
+  `042-cosmos-dbt-proekt-kak-dag-airflow` в `content/preza-dagster-simple-content.yml`.
+- **Как проверить:**
+  ```bash
+  uv run --no-project --with apache-airflow-task-sdk python -c \
+    "import inspect; from airflow.sdk import asset; print(inspect.signature(asset))"
+  uv run --no-project --with astronomer-cosmos --with 'apache-airflow>=3' python -c \
+    "import inspect; from cosmos import RenderConfig, ProjectConfig; \
+     print(inspect.signature(RenderConfig)); print(inspect.signature(ProjectConfig))"
+  ```
+- **Готово, когда:** все параметры со слайдов есть в выводе обеих команд.
+- **Блокирует:** ничего. Приоритет низкий — делать перед датой записи.

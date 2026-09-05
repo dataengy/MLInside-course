@@ -13,6 +13,9 @@ _settings := "content/build_deck_v3-settings.yml"
 _content := "content/preza-dbt-v3-content.yml"
 # v2 — актуальная дека Dagster; v1 (content/preza-dagster-content.yml) оставлена как архив
 _dagster_content := "content/preza-dagster-v2-content.yml"
+# -simple — упрощённая альтернатива v2 (50 слайдов, код и схемы, только Airflow 3 + Cosmos);
+# в presentations.yml не заведена, publish-хук её не трогает
+_dagster_simple_content := "content/preza-dagster-simple-content.yml"
 _prefect_content := "content/preza-prefect-content.yml"
 _cicd_obs_content := "content/preza-cicd-observability-content.yml"
 _airflow_content := "content/preza-apache-airflow-content.yml"
@@ -59,6 +62,11 @@ dagster-build:
     cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --pptx --html \
       --settings {{_settings}} --content {{_dagster_content}}
 
+# Build the simplified Dagster deck (PPTX + HTML) — alternative to v2, not a scheduled lecture.
+dagster-simple-build:
+    cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --pptx --html \
+      --settings {{_settings}} --content {{_dagster_simple_content}}
+
 # Build all Dagster formats (PPTX + HTML + PDF when LibreOffice is available).
 dagster-build-all:
     cd {{_dir}} && PYTHONPATH=src python3 -m preza_gen.build_deck --all \
@@ -90,7 +98,7 @@ preza-validate content:
 
 # Validate every generated DE-tool deck at once.
 preza-validate-all:
-    cd {{_dir}} && for f in {{_dagster_content}} {{_prefect_content}} {{_cicd_obs_content}} {{_airflow_content}} {{_ogip_content}}; do \
+    cd {{_dir}} && for f in {{_dagster_content}} {{_dagster_simple_content}} {{_prefect_content}} {{_cicd_obs_content}} {{_airflow_content}} {{_ogip_content}}; do \
       python3 {{_preza_skill}}/validate_content.py "$f" \
         --settings settings/config.yml --visuals code-tables || exit 1; \
     done
