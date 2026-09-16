@@ -1,6 +1,6 @@
 ---
 name: dagster-simple-demo
-description: Прогнать, починить или расширить живые демо упрощённой деки Dagster (demo/02-dagster-simple — demo 1 Quick Start, demo 2 Dagster+dbt), не сорвав запись лекции. Знает состояние «до демо» каждого демо, три грабли, которые уже валили прогон (granularity пула run вместо op, order_date строкой из CSV, манифест dbt до импорта), и что `_sources.yml` — единственный файл под гитом, который правит сам показ. Триггеры "прогони демо dagster", "just demo-smoke", "демо 2 упало", "блокировка DuckDB", "Could not set lock on file", "Cannot compare values of type VARCHAR and type DATE", "сшивка источников не работает", "источник висит без родителя", "manifest not found", "верни демо в состояние до демо", "добавь шаг в демо dbt".
+description: Прогнать, починить или расширить живые демо упрощённой деки Dagster (demo/02-dagster-simple — demo 1 Quick Start, demo 2 Dagster+dbt), не сорвав запись лекции. Знает состояние «до демо» каждого демо, три грабли, которые уже валили прогон (granularity пула run вместо op, order_date строкой из CSV, манифест dbt до импорта), и что `_sources.yml` — единственный файл под гитом, который правит сам показ. Триггеры "прогони демо dagster", "just demo-smoke", "демо 2 упало", "блокировка DuckDB", "Could not set lock on file", "Cannot compare values of type VARCHAR and type DATE", "сшивка источников не работает", "источник висит без родителя", "manifest not found", "верни демо в состояние до демо", "добавь шаг в демо dbt", "запусти dagster в браузере", "покажи демо в UI", "just ui", "сними кадры UI для деки", "граф пустой в UI", "Executable doesn't exist at .../chromium_headless_shell".
 model: "default"
 reasoning_effort: "normal"
 ---
@@ -78,6 +78,48 @@ SessionStart-хук `dagster-demo-status.sh` это ловит.
 Посмотреть форму графа без браузера: `just graph` в папке демо 2 (рёбра, внешние узлы,
 проверки). У него есть флаги ожиданий — ими пользуется смоук:
 `--expect-edge raw_orders,stg_orders`, `--expect-no-edge …`, `--expect-min-checks 20`.
+
+## В браузере: `just ui`
+
+Демо смотрят в UI, поэтому есть прогон глазами браузера — репетиция и кадры для
+screenshot fallback деки:
+
+```bash
+PORT=3001 just dev    # окно 1: сервер
+PORT=3001 just ui     # окно 2: семь шагов, клики, проверки, кадры в .ui-shots/
+```
+
+`scripts/ui_walkthrough.py` кликает в UI то же, что человек (**Reload definitions**,
+**Materialize all**), и проверяет, что видно обещанное: три ассета, `1 / 1 Passed`,
+`roc_auc 0.6049`, `Unsynced (1)`, `0.6225`. Итог — `UI OK` или список несошедшегося.
+
+**Порт.** По умолчанию 3000, но его часто держит соседняя сессия (в этом репозитории
+параллельных сессий обычно несколько, и у каждой свой `dg dev`). Перед запуском
+проверить `lsof -nP -iTCP:3000 -sTCP:LISTEN` и **не гасить чужой процесс** — взять
+свободный порт через `PORT=`.
+
+Три грабли, каждая стоила отладки:
+
+1. **Движок — СИСТЕМНЫЙ Chrome**, `p.chromium.launch(channel="chrome")`. Свой хромиум
+   playwright обычно не совпадает версией с кешем `~/Library/Caches/ms-playwright`:
+   `Executable doesn't exist at .../chromium_headless_shell-NNNN`. Доустановить его в
+   песочнице тоже нельзя (`EPERM ... __dirlock`), а системный Chrome уже стоит.
+   Лестница движков — скилл `browser-automation-setup`; расширение claude-in-chrome
+   в этом окружении не подключено.
+
+2. **Граф свёрнут в группы.** `/asset-groups` рисует боксы `features` (2) и `ml` (1);
+   имён ассетов в тексте страницы НЕТ, и проверка «есть feature_table» проваливается на
+   живом графе. Раскрытие — параметром URL, ЧЕРЕЗ ЗАПЯТУЮ:
+   `/asset-groups/?expanded=global@global:features,global@global:ml`
+   (через `|` молча не раскрывается). Это же — ссылка «открыть раскрытый граф» на показе.
+
+3. **`just reset` при поднятом сервере ломает `dg dev`**: он удаляет `.dagster_home`, где
+   живой сервер держит SQLite. Поэтому `just ui` готовит состояние мягко — пересобрать
+   признаки на срез по умолчанию и убрать `defs/ml.py`. История запусков остаётся, и
+   проверки смотрят на ГРАФ, а не на `/runs`.
+
+Слово в UI — **`Unsynced (N)`**, не «stale». После `just new-data` там ровно `Unsynced (1)`:
+пометку получает только ПРЯМОЙ потомок, и это расхождение со слайдом записано в README демо.
 
 ## Числа, которые произносятся вслух
 

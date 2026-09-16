@@ -66,6 +66,12 @@ status:
 test *ARGS:
     cd {{proj}} && uv run pytest {{ARGS}}
 
+# Сервер поднимать заранее в другом окне: `PORT=3001 just dev`. Движок — системный Chrome
+# через playwright (лестница движков — скилл browser-automation-setup).
+# Прогнать сценарий ЧЕРЕЗ БРАУЗЕР и снять кадры: репетиция + screenshot fallback для деки
+ui *ARGS:
+    cd {{root}} && PORT={{port}} uv run --with playwright python scripts/ui_walkthrough.py {{ARGS}}
+
 # весь сценарий без браузера с проверкой stale; в конце возвращает состояние «до демо»
 smoke:
     #!/usr/bin/env bash

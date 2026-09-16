@@ -2,6 +2,7 @@
 .dagster_home/
 .reset-backup/
 .smoke.log
+.ui-shots/
 ml-platform/features.parquet
 ml-platform/models/
 # рабочая копия stash/ml.py: появляется на шаге 2 (`just add-assets`), канон — stash/ml.py
