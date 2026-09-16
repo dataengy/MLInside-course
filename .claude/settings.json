@@ -51,6 +51,12 @@
           },
           {
             "type": "command",
+            "command": "bash scripts/hooks/dagster-demo-status.sh",
+            "timeout": 10,
+            "statusMessage": "Checking Dagster demo state"
+          },
+          {
+            "type": "command",
             "command": "bash scripts/hooks/course-production-status.sh",
             "timeout": 10,
             "statusMessage": "Checking course production rules"

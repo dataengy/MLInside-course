@@ -436,3 +436,27 @@ memory-pull:
 # отвечает ListAgents — спрашивать оба. Пример: just worktree-occupants .claude/worktrees/x --wait 10
 worktree-occupants path="." *ARGS:
     cd {{_dir}} && bash scripts/worktree_occupants.sh {{path}} {{ARGS}}
+
+# ── Демо упрощённой деки Dagster (demo/02-dagster-simple) ────────────────────────────────
+# Спека лейна — docs/dagster-simple-demos.md. Сценарии показа — в README каждого демо.
+# Не путать с демо деки v2: те в сабмодуле data/code/dagster_demo (docs/dagster-demo-runbook.md).
+_demo := _dir / "demo/02-dagster-simple"
+
+# Тесты обоих демо (pytest, ~15 с). Числа со слайдов и инварианты витрины признаков.
+demo-test *ARGS:
+    cd {{_demo}}/01-quickstart/ml-platform && uv run pytest {{ARGS}}
+    cd {{_demo}}/02-dagster-dbt/ml-platform && uv run pytest {{ARGS}}
+
+# Полный прогон обоих сценариев без браузера (~3 мин). Каждый сам возвращает «до демо».
+demo-smoke:
+    cd {{_demo}}/01-quickstart && just smoke
+    cd {{_demo}}/02-dagster-dbt && just smoke
+
+# Сырьё и status.py одинаковы во всех демо (реестр demo/02-dagster-simple/files.yml)
+demo-files-check:
+    cd {{_demo}}/02-dagster-dbt/ml-platform && uv run pytest tests/test_files_registry.py -q
+
+# Сверяет содержимое ПЕРЕД связыванием и разошедшиеся файлы не трогает.
+# Восстановить хардлинки между демо после клона: git их не хранит
+demo-files-link:
+    cd {{_dir}} && python3 scripts/demo_files_link.py

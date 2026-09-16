@@ -1,0 +1,154 @@
+# Демо 2 · Dagster + dbt — уровни 0 → 1 → 2 → 3 (слайды 18–27 упрощённой деки Dagster).
+# Сценарий показа — README.md рядом. Рецепты запускаются из этой папки: `just <рецепт>`.
+
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+root := justfile_directory()
+proj := root / "ml-platform"
+dbt_dir := root / "analytics_dbt"
+defs := proj / "src/ml_platform/defs"
+sources := dbt_dir / "models/staging/_sources.yml"
+
+# своё хранилище истории запусков на демо; `just reset` стирает его
+export DAGSTER_HOME := root / ".dagster_home"
+# один файл DuckDB на демо; тот же путь вычисляет project.py для Dagster
+export DUCKDB_PATH := root / "jaffle_shop.duckdb"
+port := env("PORT", "3000")
+
+# список рецептов в порядке сценария
+default:
+    @just --list --unsorted
+
+# один раз перед записью: окружение проекта и состояние «до демо»
+setup:
+    cd {{proj}} && uv sync
+    just reset
+
+# состояние «до демо»: в графе только загрузка, dbt в нём нет, источники НЕ сшиты, склад пуст
+reset:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # правленые вживую файлы шагов не теряем: откладываем в .reset-backup/
+    for f in "{{defs}}"/level0.py "{{defs}}"/analytics_dbt.py "{{defs}}"/ml.py; do
+        [ -f "$f" ] || continue
+        name="$(basename "$f")"
+        if ! cmp -s "$f" "{{root}}/stash/$name"; then
+            mkdir -p "{{root}}/.reset-backup"
+            cp "$f" "{{root}}/.reset-backup/$name.$(date +%Y%m%d-%H%M%S)"
+        fi
+        rm -f "$f"
+    done
+    # _sources.yml — файл ПОД ГИТОМ: шаг `stitch` его правит, reset возвращает канон
+    cp "{{root}}/stash/_sources.plain.yml" "{{sources}}"
+    rm -rf "{{DAGSTER_HOME}}" "{{proj}}/models" "{{DUCKDB_PATH}}"
+    rm -rf "{{dbt_dir}}/target" "{{dbt_dir}}/logs" "{{dbt_dir}}/dbt_packages"
+    mkdir -p "{{DAGSTER_HOME}}"
+    # лимит пула duckdb = 1: DuckDB не пускает второго писателя, а исполнитель
+    # Dagster по умолчанию многопроцессный (см. комментарий в defs/raw.py)
+    cat > "{{DAGSTER_HOME}}/dagster.yaml" <<'YAML'
+    telemetry:
+      enabled: false
+    concurrency:
+      pools:
+        granularity: op
+        default_limit: 1
+    YAML
+    just _parse
+    echo "готово: defs/ = resources.py + raw.py, источники не сшиты, склад пуст"
+
+# манифест — АРТЕФАКТ СБОРКИ (слайд 21): без него @dbt_assets не импортируется.
+# `dg dev` пересобирает его сам (prepare_if_dev), для `dg launch` и pytest — вот этот рецепт.
+_parse:
+    cd {{dbt_dir}} && {{proj}}/.venv/bin/dbt parse --profiles-dir . --quiet
+
+# шаг 1 · интерфейс: в графе только три ассета загрузки, dbt-проекта не видно
+dev:
+    cd {{proj}} && uv run dg dev --port {{port}}
+
+# шаг 2 · УРОВЕНЬ 0: весь dbt-проект одним ассетом-чёрным-ящиком, затем Reload в UI
+level-0:
+    cp {{root}}/stash/level0.py {{defs}}/level0.py
+    cd {{proj}} && uv run dg list defs
+
+# шаг 3 · УРОВЕНЬ 1: чёрный ящик убираем, манифест разворачиваем в ассеты по моделям
+level-1:
+    rm -f {{defs}}/level0.py
+    cp {{root}}/stash/analytics_dbt.py {{defs}}/analytics_dbt.py
+    just _parse
+    cd {{proj}} && uv run dg list defs
+
+# шаг 4 · УРОВЕНЬ 2, сшивка: meta.dagster.asset_key в _sources.yml → рёбра загрузка → staging
+stitch:
+    cp {{root}}/stash/_sources.stitched.yml {{sources}}
+    just _parse
+    cd {{proj}} && uv run python ../scripts/graph.py
+
+# шаг 5 · УРОВЕНЬ 2, низ: обучение продолжает dbt-граф от feature_mart
+level-2-ml:
+    cp {{root}}/stash/ml.py {{defs}}/ml.py
+    cd {{proj}} && uv run dg list defs
+
+# материализовать весь граф: загрузка → dbt (модели и тесты) → обучение
+materialize:
+    cd {{proj}} && uv run dg launch --assets '*'
+
+# пересчитать feature_mart и ВСЁ ниже (см. README: голое 'feature_mart+' — одна ступень)
+downstream:
+    cd {{proj}} && uv run dg launch --assets 'key:feature_mart+'
+
+# что устарело и какие метаданные — то же, что на карточках в UI
+status:
+    cd {{proj}} && uv run python ../scripts/status.py
+
+# рёбра графа и проверки: чем сшито, что висит без родителя, сколько dbt-тестов приехало
+graph *ARGS:
+    cd {{proj}} && uv run python ../scripts/graph.py {{ARGS}}
+
+# тесты демо (pytest): dbt-проект, сшивка, витрина признаков, ассеты
+test *ARGS:
+    just _parse
+    cd {{proj}} && uv run pytest {{ARGS}}
+
+# весь сценарий без браузера с проверкой рёбер; в конце возвращает состояние «до демо»
+smoke:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    log="{{root}}/.smoke.log"; : > "$log"
+    step() { echo "── $*"; }
+    run() { "$@" >>"$log" 2>&1 || { echo "УПАЛО: $*  (лог: $log)"; tail -40 "$log"; exit 1; }; }
+    G() { (cd "{{proj}}" && uv run python ../scripts/graph.py "$@"); }
+
+    step "reset";                      run just reset
+    step "шаг 1: только загрузка";     run just _check
+    G --expect-keys raw_customers,raw_orders,raw_payments
+
+    step "шаг 2: УРОВЕНЬ 0";           run just level-0
+    run just materialize
+    G --expect-table main.feature_mart --expect-table raw.raw_orders
+
+    step "шаг 3: УРОВЕНЬ 1";           run just level-1
+    # ключи сошлись бы сами, но meta ещё нет: источник висит без родителя
+    G --expect-no-edge raw_orders,stg_orders --expect-keys stg_orders,customers,feature_mart
+
+    step "шаг 4: сшивка";              run just stitch
+    # тот же граф, одно отличие — ребро появилось
+    G --expect-edge raw_orders,stg_orders --expect-edge raw_customers,stg_customers
+
+    step "шаг 5: УРОВЕНЬ 2, низ";      run just level-2-ml
+    G --expect-edge feature_mart,training_dataset --expect-edge training_dataset,trained_model
+
+    step "материализация графа";       run just materialize
+    # УРОВЕНЬ 3: dbt-тесты приехали проверками — 19 штук, плюс net_propuskov на Python
+    G --expect-min-checks 20
+    (cd "{{proj}}" && uv run python ../scripts/status.py --expect-stale "")
+
+    step "частичный пересчёт";         run just downstream
+    (cd "{{proj}}" && uv run python ../scripts/status.py --expect-stale "")
+
+    step "pytest";                     run just test -q
+    step "reset";                      run just reset
+    echo "SMOKE OK — демо 2 проходит целиком"
+
+# граф загружается без ошибок (используется смоуком)
+_check:
+    cd {{proj}} && uv run dg check defs

@@ -1,0 +1,10 @@
+jaffle_shop:
+
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      # Один файл DuckDB на демо. Путь задаёт Dagster через DUCKDB_PATH (абсолютный),
+      # значение по умолчанию — для ручного `dbt build`, запущенного из этой папки.
+      path: "{{ env_var('DUCKDB_PATH', '../jaffle_shop.duckdb') }}"
+      threads: 4

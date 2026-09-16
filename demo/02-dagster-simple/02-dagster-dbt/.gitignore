@@ -1,0 +1,17 @@
+# состояние демо — пересоздаётся `just reset`
+.dagster_home/
+.reset-backup/
+.smoke.log
+jaffle_shop.duckdb
+ml-platform/models/
+# рабочие копии файлов шагов: появляются по ходу демо, канон — stash/
+# (defs/resources.py и defs/raw.py — состояние «до демо», они ПОД ГИТОМ)
+ml-platform/src/ml_platform/defs/level0.py
+ml-platform/src/ml_platform/defs/analytics_dbt.py
+ml-platform/src/ml_platform/defs/ml.py
+# артефакты dbt: манифест собирается заново (`just _parse`)
+analytics_dbt/target/
+analytics_dbt/logs/
+analytics_dbt/dbt_packages/
+# id телеметрии, который dg пишет при первом запуске
+ml-platform/.dg/

@@ -1,4 +1,9 @@
-# Живые демо лекции про Dagster — где что лежит
+# Живые демо лекции про Dagster (дека v2) — где что лежит
+
+> **В репозитории ДВА блока демо про Dagster, не перепутать.** Этот файл — про деку
+> `preza-dagster-v2-content.yml` (113 слайдов), код в сабмодуле `data/code/dagster_demo/`.
+> Демо упрощённой деки (`preza-dagster-simple-content.yml`, 50 слайдов) лежат прямо в
+> репозитории в `demo/02-dagster-simple/`, спека — [`docs/dagster-simple-demos.md`](dagster-simple-demos.md).
 
 Практика лекции вынесена в отдельный репозиторий и подключена сюда сабмодулем:
 

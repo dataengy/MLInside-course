@@ -1,0 +1,33 @@
+version: 2
+
+# stash/_sources.stitched.yml → analytics_dbt/models/staging/_sources.yml
+# ШАГ «СШИВКА» ДЕМО — уровень 2, слайд 25. Отличие от канонического _sources.yml ровно одно:
+# у каждой таблицы появился meta.dagster.asset_key.
+#
+# Translator по умолчанию читает meta.dagster.asset_key сам — Python-кода не нужно.
+# Ключ здесь и ключ ассета загрузки в defs/raw.py — ОДИН И ТОТ ЖЕ:
+#     @dg.asset(key=dg.AssetKey(["raw_orders"]))
+# совпали → появилось ребро raw_orders → stg_orders, граф связный;
+# разошлись → источник висит отдельным узлом без родителя, а ассет загрузки — сам по себе.
+#
+# ≠ слайд: на слайде 25 источник называется olist_raw, таблица — orders, ключ — raw_orders.
+# Здесь jaffle shop: источник jaffle_raw, таблица raw_orders, ключ тоже raw_orders.
+# Именно поэтому сшивка идёт ПО КЛЮЧУ, а не по имени таблицы: имя таблицы в складе
+# (raw.raw_orders) к ключу ассета отношения не имеет.
+sources:
+  - name: jaffle_raw
+    description: Сырые таблицы jaffle shop, загружает Dagster.
+    schema: raw
+    tables:
+      - name: raw_customers
+        meta:
+          dagster:
+            asset_key: ["raw_customers"]
+      - name: raw_orders
+        meta:
+          dagster:
+            asset_key: ["raw_orders"]
+      - name: raw_payments
+        meta:
+          dagster:
+            asset_key: ["raw_payments"]

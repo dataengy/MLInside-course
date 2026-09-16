@@ -1,0 +1,136 @@
+version: 2
+
+# customers и orders — описания и тесты дословно из jaffle_shop_duckdb (models/schema.yml).
+# feature_mart — добавлена для лекции: витрина признаков, стык dbt и ML.
+# При `dbt build` из Dagster каждый тест становится asset check своей модели.
+models:
+  - name: customers
+    description: This table has basic information about a customer, as well as some derived facts based on a customer's orders
+
+    columns:
+      - name: customer_id
+        description: This is a unique identifier for a customer
+        tests:
+          - unique
+          - not_null
+
+      - name: first_name
+        description: Customer's first name. PII.
+
+      - name: last_name
+        description: Customer's last name. PII.
+
+      - name: first_order
+        description: Date (UTC) of a customer's first order
+
+      - name: most_recent_order
+        description: Date (UTC) of a customer's most recent order
+
+      - name: number_of_orders
+        description: Count of the number of orders a customer has placed
+
+      - name: total_order_amount
+        description: Total value (AUD) of a customer's orders
+
+  - name: orders
+    description: This table has basic information about orders, as well as some derived facts based on payments
+
+    columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+        description: This is a unique identifier for an order
+
+      - name: customer_id
+        description: Foreign key to the customers table
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('customers')
+                field: customer_id
+
+      - name: order_date
+        description: Date (UTC) that the order was placed
+
+      - name: status
+        description: '{{ doc("orders_status") }}'
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['placed', 'shipped', 'completed', 'return_pending', 'returned']
+
+      - name: amount
+        description: Total amount (AUD) of the order
+        tests:
+          - not_null
+
+      - name: credit_card_amount
+        description: Amount of the order (AUD) paid for by credit card
+        tests:
+          - not_null
+
+      - name: coupon_amount
+        description: Amount of the order (AUD) paid for by coupon
+        tests:
+          - not_null
+
+      - name: bank_transfer_amount
+        description: Amount of the order (AUD) paid for by bank transfer
+        tests:
+          - not_null
+
+      - name: gift_card_amount
+        description: Amount of the order (AUD) paid for by gift card
+        tests:
+          - not_null
+
+  - name: feature_mart
+    description: >-
+      Витрина признаков: одна строка на клиента. Признаки — по заказам до даты среза
+      (var cutoff_date), цель target — был ли заказ после среза. Стык dbt и ML: сверху
+      витрину строит dbt, снизу её читает обучение в Dagster.
+
+    columns:
+      - name: customer_id
+        description: Клиент — ключ витрины
+        tests:
+          - unique
+          - not_null
+
+      - name: n_orders
+        description: Заказов до среза
+        tests:
+          - not_null
+
+      - name: total_amount
+        description: Сумма заказов до среза, AUD
+
+      - name: avg_order_value
+        description: Средний чек до среза, AUD; NULL, если заказов не было
+
+      - name: days_since_last_order
+        description: Дней от последнего заказа до среза; NULL, если заказов не было
+
+      - name: coupon_share
+        description: Доля заказов, оплаченных купоном хотя бы частично
+
+      - name: n_returns
+        description: Возвратов (returned и return_pending) до среза
+
+      - name: target
+        description: 1 — после среза клиент заказал ещё раз, 0 — нет
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+                quote: false
+
+      - name: split
+        description: train или test — каждый пятый клиент уходит в тест
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['train', 'test']

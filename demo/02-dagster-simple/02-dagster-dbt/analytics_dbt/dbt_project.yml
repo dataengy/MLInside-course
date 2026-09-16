@@ -1,0 +1,43 @@
+# analytics_dbt — jaffle shop (github.com/dbt-labs/jaffle_shop_duckdb, Apache-2.0),
+# доработанный под демо лекции «Оркестрация ML-пайплайнов на Dagster» (упрощённая дека).
+# Что изменено относительно оригинала — в README.md рядом.
+name: 'jaffle_shop'
+
+config-version: 2
+version: '0.1'
+
+profile: 'jaffle_shop'
+
+model-paths: ["models"]
+test-paths: ["tests"]
+analysis-paths: ["analysis"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets:
+    - "target"
+    - "dbt_packages"
+    - "logs"
+
+require-dbt-version: [">=1.11.0", "<2.0.0"]
+
+# На показе сети может не быть, а dbt по умолчанию стучится в свою телеметрию
+# (fishtownanalytics.sinter-collect.com) на КАЖДОЙ команде. Отказ соединения dbt не валит,
+# но добавляет секунды ожидания в каждый шаг демо — выключаем.
+flags:
+  send_anonymous_usage_stats: false
+
+vars:
+  # дата среза витрины признаков: признаки — по заказам ДО неё, цель — ПОСЛЕ
+  cutoff_date: '2018-03-01'
+
+models:
+  jaffle_shop:
+    +materialized: table
+    staging:
+      +materialized: view
+      +docs:
+        node_color: 'silver'
+    marts:
+      +docs:
+        node_color: 'gold'

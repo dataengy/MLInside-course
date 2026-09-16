@@ -1,0 +1,10 @@
+# состояние демо — пересоздаётся `just reset`
+.dagster_home/
+.reset-backup/
+.smoke.log
+ml-platform/features.parquet
+ml-platform/models/
+# рабочая копия stash/ml.py: появляется на шаге 2 (`just add-assets`), канон — stash/ml.py
+ml-platform/src/ml_platform/defs/ml.py
+# id телеметрии, который dg пишет при первом запуске
+ml-platform/.dg/

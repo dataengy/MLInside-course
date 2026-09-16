@@ -1,0 +1,17 @@
+version: 2
+
+# Сырьё jaffle shop. В оригинале это seeds; здесь таблицы raw.raw_* грузит Dagster
+# (в демо 2 — ассетами загрузки), а dbt их только читает.
+#
+# СОСТОЯНИЕ «ДО ДЕМО»: у таблиц нет meta.dagster.asset_key, поэтому в графе Dagster
+# источник висит отдельным узлом jaffle_raw/raw_orders без родителя, а ассет загрузки
+# raw_orders стоит сам по себе. Шаг 3 демо — добавить meta (см. stash/_sources.stitched.yml
+# или `just stitch`): ключи совпадут, и ребро raw_orders → stg_orders появится само.
+sources:
+  - name: jaffle_raw
+    description: Сырые таблицы jaffle shop, загружает Dagster.
+    schema: raw
+    tables:
+      - name: raw_customers
+      - name: raw_orders
+      - name: raw_payments

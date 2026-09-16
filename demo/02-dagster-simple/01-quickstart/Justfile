@@ -1,0 +1,88 @@
+# Демо 1 · Quick Start — от пустой папки до графа (слайд 17 упрощённой деки Dagster).
+# Сценарий показа — README.md рядом. Рецепты запускаются из этой папки: `just <рецепт>`.
+
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+root := justfile_directory()
+proj := root / "ml-platform"
+defs_ml := proj / "src/ml_platform/defs/ml.py"
+
+# своё хранилище истории запусков на демо; `just reset` стирает его
+export DAGSTER_HOME := root / ".dagster_home"
+port := env("PORT", "3000")
+
+# список рецептов в порядке сценария
+default:
+    @just --list --unsorted
+
+# один раз перед записью: окружение проекта и состояние «до демо»
+setup:
+    cd {{proj}} && uv sync
+    just reset
+
+# состояние «до демо»: defs/ пустая, история запусков пуста, признаки на срез 2018-03-01
+reset:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # правленый вживую defs/ml.py не теряем: откладываем в .reset-backup/
+    if [ -f "{{defs_ml}}" ] && ! cmp -s "{{defs_ml}}" "{{root}}/stash/ml.py"; then
+        mkdir -p "{{root}}/.reset-backup"
+        mv "{{defs_ml}}" "{{root}}/.reset-backup/ml.py.$(date +%Y%m%d-%H%M%S)"
+    fi
+    rm -f "{{defs_ml}}"
+    rm -rf "{{DAGSTER_HOME}}" "{{proj}}/models"
+    mkdir -p "{{DAGSTER_HOME}}"
+    printf 'telemetry:\n  enabled: false\n' > "{{DAGSTER_HOME}}/dagster.yaml"
+    cd "{{proj}}" && uv run python ../scripts/make_features.py
+    echo "готово: defs/ пустая, история стёрта — можно запускать just dev"
+
+# шаг 1 · интерфейс: пустой граф → http://localhost:3000
+dev:
+    cd {{proj}} && uv run dg dev --port {{port}}
+
+# шаг 2 · положить готовый defs/ml.py (три ассета, проверка, свежесть), затем Reload в UI
+add-assets:
+    cp {{root}}/stash/ml.py {{defs_ml}}
+    cd {{proj}} && uv run dg list defs
+
+# шаг 3 · материализовать весь граф: порядок по рёбрам Dagster выстроит сам
+materialize:
+    cd {{proj}} && uv run dg launch --assets '*'
+
+# шаг 4а · «пришли новые данные»: признаки на срез 2018-03-15, пересчитать только feature_table → training_dataset stale
+new-data:
+    cd {{proj}} && uv run python ../scripts/make_features.py --cutoff 2018-03-15
+    cd {{proj}} && uv run dg launch --assets feature_table
+
+# шаг 4б · пересчитать feature_table и ВСЁ ниже (≠ слайд: голое 'feature_table+' в 1.13 — одна ступень)
+downstream:
+    cd {{proj}} && uv run dg launch --assets 'key:feature_table+'
+
+# что устарело и какие метаданные — то же, что на карточках в UI
+status:
+    cd {{proj}} && uv run python ../scripts/status.py
+
+# тесты демо (pytest): витрина признаков, три ассета, проверка, расхождения со слайдами
+test *ARGS:
+    cd {{proj}} && uv run pytest {{ARGS}}
+
+# весь сценарий без браузера с проверкой stale; в конце возвращает состояние «до демо»
+smoke:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    log="{{root}}/.smoke.log"; : > "$log"
+    step() { echo "── $*"; }
+    run() { "$@" >>"$log" 2>&1 || { echo "УПАЛО: $*  (лог: $log)"; tail -40 "$log"; exit 1; }; }
+    step "reset";                 run just reset
+    step "шаг 2: add-assets";     run just add-assets
+    step "dg check defs";         (cd "{{proj}}" && run uv run dg check defs)
+    step "шаг 3: materialize";    run just materialize
+    (cd "{{proj}}" && uv run python ../scripts/status.py --expect-stale "")
+    step "шаг 4а: new-data";      run just new-data
+    # Dagster 1.13 помечает stale только ПРЯМОГО потомка; внук станет stale после его пересчёта
+    (cd "{{proj}}" && uv run python ../scripts/status.py --expect-stale "training_dataset")
+    step "шаг 4б: downstream";    run just downstream
+    (cd "{{proj}}" && uv run python ../scripts/status.py --expect-stale "")
+    step "pytest";                run just test -q
+    step "reset";                 run just reset
+    echo "SMOKE OK — демо 1 проходит целиком"

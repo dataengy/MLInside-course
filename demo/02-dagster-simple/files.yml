@@ -1,0 +1,58 @@
+# files.yml — реестр ОБЩИХ файлов демо блока «Оркестрация ML-пайплайнов на Dagster».
+#
+# Зачем. Сырьё jaffle shop и status.py должны быть одинаковыми во всех демо: если в одном
+# демо витрина построена на других данных, числа на слайдах разойдутся. Копии для этого
+# не годятся — они расходятся молча. Файлы связаны ХАРДЛИНКАМИ: один инод, правка в любой
+# папке сразу видна в остальных.
+#
+# ВАЖНО ПРО GIT. Git хардлинков не хранит: при клоне на новой машине получатся обычные
+# отдельные файлы с тем же содержимым. Всё продолжит работать, но правка в одной папке
+# перестанет доезжать до другой — связь восстанавливается `just demo-files-link` из корня
+# репозитория. Проверка целостности — `just demo-files-check` (тест
+# 02-dagster-dbt/ml-platform/tests/test_files_registry.py).
+#
+# owner — та копия, которую считаем канонической при расхождении.
+# Сверка: sha256 содержимого; inode приведён как след на момент записи и после клона
+# будет другим — это нормально.
+#
+# Демо 3 в блоке ещё нет. Когда появится, его копии добавляются в те же группы, а
+# analytics_dbt/ станет общим между демо 2 и демо 3 (см. analytics_dbt/README.md).
+
+generated: 2026-09-16
+shared:
+  data/raw_customers.csv:
+    owner: 01-quickstart/data/raw_customers.csv
+    method: hardlink
+    inode: 37766723
+    bytes: 1302
+    sha256: 24579b4b26098d43265376f3c50be8b10faf8e8fd95f5508074f10f76a12671d
+    copies:
+      - 01-quickstart/data/raw_customers.csv
+      - 02-dagster-dbt/data/raw_customers.csv
+  data/raw_orders.csv:
+    owner: 01-quickstart/data/raw_orders.csv
+    method: hardlink
+    inode: 37766724
+    bytes: 2723
+    sha256: ee6c68d1639ec2b23a4495ec12475e09b8ed4b61e23ab0411ea7ec76648356f7
+    copies:
+      - 01-quickstart/data/raw_orders.csv
+      - 02-dagster-dbt/data/raw_orders.csv
+  data/raw_payments.csv:
+    owner: 01-quickstart/data/raw_payments.csv
+    method: hardlink
+    inode: 37766725
+    bytes: 2560
+    sha256: 03fd407f3135f84456431a923f22fc185a2154079e210c20b690e3ab11687d11
+    copies:
+      - 01-quickstart/data/raw_payments.csv
+      - 02-dagster-dbt/data/raw_payments.csv
+  scripts/status.py:
+    owner: 01-quickstart/scripts/status.py
+    method: hardlink
+    inode: 37838347
+    bytes: 4813
+    sha256: 4ffb7fc894d1abead0e0fee856da96a09fc62dc4bb21fc6c33f1ca066925017b
+    copies:
+      - 01-quickstart/scripts/status.py
+      - 02-dagster-dbt/scripts/status.py

@@ -22,6 +22,8 @@
 | Ручная правка деки и её возврат в генератор | [`docs/deck-manual-pass.md`](docs/deck-manual-pass.md) |
 | Публикация: Telegram + Drive + лист | [`docs/deck-publish-pipeline.md`](docs/deck-publish-pipeline.md) |
 | Секреты между машинами | [`docs/secrets-sync.md`](docs/secrets-sync.md) |
+| Живые демо упрощённой деки Dagster (`demo/02-dagster-simple`) | [`docs/dagster-simple-demos.md`](docs/dagster-simple-demos.md) |
+| Живые демо деки v2 (сабмодуль `data/code/dagster_demo`) | [`docs/dagster-demo-runbook.md`](docs/dagster-demo-runbook.md) |
 | Разовые скрипты сборки и QA дек | [`.tmp/README.md`](.tmp/README.md) |
 | Ручные деки (не воспроизводятся генератором) | [`data/source/manual/README.md`](data/source/manual/README.md) |
 
