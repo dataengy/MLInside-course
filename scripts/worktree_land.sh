@@ -77,7 +77,23 @@ else
 fi
 
 # 4. Всё ли выложено на remote: локальный коммит умрёт вместе с каталогом.
-if git -C "$WT" rev-parse --verify --quiet "origin/$BRANCH" >/dev/null; then
+#
+# ОТЦЕПЛЁННЫЙ HEAD — не экзотика, а штатный остаток посадки: локальную ветку нельзя удалить,
+# пока она вычекана в worktree, поэтому её удаляют после `git checkout --detach`. Тогда
+# $BRANCH буквально равен "HEAD", `origin/HEAD` существует (это указатель на origin/main) —
+# и проверка проходила ВХОЛОСТУЮ, сравнивая HEAD сам с собой. Здесь это разведено явно.
+if [ "$BRANCH" = "HEAD" ]; then
+  if git -C "$WT" rev-parse --verify --quiet origin/main >/dev/null; then
+    AHEAD="$(git -C "$WT" rev-list --count origin/main..HEAD)"
+    if [ "$AHEAD" = "0" ]; then
+      ok "HEAD отцеплён, но целиком лежит в origin/main — терять нечего"
+    else
+      bad "HEAD отцеплён и НЕ выложен: коммитов сверх origin/main — $AHEAD (git push origin HEAD:main)"
+    fi
+  else
+    bad "HEAD отцеплён, а origin/main не найден — сверить, где лежит работа"
+  fi
+elif git -C "$WT" rev-parse --verify --quiet "origin/$BRANCH" >/dev/null; then
   AHEAD="$(git -C "$WT" rev-list --count "origin/$BRANCH..HEAD")"
   [ "$AHEAD" = "0" ] && ok "ветка выложена в origin" || bad "не выложено коммитов: $AHEAD"
 else
@@ -167,14 +183,45 @@ fi
 #     включая нас самих; интересны только ФАЙЛЫ внутри;
 #   * служебные процессы, которые держат каталог по долгу службы, — наш собственный bash,
 #     awk и lsof в этом же конвейере, git, caffeinate, сам claude.
+#
+# ФИЛЬТР ПО ИМЕНИ ИЗ lsof НЕДОСТАТОЧЕН, и это стоило ложного «сливать нельзя». lsof режет
+# COMMAND до 9 символов, поэтому `com.apple.Virtualization.VirtualMachine` (служба VM, у
+# которой домашний каталог смонтирован внутрь) и `com.apple.TextEdit` выглядят ОДИНАКОВО —
+# как `com.apple`. Отличить их по этому имени нельзя ни в ту, ни в другую сторону:
+# отбросишь `com.apple` целиком — спрячешь TextEdit с несохранённым файлом; не отбросишь —
+# проверка навсегда красная от служб macOS, и её перестают читать.
+#
+# Поэтому имя берём не из lsof, а по pid из `ps -o comm=` — там полный путь к бинарю, и
+# служебное от пользовательского отличается однозначно:
+#   · /System/Library/…      — фреймворки, XPC-службы, CoreServices: документов не держат;
+#   · mds/mdworker/fseventsd — индексация Spotlight, ходит по любому новому каталогу;
+#   · /System/Applications/  НЕ фильтруем: там лежит TextEdit, а он как раз держит
+#     несохранённое — ровно то, ради чего проверка написана.
 OFFICE_LOCKS="$(cd "$WT" && find . -name '~$*' 2>/dev/null | sed 's|^\./||')"
 WT_ABS="$(cd "$WT" && pwd -P)"
 OPEN_BY=""
-command -v lsof >/dev/null 2>&1 && OPEN_BY="$(lsof -w +D "$WT" 2>/dev/null \
-  | awk -v root="$WT_ABS" 'NR>1 && $NF != root && $NF ~ "^" root "/" {print $1 "\t" $2 "\t" $NF}' \
-  | grep -vE '^(bash|sh|zsh|awk|lsof|git|caffeinat|claude|node|Code Helper)\b' \
-  | awk -F'\t' '{print "      " $1 " (pid " $2 ") → " substr($3, length(root)+2)}' root="$WT_ABS" \
-  | sort -u | head -10)"
+# служебное, что держит каталог по долгу службы, а не потому что в нём открыт документ
+_is_system_proc() {
+  case "$(ps -o comm= -p "$1" 2>/dev/null)" in
+    /System/Library/*|*/mds|*/mds_stores|*/mdworker*|*/fseventsd|*/Spotlight*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+if command -v lsof >/dev/null 2>&1; then
+  _raw="$(lsof -w +D "$WT" 2>/dev/null \
+    | awk -v root="$WT_ABS" 'NR>1 && $NF != root && $NF ~ "^" root "/" {print $1 "\t" $2 "\t" $NF}' \
+    | grep -vE '^(bash|sh|zsh|awk|lsof|git|caffeinat|claude|node|Code Helper)\b' \
+    | sort -u)"
+  while IFS="$(printf '\t')" read -r _cmd _pid _path; do
+    [ -z "${_pid:-}" ] && continue
+    _is_system_proc "$_pid" && continue
+    OPEN_BY="$OPEN_BY      $_cmd (pid $_pid) → ${_path#"$WT_ABS"/}
+"
+  done <<EOF
+$_raw
+EOF
+  OPEN_BY="$(printf '%s' "$OPEN_BY" | head -10)"
+fi
 if [ -n "$OFFICE_LOCKS" ] || [ -n "$OPEN_BY" ]; then
   bad "в каталоге есть ОТКРЫТЫЕ файлы — несохранённое с экрана не лежит нигде:"
   [ -n "$OPEN_BY" ] && printf '%s\n' "$OPEN_BY"
